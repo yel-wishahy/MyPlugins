@@ -1,0 +1,5 @@
+name: ShallowEconomy
+version: ${project.version}
+main: shallowcraft.shalloweconomy.ShallowEconomy
+api-version: 1.16
+authors: [ BlackShadow2941 ]
