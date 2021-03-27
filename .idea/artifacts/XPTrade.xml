@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="XPTrade">
+    <output-path>$PROJECT_DIR$/out/artifacts/XPTrade</output-path>
+    <root id="archive" name="XPTrade.jar">
+      <element id="module-output" name="XPTrade" />
+      <element id="library" level="project" name="spigot-1.16.5" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/plugin.yml" />
+      <element id="file-copy" path="$PROJECT_DIR$/XPTrade.iml" />
+    </root>
+  </artifact>
+</component>

@@ -1,4 +1,3 @@
-# MyPlugins
-Plugins I've create for minecraft servers
+# XPTrade
 
-- This branch is for an xp Trading plugin i've created
+A simple XP trading plugin for minecraft (use with bukkit, spigot , or paper servers). The concept is to trade xp with diamonds using chest shop signs!

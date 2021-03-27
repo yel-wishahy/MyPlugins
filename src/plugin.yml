@@ -1,0 +1,5 @@
+name: XPTrade
+version: 1.0b
+author: BlackShadow2941
+main: EXPTrade.XPTrade
+api-version: 1.16
