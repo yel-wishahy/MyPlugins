@@ -1,5 +1,6 @@
-name: ShallowEconomy
+name: ItemEconomy
 version: ${project.version}
-main: shallowcraft.shalloweconomy.ShallowEconomy
+main: shallowcraft.itemeconomy.ItemEconomy
 api-version: 1.16
 authors: [ BlackShadow2941 ]
+description: An item based economy for minecraft with potential for vault support
