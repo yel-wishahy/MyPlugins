@@ -22,7 +22,7 @@ public class ItemVault {
     }
 
     public int getVaultBalance(){
-        if(vaultSign.isPlaced() && Util.isValidVaultSign(vaultSign) && containerVault == Util.chestBlock(vaultSign)){
+        if(vaultSign.isPlaced() && containerVault.equals(Util.chestBlock(vaultSign))){
             Inventory inventory =  ((Container) containerVault.getState()).getInventory();
             return Util.countItem(inventory, itemCurrency);
         } else{

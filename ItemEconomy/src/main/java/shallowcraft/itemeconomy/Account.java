@@ -36,7 +36,6 @@ public class Account {
 
     private int balance(){
         int count = 0;
-        ItemEconomy.log.info("checking player inv");
         count+=Util.countItem(personalInventory, itemCurrency);
         ItemEconomy.log.info("checking vaults, total vaults to check: " + vaults.size());
         for (ItemVault vault:new ArrayList<>(vaults)) {

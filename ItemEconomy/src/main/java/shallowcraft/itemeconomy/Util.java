@@ -56,14 +56,6 @@ public class Util {
         }
     }
 
-    public static boolean isValidVaultSign(Sign sign){
-        String line = sign.line(0).toString();
-        if(line == "[Vault]")
-            return true;
-        else
-            return false;
-    }
-
     public static boolean isBlockOfItem(Material item, Material block){
         String itemName = item.toString();
         String blockName = block.toString();
