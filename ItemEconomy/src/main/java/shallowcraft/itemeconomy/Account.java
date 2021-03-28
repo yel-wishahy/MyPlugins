@@ -18,7 +18,7 @@ public class Account {
     public Account(OfflinePlayer player){
         balance = 0;
         this.player = player;
-        vaults = new ArrayList<ItemVault>();
+        vaults = new ArrayList<>();
         personalInventory = player.getPlayer().getInventory();
     }
 
@@ -31,13 +31,15 @@ public class Account {
     }
 
     public List<ItemVault> getVaults() {
-        return vaults;
+        return new ArrayList<>(vaults);
     }
 
     private int balance(){
         int count = 0;
+        ItemEconomy.log.info("checking player inv");
         count+=Util.countItem(personalInventory, itemCurrency);
-        for (ItemVault vault:vaults) {
+        ItemEconomy.log.info("checking vaults, total vaults to check: " + vaults.size());
+        for (ItemVault vault:new ArrayList<>(vaults)) {
             int current = vault.getVaultBalance();
             if(current > 0)
                 count+=current;
@@ -49,4 +51,6 @@ public class Account {
     public boolean removeVault(ItemVault vault){
         return vaults.remove(vault);
     }
+
+    public boolean addVault(ItemVault vault){return vaults.add(vault);}
 }

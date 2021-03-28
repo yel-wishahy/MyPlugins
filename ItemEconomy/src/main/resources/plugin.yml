@@ -4,3 +4,8 @@ main: shallowcraft.itemeconomy.ItemEconomy
 api-version: 1.16
 authors: [ BlackShadow2941 ]
 description: An item based economy for minecraft with potential for vault support
+softdepend: [Vault]
+commands:
+  create_account:
+  balance:
+

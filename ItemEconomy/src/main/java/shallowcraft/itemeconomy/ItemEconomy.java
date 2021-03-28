@@ -1,10 +1,18 @@
 package shallowcraft.itemeconomy;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.logging.Logger;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
@@ -16,8 +24,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class ItemEconomy extends JavaPlugin {
-    private static final Logger log = Logger.getLogger("Minecraft");
+public class ItemEconomy extends JavaPlugin implements Listener {
+    public static final Logger log = Logger.getLogger("Minecraft");
     private static List<Account> accounts;
     public final static Material currency = Material.DIAMOND;
 
@@ -27,7 +35,8 @@ public class ItemEconomy extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        accounts = new ArrayList<Account>();
+        accounts = new ArrayList<>();
+        Bukkit.getPluginManager().registerEvents(this, this);
     }
 
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
@@ -38,7 +47,7 @@ public class ItemEconomy extends JavaPlugin {
 
         Player player = (Player) sender;
 
-        if(command.getLabel().equals("createEcoAccount")) {
+        if(command.getLabel().equals("create_account")) {
             if(Util.hasAccount(player, accounts)){
                 sender.sendMessage("[ItemEconomy] You are already registered for an account!");
             } else {
@@ -50,13 +59,34 @@ public class ItemEconomy extends JavaPlugin {
         } else if(command.getLabel().equals("balance")) {
             // Lets test if user has the node "example.plugin.awesome" to determine if they are awesome or just suck
             if(Util.hasAccount(player, accounts)) {
-                sender.sendMessage("[ItemEconomy] Your balance is: " + Util.getAccount(player, accounts).getBalance() + " Diamonds");
+                sender.sendMessage("[ItemEconomy] Your balance is: " + Objects.requireNonNull(Util.getAccount(player, accounts)).getBalance() + " Diamonds");
             } else {
                 sender.sendMessage("[ItemEconomy] You do not have a bank account");
             }
             return true;
         } else {
             return false;
+        }
+    }
+
+    @EventHandler
+    public void onCreateVaultSign(SignChangeEvent signEvent) {
+        Player player = signEvent.getPlayer();
+        Sign sign = (Sign) signEvent.getBlock().getState();
+        if (Objects.requireNonNull(signEvent.line(0)).toString().contains("[Vault]")){
+            Account holder = Util.getAccount(player, accounts);
+            Block container = Util.chestBlock(sign);
+
+            if (holder != null && container != null){
+                holder.addVault(new ItemVault(container, sign, holder, currency));
+                player.sendMessage("[ItemEconomy] Created new vault!");
+                player.sendMessage("[ItemEconomy] " + container.getType().toString());
+            } else {
+                if(holder == null)
+                    player.sendMessage("[ItemEconomy] You cannot create a vault without an account");
+                if(container == null)
+                    player.sendMessage("[ItemEconomy] You cannot create a vault without a vault container!");
+            }
         }
     }
 }

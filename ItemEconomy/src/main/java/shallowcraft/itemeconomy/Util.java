@@ -11,6 +11,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Util {
     /**
@@ -66,10 +67,12 @@ public class Util {
     public static boolean isBlockOfItem(Material item, Material block){
         String itemName = item.toString();
         String blockName = block.toString();
-        if(blockName.contains("_"))
-            blockName = blockName.split("_")[0];
+        String[] strings = null;
 
-        return itemName.equals(blockName);
+        if(blockName.contains("_"))
+            strings = blockName.split("_");
+
+        return strings != null && strings.length > 1 && strings[0].equals(itemName) && strings[1].equals("BLOCK");
     }
 
     public static boolean hasAccount(OfflinePlayer player, List<Account> accounts){
@@ -95,7 +98,7 @@ public class Util {
         int itemCount = 0;
         for (ItemStack stack:inventory.getContents()) {
             if(stack != null) {
-                if (stack.getData().getItemType().equals(itemType))
+                if (stack.getType().equals(itemType))
                     itemCount += stack.getAmount();
 
                 if(Util.isBlockOfItem(itemType, stack.getType())){
