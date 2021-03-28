@@ -56,6 +56,11 @@ public class Util {
         }
     }
 
+    public static boolean isValidVaultSign(Sign sign){
+        return sign.isPlaced();
+       //return sign.isPlaced() && sign.line(0).toString().contains("[Vault]");
+    }
+
     public static boolean isBlockOfItem(Material item, Material block){
         String itemName = item.toString();
         String blockName = block.toString();
@@ -101,5 +106,6 @@ public class Util {
 
         return itemCount;
     }
+
 
 }

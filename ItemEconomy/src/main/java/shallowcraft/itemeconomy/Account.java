@@ -3,23 +3,22 @@ package shallowcraft.itemeconomy;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.Inventory;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Account {
     private final OfflinePlayer player;
-    private int balance;
     private List<ItemVault> vaults;
-    private Inventory personalInventory;
-    private Material itemCurrency = ItemEconomy.currency;
+    private Material itemCurrency;
 
 
-    public Account(OfflinePlayer player){
-        balance = 0;
+    public Account(OfflinePlayer player, Material itemCurrency){
         this.player = player;
         vaults = new ArrayList<>();
-        personalInventory = player.getPlayer().getInventory();
+        this.itemCurrency = itemCurrency;
     }
 
     public int getBalance() {
@@ -34,9 +33,17 @@ public class Account {
         return new ArrayList<>(vaults);
     }
 
+    public void overrideLoadVaults(List<ItemVault> override){
+        vaults = new ArrayList<>(override);
+    }
+
+    public Material getItemCurrency(){
+        return itemCurrency;
+    }
+
     private int balance(){
         int count = 0;
-        count+=Util.countItem(personalInventory, itemCurrency);
+        count+=Util.countItem(Objects.requireNonNull(player.getPlayer()).getInventory(), itemCurrency);
         ItemEconomy.log.info("checking vaults, total vaults to check: " + vaults.size());
         for (ItemVault vault:new ArrayList<>(vaults)) {
             int current = vault.getVaultBalance();

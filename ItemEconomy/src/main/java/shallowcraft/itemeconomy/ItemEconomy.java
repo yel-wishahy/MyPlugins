@@ -9,6 +9,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -27,15 +31,32 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class ItemEconomy extends JavaPlugin implements Listener {
     public static final Logger log = Logger.getLogger("Minecraft");
     private static List<Account> accounts;
-    public final static Material currency = Material.DIAMOND;
 
     @Override
     public void onDisable() {
+        try {
+            File dataFile = DataLoader.createDataFile(Config.dataFileName);
+            DataLoader.saveDataToJSON(accounts, dataFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("[ItemEconomy] Failed to save data.");
+        }
     }
 
     @Override
     public void onEnable() {
-        accounts = new ArrayList<>();
+        try {
+            File dataFile = DataLoader.getDataFile(Config.dataFileName);
+            if(dataFile.exists())
+                accounts = DataLoader.loadJSON(dataFile, Bukkit.getServer());
+            else
+                accounts = new ArrayList<>();
+        } catch (IOException | InvalidDataException e) {
+            e.printStackTrace();
+            accounts = new ArrayList<>();
+            log.info("[ItemEconomy] Failed to load data");
+        }
+
         Bukkit.getPluginManager().registerEvents(this, this);
     }
 
@@ -51,7 +72,7 @@ public class ItemEconomy extends JavaPlugin implements Listener {
             if(Util.hasAccount(player, accounts)){
                 sender.sendMessage("[ItemEconomy] You are already registered for an account!");
             } else {
-                accounts.add(new Account(player));
+                accounts.add(new Account(player, Config.currency));
                 sender.sendMessage("[ItemEconomy] You have created a NEW bank account! Lucky spending!");
             }
             return true;
@@ -78,7 +99,7 @@ public class ItemEconomy extends JavaPlugin implements Listener {
             Block container = Util.chestBlock(sign);
 
             if (holder != null && container != null){
-                holder.addVault(new ItemVault(container, sign, holder, currency));
+                holder.addVault(new ItemVault(container, sign, holder, Config.currency));
                 player.sendMessage("[ItemEconomy] Created new vault!");
                 player.sendMessage("[ItemEconomy] " + container.getType().toString());
             } else {
