@@ -1,10 +1,10 @@
 name: ItemEconomy
 version: ${project.version}
-main: shallowcraft.itemeconomy.ItemEconomy
+main: shallowcraft.itemeconomy.Core.ItemEconomy
 api-version: 1.16
 authors: [ BlackShadow2941 ]
 description: An item based economy for minecraft with potential for vault support
-softdepend: [Vault]
+depend: [Vault]
 commands:
   create_account:
   balance:

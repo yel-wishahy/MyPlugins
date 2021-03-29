@@ -1,4 +1,4 @@
-package shallowcraft.itemeconomy;
+package shallowcraft.itemeconomy.Util;
 
 public class InvalidDataException extends Exception {
 
