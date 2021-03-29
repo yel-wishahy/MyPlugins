@@ -102,6 +102,7 @@ public class Account {
     }
 
     public TransactionResult withdraw(int amount){
+        ItemEconomy.log.info("Withdrawing " + amount + " from total of " + balance());
         if(balance() < amount)
             return new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
 
@@ -114,13 +115,12 @@ public class Account {
     }
 
     public TransactionResult deposit(int amount){
+        ItemEconomy.log.info("Depositing " + amount + " into total of " + balance());
         int numAdded = 0;
         Inventory inventory =  Objects.requireNonNull(player.getPlayer()).getInventory();
 
-        if(inventory != null){
-            TransactionResult playerResult = Util.deposit(inventory, amount);
-            numAdded += playerResult.amount;
-        }
+        TransactionResult playerResult = Util.deposit(inventory, amount);
+        numAdded += playerResult.amount;
 
         return depositAllVaults(amount - numAdded);
     }

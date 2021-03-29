@@ -12,6 +12,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Core.Account;
+import shallowcraft.itemeconomy.Core.ItemEconomy;
 import shallowcraft.itemeconomy.Core.TransactionResult;
 
 import java.util.List;
@@ -128,13 +129,15 @@ public class Util {
             if (numRemoved >= amount)
                 break;
 
-            if (stack.getType().equals(Config.currency)) {
+            if (stack != null && stack.getType().equals(Config.currency)) {
+                ItemEconomy.log.info("withdrawing items");
                 int toRemove = Util.amountToRemove(stack.getAmount(), amount);
                 stack.setAmount(stack.getAmount() - toRemove);
                 numRemoved += toRemove;
             }
 
-            if (stack.getType().equals(Config.currency_block)) {
+            if (stack != null && stack.getType().equals(Config.currency_block)) {
+                ItemEconomy.log.info("withdrawing blocks");
                 int toRemove = Util.amountToRemove(stack.getAmount() * 9, amount);
                 int[] result = Util.currencyToCurrencyBlock(toRemove);
                 int items = result[0];

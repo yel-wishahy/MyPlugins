@@ -138,7 +138,7 @@ public class Economy_ItemEconomy implements Economy {
      */
     @Override
     public boolean hasAccount(OfflinePlayer player, String worldName) {
-        return itemEconomy.hasAccount(player, worldName);
+        return false;
     }
 
     /**
@@ -181,7 +181,7 @@ public class Economy_ItemEconomy implements Economy {
      */
     @Override
     public double getBalance(OfflinePlayer player, String world) {
-        return itemEconomy.getBalance(player, world);
+        return 0;
     }
 
     /**

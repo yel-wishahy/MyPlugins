@@ -1,22 +1,26 @@
 package shallowcraft.itemeconomy.Core;
 
+import net.kyori.adventure.text.TextComponent;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
+import net.kyori.*;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.bukkit.command.Command;
@@ -102,7 +106,7 @@ public class ItemEconomy extends JavaPlugin implements Listener {
             }
             return true;
 
-        } else if (command.getLabel().equals("balance")) {
+        } else if (command.getLabel().equals("balance") && args.length < 1) {
             // Lets test if user has the node "example.plugin.awesome" to determine if they are awesome or just suck
             if (Util.hasAccount(player, accounts)) {
                 sender.sendMessage("[ItemEconomy] Your balance is: " + Objects.requireNonNull(Util.getAccount(player, accounts)).getBalance() + " Diamonds");
@@ -110,17 +114,40 @@ public class ItemEconomy extends JavaPlugin implements Listener {
                 sender.sendMessage("[ItemEconomy] You do not have a bank account");
             }
             return true;
-        } else {
-            return false;
+        } else if (command.getLabel().equals("accounts")){
+            StringBuilder message = new StringBuilder();
+            for (Account acc:accounts) {
+                message.append(", ").append(acc.getPlayer().getName());
+            }
+
+            sender.sendMessage("[ItemEconomy] List of Existing Accounts: " + message);
+            return true;
+        } else if (command.getLabel().equals("balance") && args.length > 1) {
+            OfflinePlayer holder = getServer().getOfflinePlayer(Objects.requireNonNull(getServer().getPlayerUniqueId(args[0])));
+            sender.sendMessage("[ItemEconomy] " + holder.getName() + "'s balance is: " + Objects.requireNonNull(Util.getAccount(holder, accounts)).getBalance() + " Diamonds");
+            return true;
         }
+
+        return false;
     }
 
     @EventHandler
     public void onCreateVaultSign(SignChangeEvent signEvent) {
+        String header = ((TextComponent) Objects.requireNonNull(signEvent.line(0))).content();
+        String name = ((TextComponent) Objects.requireNonNull(signEvent.line(1))).content();
+
         Player player = signEvent.getPlayer();
         Sign sign = (Sign) signEvent.getBlock().getState();
-        if (Objects.requireNonNull(signEvent.line(0)).toString().contains("[Vault]")) {
-            Account holder = Util.getAccount(player, accounts);
+
+        if (header != null && header.equals("[Vault]")) {
+            Account holder = null;
+
+            if(!name.isEmpty()){
+                holder = Util.getAccount(getServer().getOfflinePlayer(Objects.requireNonNull(getServer().getPlayerUniqueId(name))), accounts);
+            } else {
+                holder = Util.getAccount(player, accounts);
+            }
+
             Block container = Util.chestBlock(sign);
 
             if (holder != null && container != null) {
@@ -141,21 +168,9 @@ public class ItemEconomy extends JavaPlugin implements Listener {
         return Util.hasAccount(player, accounts);
     }
 
-
-    public boolean hasAccount(OfflinePlayer player, String worldName) {
-        if (Objects.requireNonNull(getServer().getWorld(worldName)).getPlayers().contains(player.getPlayer()))
-            return hasAccount(player);
-        else
-            return false;
-    }
-
     public double getBalance(OfflinePlayer player) {
-        return Objects.requireNonNull(Util.getAccount(player, accounts)).getBalance();
-    }
-
-    public double getBalance(OfflinePlayer player, String worldName) {
-        if (Objects.requireNonNull(getServer().getWorld(worldName)).getPlayers().contains(player.getPlayer()))
-            return getBalance(player);
+        if(hasAccount(player))
+            return Objects.requireNonNull(Util.getAccount(player, accounts)).getBalance();
         else
             return 0;
     }
