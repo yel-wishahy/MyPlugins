@@ -10,6 +10,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.WallSign;
+import org.bukkit.entity.Item;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -144,6 +145,33 @@ public class Util {
         int items = amount - blocks * 9;
         return new int[]{items, blocks};
     }
+
+    //cannot be more than 5 blocks
+    public static ItemStack convertToItem(int amount, ItemStack blockStack, Inventory inventory){
+        int slot = inventory.firstEmpty();
+
+        if(slot != -1){
+            blockStack.setAmount(blockStack.getAmount() - amount);
+            inventory.setItem(slot, new ItemStack(Config.currency, amount * 9));
+            return inventory.getItem(slot);
+        }
+
+        return null;
+    }
+
+    //amount must be divisible by 9
+    public static ItemStack convertToBlock(int amount, ItemStack itemStack, Inventory inventory){
+        int slot = inventory.firstEmpty();
+
+        if(slot != -1){
+            itemStack.setAmount(itemStack.getAmount() - amount);
+            inventory.setItem(slot, new ItemStack(Config.currency_block, amount / 9));
+            return inventory.getItem(slot);
+        }
+
+        return null;
+    }
+
 
     public static EconomyResponse.ResponseType convertResponse(TransactionResult.ResultType resultType) {
         switch (resultType) {

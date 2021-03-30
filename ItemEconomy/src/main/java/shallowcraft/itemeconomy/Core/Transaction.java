@@ -21,26 +21,32 @@ public class Transaction {
 
             if (stack != null && stack.getType().equals(Config.currency)) {
                 ItemEconomy.log.info("withdrawing items");
-                int toRemove = Util.amountToRemove(stack.getAmount(), amount);
+                int toRemove = Util.amountToRemove(stack.getAmount(), amount - numRemoved);
                 stack.setAmount(stack.getAmount() - toRemove);
                 numRemoved += toRemove;
             }
 
             if (stack != null && stack.getType().equals(Config.currency_block)) {
                 ItemEconomy.log.info("withdrawing blocks");
-                int toRemove = Util.amountToRemove(stack.getAmount() * 9, amount);
+                int toRemove = Util.amountToRemove(stack.getAmount() * 9, amount - numRemoved);
                 int[] result = Util.currencyToCurrencyBlock(toRemove);
 
-                int items = result[0];
-                int blocks = result[1];
+                int itemsToRemove = result[0];
+                int blocksToRemove = result[1];
+                int toConvert = 0;
 
-                int slot = inventory.firstEmpty();
-                if (slot != -1) {
-                    inventory.setItem(slot, new ItemStack(Config.currency, items));
+                if(itemsToRemove > 0)
+                    toConvert = (int) Math.ceil(((double) itemsToRemove)/9.0);
+
+                ItemStack itemStack = null;
+                if(toConvert > 0 && stack.getAmount() - toConvert >= blocksToRemove)
+                    itemStack = Util.convertToItem(toConvert, stack, inventory);
+
+                if(itemStack != null && stack.getAmount() >= blocksToRemove && itemStack.getAmount() >= itemsToRemove){
+                    stack.setAmount(stack.getAmount() - blocksToRemove);
+                    itemStack.setAmount(itemStack.getAmount() - itemsToRemove);
+                    numRemoved += itemsToRemove + blocksToRemove * 9;
                 }
-
-                stack.setAmount(stack.getAmount() - blocks);
-                numRemoved += items + blocks * 9;
             }
         }
 
