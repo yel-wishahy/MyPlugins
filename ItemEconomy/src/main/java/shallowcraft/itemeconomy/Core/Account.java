@@ -94,9 +94,11 @@ public class Account {
     public boolean removeVault(ItemVault vault){
         return vaults.remove(vault);
     }
-    public boolean addVault(ItemVault vault){
+    public void addVault(ItemVault vault) {
+        vaults.add(vault);
         ItemEconomy.getInstance().saveData();
-        return vaults.add(vault);}
+    }
+
 
     private TransactionResult withdrawAllVaults(int amount){
         if(getAllVaultBalance() < amount)

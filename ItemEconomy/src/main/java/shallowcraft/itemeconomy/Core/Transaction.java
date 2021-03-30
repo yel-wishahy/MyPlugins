@@ -50,8 +50,12 @@ public class Transaction {
             }
         }
 
-        ItemEconomy.log.info("Success: Withdrew " + numRemoved + " from " + inventory.getType().name());
-        return new TransactionResult(numRemoved, TransactionResult.ResultType.SUCCESS, "withdraw");
+        if(numRemoved == amount){
+            ItemEconomy.log.info("Success: Withdrew " + numRemoved + " from " + inventory.getType().name());
+            return new TransactionResult(numRemoved, TransactionResult.ResultType.SUCCESS, "withdraw");
+        }
+
+        return new TransactionResult(numRemoved, TransactionResult.ResultType.FAILURE, "withdraw");
     }
 
     public static TransactionResult deposit(Inventory inventory, int amount){
@@ -61,36 +65,44 @@ public class Transaction {
         ItemEconomy.log.info("Trying to deposit " + amount + " into " + inventory.getType().name());
         int numAdded = 0;
 
-        while(numAdded < amount){
-            boolean empty = false;
-            int slot = inventory.first(Config.currency);
-            if(slot == -1){
-                slot = inventory.firstEmpty();
-                empty = true;
+        for (int i = 0; i < inventory.getSize(); i++) {
+            if(numAdded >= amount)
+                break;
+
+            ItemStack item = inventory.getItem(i);
+
+            int[] conversion = Util.currencyToCurrencyBlock(amount - numAdded);
+            int itemsToAdd = conversion[0];
+            int blocksToAdd = conversion[1];
+
+            if(item == null){
+                int toAdd = 0;
+
+                if(blocksToAdd > 0){
+                    toAdd = Util.amountToAdd(0, blocksToAdd);
+                    inventory.setItem(i, new ItemStack(Config.currency_block, toAdd));
+                    numAdded += blocksToAdd * 9;
+                } else {
+                    toAdd = Util.amountToAdd(0, itemsToAdd);
+                    inventory.setItem(i, new ItemStack(Config.currency, toAdd));
+                    numAdded += toAdd;
+                }
+            } else if(item.getType().equals(Config.currency_block)){
+                int toAdd = Util.amountToAdd(item.getAmount(), blocksToAdd);
+                item.setAmount(item.getAmount() + toAdd);
+                numAdded+= toAdd * 9;
+            } else if(item.getType().equals(Config.currency)){
+                int toAdd = Util.amountToAdd(item.getAmount(), itemsToAdd);
+                item.setAmount(item.getAmount() + toAdd);
+                numAdded+= toAdd;
             }
-
-
-            if(slot == -1){
-                ItemEconomy.log.info("Failed: only able to deposit " + numAdded + " into " + inventory.getType().name());
-                return new TransactionResult(numAdded, TransactionResult.ResultType.INSUFFICIENT_SPACE, "deposit");
-            }
-
-
-            int toAdd = 0;
-
-            if(empty) {
-                toAdd = Util.amountToAdd(0, amount - numAdded);
-                inventory.setItem(slot, new ItemStack(Config.currency, toAdd));
-            }
-            else {
-                toAdd = Util.amountToAdd(Objects.requireNonNull(inventory.getItem(slot)).getAmount(), amount-numAdded);
-                Objects.requireNonNull(inventory.getItem(slot)).setAmount(Objects.requireNonNull(inventory.getItem(slot)).getAmount() + toAdd);
-            }
-
-            numAdded+=toAdd;
         }
 
-        ItemEconomy.log.info("Success: Deposited " + numAdded + " into " + inventory.getType().name());
-        return new TransactionResult(numAdded, TransactionResult.ResultType.SUCCESS, "deposit");
+        if(numAdded == amount){
+            ItemEconomy.log.info("Success: Deposited " + numAdded + " into " + inventory.getType().name());
+            return new TransactionResult(numAdded, TransactionResult.ResultType.SUCCESS, "deposit");
+        }
+
+        return new TransactionResult(numAdded, TransactionResult.ResultType.INSUFFICIENT_SPACE, "deposit");
     }
 }
