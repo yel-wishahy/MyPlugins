@@ -7,6 +7,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Core.Account;
 import shallowcraft.itemeconomy.Core.ItemEconomy;
 import shallowcraft.itemeconomy.Core.ItemVault;
@@ -24,22 +25,35 @@ public class DataLoader {
         Map<String, Map<String, String>> jsonData = gson.fromJson(reader, Map.class);
         reader.close();
 
+        if(jsonData == null || jsonData.isEmpty())
+            throw new InvalidDataException("[ItemEconomy] Failed to load data due to invalid file.");
+
         for (String uuid : jsonData.keySet()) {
             Map<String, String> playerData = jsonData.get(uuid);
             Material currency = Material.getMaterial(playerData.get("currency"));
             OfflinePlayer player = server.getOfflinePlayer(UUID.fromString(uuid));
-            ItemEconomy.log.info("[ItemEconomy] Loaded data for player with uuid: " + player.getUniqueId());
+
+            if(player == null)
+                ItemEconomy.log.info("[ItemEconomy] Failed to load data for player with uuid: " + player.getUniqueId());
+            else
+                ItemEconomy.log.info("[ItemEconomy] Loaded data for player with uuid: " + player.getUniqueId());
+
             assert currency != null;
             ItemEconomy.log.info("[ItemEconomy] Loaded currency with material ID: " + currency.name());
+            int personalBalance = 0;
+            personalBalance = Integer.parseInt(playerData.get("personal_balance"));
+            ItemEconomy.log.info("[ItemEconomy] Loaded last known personal balance of " + personalBalance + " Diamonds");
 
-            Account currentAccount = new Account(player, currency);
+            Account currentAccount = new Account(player, currency, personalBalance);
+            List<ItemVault> vaults = new ArrayList<>();
 
-            int index = 0;
+            int containerIndex = 0;
 
             for (String identifier : playerData.keySet()) {
 
                 if (identifier.contains("Container")) {
-                    index = Integer.parseInt(identifier.split("_")[1]);
+                    ItemEconomy.log.info("[ItemEconomy] Loading Vault " + containerIndex);
+                    containerIndex++;
 
                     String[] data = playerData.get(identifier).split(",");
 
@@ -51,11 +65,12 @@ public class DataLoader {
                     Block container = containerLoc.getBlock();
                     if (Util.isValidContainer(container.getType()) && Util.isValidVaultSign((Sign) sign.getState())) {
                         ItemVault currentVault = new ItemVault(container, (Sign) sign.getState(), currentAccount, currency);
-                        currentAccount.addVault(currentVault);
+                        vaults.add(currentVault);
                     }
                 }
             }
 
+            currentAccount.overrideLoadVaults(vaults);
             accounts.add(currentAccount);
         }
 
@@ -73,11 +88,14 @@ public class DataLoader {
             ItemEconomy.log.info("[ItemEconomy] Saving player uuid");
             String currency = acc.getItemCurrency().toString();
             playerData.put("currency", currency);
-            ItemEconomy.log.info("[ItemEconomy] Saving Currency");
+            ItemEconomy.log.info("[ItemEconomy] Saving currency");
+            String personalBalance = String.valueOf(acc.getLastPersonalBalance());
+            playerData.put("personal_balance", personalBalance);
+            ItemEconomy.log.info("[ItemEconomy] Saving balance");
 
-            int count = 0;
+            int containerIndex = 0;
             for (ItemVault vault : acc.getVaults()) {
-                ItemEconomy.log.info("[ItemEconomy] Saving Vault " + count + " of " + acc.getVaults().size());
+                ItemEconomy.log.info("[ItemEconomy] Saving Vault " + containerIndex + " of " + acc.getVaults().size());
                 StringBuilder data = new StringBuilder();
                 String worldName = vault.vaultSign.getLocation().getWorld().getName();
                 data.append(worldName).append(",");
@@ -96,8 +114,8 @@ public class DataLoader {
                 int containerz = vault.containerVault.getLocation().getBlockZ();
                 data.append(containerz);
 
-                playerData.put("Container_" + count, data.toString());
-                count++;
+                playerData.put("Container_" + containerIndex, data.toString());
+                containerIndex++;
             }
 
             output.put(uuid, playerData);
@@ -108,9 +126,6 @@ public class DataLoader {
         FileWriter writer = new FileWriter(dataFile);
         gson.toJson(output, writer);
         writer.close();
-
-
-
     }
 
     public static File createDataFile(String fileName) throws IOException {
@@ -125,6 +140,8 @@ public class DataLoader {
     public static File getDataFile(String fileName) throws IOException{
         return  new File("plugins/ItemEconomy/" + fileName + ".json");
     }
+
+
 
 
 }

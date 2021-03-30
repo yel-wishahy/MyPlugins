@@ -53,6 +53,11 @@ public class ItemEconomy extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        saveData();
+        log.info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
+    }
+
+    public void saveData() {
         try {
             File dataFile = DataLoader.createDataFile(Config.dataFileName);
             DataLoader.saveDataToJSON(accounts, dataFile);
@@ -60,8 +65,6 @@ public class ItemEconomy extends JavaPlugin implements Listener {
             e.printStackTrace();
             log.info("[ItemEconomy] Failed to save data.");
         }
-
-        log.info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
     }
 
     @Override
@@ -114,7 +117,7 @@ public class ItemEconomy extends JavaPlugin implements Listener {
                 sender.sendMessage("[ItemEconomy] You do not have a bank account");
             }
             return true;
-        } else if (command.getLabel().equals("accounts")){
+        } else if (command.getLabel().equals("list_accounts")){
             StringBuilder message = new StringBuilder();
             for (Account acc:accounts) {
                 message.append(", ").append(acc.getPlayer().getName());
@@ -122,7 +125,7 @@ public class ItemEconomy extends JavaPlugin implements Listener {
 
             sender.sendMessage("[ItemEconomy] List of Existing Accounts: " + message);
             return true;
-        } else if (command.getLabel().equals("balance") && args.length > 1) {
+        } else if (command.getLabel().equals("balance") && args.length >= 1) {
             OfflinePlayer holder = getServer().getOfflinePlayer(Objects.requireNonNull(getServer().getPlayerUniqueId(args[0])));
             sender.sendMessage("[ItemEconomy] " + holder.getName() + "'s balance is: " + Objects.requireNonNull(Util.getAccount(holder, accounts)).getBalance() + " Diamonds");
             return true;
@@ -133,13 +136,12 @@ public class ItemEconomy extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onCreateVaultSign(SignChangeEvent signEvent) {
-        String header = ((TextComponent) Objects.requireNonNull(signEvent.line(0))).content();
         String name = ((TextComponent) Objects.requireNonNull(signEvent.line(1))).content();
 
         Player player = signEvent.getPlayer();
         Sign sign = (Sign) signEvent.getBlock().getState();
 
-        if (header != null && header.equals("[Vault]")) {
+        if (Util.isValidVaultSign(signEvent)) {
             Account holder = null;
 
             if(!name.isEmpty()){
@@ -153,12 +155,11 @@ public class ItemEconomy extends JavaPlugin implements Listener {
             if (holder != null && container != null) {
                 holder.addVault(new ItemVault(container, sign, holder, Config.currency));
                 player.sendMessage("[ItemEconomy] Created new vault!");
-                player.sendMessage("[ItemEconomy] " + container.getType().toString());
             } else {
                 if (holder == null)
                     player.sendMessage("[ItemEconomy] You cannot create a vault without an account");
                 if (container == null)
-                    player.sendMessage("[ItemEconomy] You cannot create a vault without a vault container!");
+                    player.sendMessage("[ItemEconomy] You cannot create a vault without a proper vault container!");
             }
         }
     }

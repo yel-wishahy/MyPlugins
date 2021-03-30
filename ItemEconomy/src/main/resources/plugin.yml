@@ -8,4 +8,5 @@ depend: [Vault]
 commands:
   create_account:
   balance:
+  list_accounts:
 

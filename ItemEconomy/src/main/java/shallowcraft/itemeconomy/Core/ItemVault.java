@@ -37,15 +37,16 @@ public class ItemVault {
 
     public TransactionResult withdraw(int amount){
         Inventory inventory =  ((Container) containerVault.getState()).getInventory();
-        return Util.withdraw(inventory, amount);
+        return Transaction.withdraw(inventory, amount);
     }
 
     public TransactionResult deposit(int amount){
         Inventory inventory =  ((Container) containerVault.getState()).getInventory();
-        return Util.deposit(inventory, amount);
+        return Transaction.deposit(inventory, amount);
     }
 
     private void destroy(){
+        ItemEconomy.log.info("DESTROYING VAULT");
         holder.removeVault(this);
     }
 

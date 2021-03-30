@@ -1,5 +1,7 @@
 package shallowcraft.itemeconomy.Util;
 
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -8,6 +10,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.WallSign;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import shallowcraft.itemeconomy.Config;
@@ -16,6 +19,7 @@ import shallowcraft.itemeconomy.Core.ItemEconomy;
 import shallowcraft.itemeconomy.Core.TransactionResult;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Util {
     /**
@@ -61,8 +65,14 @@ public class Util {
     }
 
     public static boolean isValidVaultSign(Sign sign) {
-        return sign.isPlaced();
-        //return sign.isPlaced() && sign.line(0).toString().contains("[Vault]");
+
+        return sign != null && sign.isPlaced();
+    }
+
+    public static boolean isValidVaultSign(SignChangeEvent sign) {
+        String header = ((TextComponent) Objects.requireNonNull(sign.line(0))).content();
+
+        return header != null && header.equals(Config.vaultHeader);
     }
 
     public static boolean hasAccount(OfflinePlayer player, List<Account> accounts) {
@@ -101,19 +111,32 @@ public class Util {
     }
 
     public static int amountToRemove(int inStack, int toRemove) {
+        ItemEconomy.log.info("Inventory: " + inStack + " ToRemove: " + toRemove);
         int result = inStack - toRemove;
 
         if (result < 0)
             return toRemove + result;
 
         if (result > 0)
-            return toRemove - result;
+            result = toRemove;
 
-        return toRemove;
+        ItemEconomy.log.info("Toremove result: " + result);
+
+        return result;
     }
 
-    public static int amountToAdd(int toAdd){
-        return Math.min(toAdd, 64);
+    public static int amountToAdd(int inStack, int toAdd) {
+        ItemEconomy.log.info("Inventory: " + inStack + " ToAdd: " + toAdd);
+        int result = inStack + toAdd;
+
+        if (result > 64)
+            result = 64 - inStack;
+        else
+            result = toAdd;
+
+        ItemEconomy.log.info("ToAdd result: " + result);
+
+        return result;
     }
 
     public static int[] currencyToCurrencyBlock(int amount) {
@@ -122,67 +145,14 @@ public class Util {
         return new int[]{items, blocks};
     }
 
-    public static TransactionResult withdraw(Inventory inventory, int amount) {
-        int numRemoved = 0;
-
-        for (ItemStack stack : inventory) {
-            if (numRemoved >= amount)
-                break;
-
-            if (stack != null && stack.getType().equals(Config.currency)) {
-                ItemEconomy.log.info("withdrawing items");
-                int toRemove = Util.amountToRemove(stack.getAmount(), amount);
-                stack.setAmount(stack.getAmount() - toRemove);
-                numRemoved += toRemove;
-            }
-
-            if (stack != null && stack.getType().equals(Config.currency_block)) {
-                ItemEconomy.log.info("withdrawing blocks");
-                int toRemove = Util.amountToRemove(stack.getAmount() * 9, amount);
-                int[] result = Util.currencyToCurrencyBlock(toRemove);
-                int items = result[0];
-                int blocks = result[1];
-
-                int slot = inventory.firstEmpty();
-                if (slot != -1) {
-                    inventory.setItem(slot, new ItemStack(Config.currency, items));
-                } else {
-                    return new TransactionResult(numRemoved, TransactionResult.ResultType.INSUFFICIENT_SPACE, "withdraw");
-                }
-
-                stack.setAmount(stack.getAmount() - blocks);
-                numRemoved += items + blocks * 9;
-            }
-        }
-
-        return new TransactionResult(numRemoved, TransactionResult.ResultType.SUCCESS, "withdraw");
-    }
-
-    public static TransactionResult deposit(Inventory inventory, int amount){
-        int numAdded = 0;
-
-        while(numAdded <= amount){
-            int slot = inventory.firstEmpty();
-
-            if(slot == -1 && numAdded <= amount)
-                return new TransactionResult(numAdded, TransactionResult.ResultType.INSUFFICIENT_SPACE, "deposit");
-
-            int toAdd = amountToAdd(amount);
-            inventory.setItem(slot, new ItemStack(Config.currency, toAdd));
-            numAdded+=toAdd;
-        }
-
-        return new TransactionResult(numAdded, TransactionResult.ResultType.SUCCESS, "deposit");
-    }
-
-    public static EconomyResponse.ResponseType convertResponse(TransactionResult.ResultType resultType){
-        switch (resultType){
+    public static EconomyResponse.ResponseType convertResponse(TransactionResult.ResultType resultType) {
+        switch (resultType) {
             case FAILURE:
-                return  EconomyResponse.ResponseType.FAILURE;
+                return EconomyResponse.ResponseType.FAILURE;
             case SUCCESS:
-                return  EconomyResponse.ResponseType.SUCCESS;
+                return EconomyResponse.ResponseType.SUCCESS;
             case NOT_IMPLEMENTED:
-                return  EconomyResponse.ResponseType.NOT_IMPLEMENTED;
+                return EconomyResponse.ResponseType.NOT_IMPLEMENTED;
             case INSUFFICIENT_FUNDS:
                 return EconomyResponse.ResponseType.FAILURE;
             case INSUFFICIENT_SPACE:
