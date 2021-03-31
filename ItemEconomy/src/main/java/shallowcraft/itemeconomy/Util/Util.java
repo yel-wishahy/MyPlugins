@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Core.Account;
 import shallowcraft.itemeconomy.Core.ItemEconomy;
+import shallowcraft.itemeconomy.Core.ItemVault;
 import shallowcraft.itemeconomy.Core.TransactionResult;
 
 import java.util.List;
@@ -46,6 +47,21 @@ public class Util {
         Block blockBelow = signBlock.getRelative(BlockFace.DOWN);
 
         return isValidContainer(blockAttached.getType()) ? blockAttached : isValidContainer(blockBelow.getType()) ? blockBelow : null;
+    }
+
+    public static boolean isVault(Block containerVault, List<Account> accounts){
+        for (Account acc:accounts) {
+            for (ItemVault vault:acc.getVaults()) {
+                if(vault.containerVault.getLocation().equals(containerVault.getLocation())){
+                    ItemEconomy.log.info("IS A VAULT");
+                    return true;
+
+                }
+
+            }
+        }
+        ItemEconomy.log.info("IS NOT A VAULT");
+        return false;
     }
 
     /**

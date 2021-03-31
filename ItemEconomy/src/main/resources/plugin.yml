@@ -9,4 +9,5 @@ commands:
   create_account:
   balance:
   list_accounts:
+  create_account_all:
 

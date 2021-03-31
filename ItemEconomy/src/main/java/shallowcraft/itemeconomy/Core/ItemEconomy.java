@@ -109,14 +109,14 @@ public class ItemEconomy extends JavaPlugin implements Listener {
             }
             return true;
 
-        } else if (command.getLabel().equals("balance") && args.length < 1) {
-            // Lets test if user has the node "example.plugin.awesome" to determine if they are awesome or just suck
+        } else if (command.getLabel().equals("balance")) {
             if (Util.hasAccount(player, accounts)) {
                 sender.sendMessage("[ItemEconomy] Your balance is: " + Objects.requireNonNull(Util.getAccount(player, accounts)).getBalance() + " Diamonds");
+                return true;
             } else {
                 sender.sendMessage("[ItemEconomy] You do not have a bank account");
+                return false;
             }
-            return true;
         } else if (command.getLabel().equals("list_accounts")){
             StringBuilder message = new StringBuilder();
             for (Account acc:accounts) {
@@ -125,10 +125,24 @@ public class ItemEconomy extends JavaPlugin implements Listener {
 
             sender.sendMessage("[ItemEconomy] List of Existing Accounts: " + message);
             return true;
-        } else if (command.getLabel().equals("balance") && args.length >= 1) {
-            OfflinePlayer holder = getServer().getOfflinePlayer(Objects.requireNonNull(getServer().getPlayerUniqueId(args[0])));
-            sender.sendMessage("[ItemEconomy] " + holder.getName() + "'s balance is: " + Objects.requireNonNull(Util.getAccount(holder, accounts)).getBalance() + " Diamonds");
-            return true;
+        } else if (command.getLabel().equals("create_account_all")) {
+            for (Player p:getServer().getOnlinePlayers()) {
+                if (Util.hasAccount(p, accounts)) {
+                    sender.sendMessage("[ItemEconomy]" + p.getName() + "is already registered for an account!");
+                } else {
+                    accounts.add(new Account(p, Config.currency));
+                    sender.sendMessage("[ItemEconomy] You have created a NEW bank account for " + p.getName() + "! Lucky spending.");
+                }
+            }
+
+            for (OfflinePlayer p:getServer().getOfflinePlayers()) {
+                if (Util.hasAccount(p, accounts)) {
+                    sender.sendMessage("[ItemEconomy] " + p.getName() + " is already registered for an account!");
+                } else {
+                    accounts.add(new Account(p, Config.currency));
+                    sender.sendMessage("[ItemEconomy] You have created a NEW bank account for " + p.getName() + "! Lucky spending.");
+                }
+            }
         }
 
         return false;
@@ -152,14 +166,14 @@ public class ItemEconomy extends JavaPlugin implements Listener {
 
             Block container = Util.chestBlock(sign);
 
-            if (holder != null && container != null) {
+            if (holder != null && container != null && !Util.isVault(container, accounts)) {
                 holder.addVault(new ItemVault(container, sign, holder, Config.currency));
                 player.sendMessage("[ItemEconomy] Created new vault!");
             } else {
                 if (holder == null)
                     player.sendMessage("[ItemEconomy] You cannot create a vault without an account");
                 if (container == null)
-                    player.sendMessage("[ItemEconomy] You cannot create a vault without a proper vault container!");
+                    player.sendMessage("[ItemEconomy] Cannot create a vault here!");
             }
         }
     }
