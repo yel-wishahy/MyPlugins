@@ -112,22 +112,20 @@ public class Util {
     }
 
     public static int amountToRemove(int inStack, int toRemove) {
-        ItemEconomy.log.info("Inventory: " + inStack + " ToRemove: " + toRemove);
-        int result = inStack - toRemove;
+        //ItemEconomy.log.info("Inventory: " + inStack + " ToRemove: " + toRemove);
+        int result = 0;
 
-        if (result < 0)
-            return toRemove + result;
-
-        if (result > 0)
+        if(toRemove <= inStack)
             result = toRemove;
+        else
+            result = inStack;
 
-        ItemEconomy.log.info("Toremove result: " + result);
-
+        //ItemEconomy.log.info("Toremove result: " + result);
         return result;
     }
 
     public static int amountToAdd(int inStack, int toAdd) {
-        ItemEconomy.log.info("Inventory: " + inStack + " ToAdd: " + toAdd);
+        //ItemEconomy.log.info("Inventory: " + inStack + " ToAdd: " + toAdd);
         int result = inStack + toAdd;
 
         if (result > 64)
@@ -135,7 +133,7 @@ public class Util {
         else
             result = toAdd;
 
-        ItemEconomy.log.info("ToAdd result: " + result);
+        //ItemEconomy.log.info("ToAdd result: " + result);
 
         return result;
     }
@@ -153,6 +151,7 @@ public class Util {
         if(slot != -1){
             blockStack.setAmount(blockStack.getAmount() - amount);
             inventory.setItem(slot, new ItemStack(Config.currency, amount * 9));
+            //ItemEconomy.log.info("conversion of 1 " + amount + "blocks to items result: " + (inventory.getItem(slot) != null));
             return inventory.getItem(slot);
         }
 

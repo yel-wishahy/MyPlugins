@@ -120,23 +120,22 @@ public class Account {
 
    private TransactionResult depositAllVaults(int amount){
         int numAdded = 0;
-        TransactionResult result = null;
+
         for (ItemVault vault:new ArrayList<>(vaults)) {
             if(numAdded >= amount)
                 break;
 
-            result = vault.deposit(amount);
-            numAdded+=result.amount;
+            numAdded+=vault.deposit(amount - numAdded).amount;
         }
 
-        if(numAdded >= amount)
-            return new TransactionResult(numAdded, TransactionResult.ResultType.SUCCESS, "deposit");
+        if(numAdded < amount)
+            return new TransactionResult(numAdded, TransactionResult.ResultType.INSUFFICIENT_SPACE, "deposit");
 
-        return new TransactionResult(numAdded, TransactionResult.ResultType.INSUFFICIENT_SPACE, "deposit");
+        return new TransactionResult(numAdded, TransactionResult.ResultType.SUCCESS, "deposit");
     }
 
     public TransactionResult withdraw(int amount){
-        ItemEconomy.log.info("Withdrawing " + amount + " from total of " + balance());
+        //ItemEconomy.log.info("Withdrawing " + amount + " from total of " + balance());
         if(balance() < amount)
             return new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
 
@@ -153,7 +152,7 @@ public class Account {
     }
 
     public TransactionResult deposit(int amount){
-        ItemEconomy.log.info("Depositing " + amount + " into total of " + balance());
+        //ItemEconomy.log.info("Depositing " + amount + " into total of " + balance());
 
         Inventory inventory =  Objects.requireNonNull(player.getPlayer()).getInventory();
         int numAdded = 0;
