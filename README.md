@@ -9,6 +9,7 @@ The way the physical currency works is that any player invetory and chest vault 
 by placing a sign on a chest with "[Vault]" as the first line.
 
 Item Vault creation sign:
-Line 1: "[Vault]"
-Line 2 (optional): Name of account holder
-Line 3 (optional, defaults to regular): Vault type: "[Withdraw]" or "[Deposit]" for withdraw or deposit only vaults
+  - Line 1: "[Vault]"
+  - Line 2 (optional): Name of account holder
+  - Line 3 (optional, defaults to regular): Vault type: "[Withdraw]" or "[Deposit]" 
+    - for withdraw or deposit only vaults
