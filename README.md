@@ -13,3 +13,9 @@ Item Vault creation sign:
   - Line 2 (optional): Name of account holder
   - Line 3 (optional, defaults to regular): Vault type: "[Withdraw]" or "[Deposit]" 
     - for withdraw or deposit only vaults
+
+Commands : 
+  - "\create_account"
+  - "\create_account_all"
+  - "\balance"
+  - "\baltop"
