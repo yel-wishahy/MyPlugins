@@ -1,2 +1,2 @@
 # MyPlugins
-Plugins I've create for minecraft servers
+Plugins I've created for minecraft servers
