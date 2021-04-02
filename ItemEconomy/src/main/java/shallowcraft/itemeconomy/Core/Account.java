@@ -63,7 +63,13 @@ public class Account {
     }
 
     private boolean updatePersonalBalance(){
-        Inventory inventory = Objects.requireNonNull(player.getPlayer()).getInventory();
+        Inventory inventory = null;
+
+        try{
+            inventory = player.getPlayer().getInventory();
+        } catch (Exception ignored){
+        }
+
         if(inventory != null){
             lastPersonalBalance = Util.countItem(inventory);
             return true;
@@ -108,8 +114,12 @@ public class Account {
         for (ItemVault vault:new ArrayList<>(vaults)) {
             if(numRemoved >= amount)
                 break;
-            int toRemove = Util.amountToRemove(vault.getVaultBalance(), amount - numRemoved);
-            numRemoved += vault.withdraw(toRemove).amount;
+
+            if(vault.vaultType != ItemVault.VaultType.DEPOSIT_ONLY){
+                int toRemove = Util.amountToRemove(vault.getVaultBalance(), amount - numRemoved);
+                numRemoved += vault.withdraw(toRemove).amount;
+            }
+
         }
 
         if(numRemoved < amount)
@@ -125,7 +135,8 @@ public class Account {
             if(numAdded >= amount)
                 break;
 
-            numAdded+=vault.deposit(amount - numAdded).amount;
+            if(vault.vaultType != ItemVault.VaultType.WITHDRAW_ONLY)
+                numAdded+=vault.deposit(amount - numAdded).amount;
         }
 
         if(numAdded < amount)

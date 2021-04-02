@@ -10,4 +10,6 @@ commands:
   balance:
   list_accounts:
   create_account_all:
+  reload:
+  baltop:
 

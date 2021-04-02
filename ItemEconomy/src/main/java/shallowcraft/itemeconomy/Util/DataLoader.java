@@ -60,11 +60,16 @@ public class DataLoader {
                     Location signLoc = new Location(server.getWorld(data[0]), Integer.parseInt(data[1]), Integer.parseInt(data[2]), Integer.parseInt(data[3]));
                     Location containerLoc = new Location(server.getWorld(data[0]), Integer.parseInt(data[4]), Integer.parseInt(data[5]), Integer.parseInt(data[6]));
 
+                    ItemVault.VaultType type = ItemVault.VaultType.REGULAR;
+                    if(data.length > 7)
+                        type = ItemVault.VaultType.fromID(Integer.parseInt(data[7]));
+
+
 
                     Block sign = signLoc.getBlock();
                     Block container = containerLoc.getBlock();
                     if (Util.isValidContainer(container.getType()) && Util.isValidVaultSign((Sign) sign.getState())) {
-                        ItemVault currentVault = new ItemVault(container, (Sign) sign.getState(), currentAccount, currency);
+                        ItemVault currentVault = new ItemVault(container, (Sign) sign.getState(), currentAccount, currency, type);
                         vaults.add(currentVault);
                     }
                 }
@@ -112,7 +117,7 @@ public class DataLoader {
                 int containery = vault.containerVault.getLocation().getBlockY();
                 data.append(containery).append(",");
                 int containerz = vault.containerVault.getLocation().getBlockZ();
-                data.append(containerz);
+                data.append(containerz).append(",").append(vault.vaultType.getId());
 
                 playerData.put("Container_" + containerIndex, data.toString());
                 containerIndex++;

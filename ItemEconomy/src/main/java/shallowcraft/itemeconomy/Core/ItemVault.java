@@ -16,6 +16,7 @@ public class ItemVault {
     public final Sign vaultSign;
     public final Account holder;
     private Material itemCurrency;
+    public final VaultType vaultType;
 
 
     public ItemVault(Block container, Sign vaultSign, Account holder, Material itemCurrency){
@@ -23,6 +24,15 @@ public class ItemVault {
         this.vaultSign = vaultSign;
         this.holder = holder;
         this.itemCurrency = itemCurrency;
+        this.vaultType = VaultType.REGULAR;
+    }
+
+    public ItemVault(Block container, Sign vaultSign, Account holder, Material itemCurrency, VaultType vaultType){
+        this.containerVault = container;
+        this.vaultSign = vaultSign;
+        this.holder = holder;
+        this.itemCurrency = itemCurrency;
+        this.vaultType = vaultType;
     }
 
     public int getVaultBalance(){
@@ -48,6 +58,35 @@ public class ItemVault {
     private void destroy(){
         ItemEconomy.log.info("DESTROYING VAULT");
         holder.removeVault(this);
+    }
+
+    public static enum VaultType {
+        REGULAR(1),
+        DEPOSIT_ONLY(2),
+        WITHDRAW_ONLY(3);
+
+        private int id;
+
+        VaultType(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public static ItemVault.VaultType fromID(int id){
+            switch (id){
+                case 1:
+                    return REGULAR;
+                case 2:
+                    return DEPOSIT_ONLY;
+                case 3:
+                    return WITHDRAW_ONLY;
+                default:
+                    return REGULAR;
+            }
+        }
     }
 
 }

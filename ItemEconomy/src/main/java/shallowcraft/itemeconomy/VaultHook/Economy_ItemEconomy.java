@@ -250,7 +250,7 @@ public class Economy_ItemEconomy implements Economy {
      */
     @Override
     public EconomyResponse withdrawPlayer(OfflinePlayer player, double amount) {
-        TransactionResult result = itemEconomy.withdrawPlayer(player, (int) amount);
+        TransactionResult result = itemEconomy.withdrawPlayer(player, (int) Math.round(amount));
         return new EconomyResponse(result.amount, getBalance(player), Util.convertResponse(result.type), result.errorMessage );
     }
 
@@ -298,7 +298,7 @@ public class Economy_ItemEconomy implements Economy {
      */
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer player, double amount) {
-        TransactionResult result = itemEconomy.depositPlayer(player, (int) amount);
+        TransactionResult result = itemEconomy.depositPlayer(player, (int) Math.round(amount));
         return new EconomyResponse(result.amount, getBalance(player), Util.convertResponse(result.type), result.errorMessage );
     }
 

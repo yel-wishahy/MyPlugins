@@ -20,8 +20,7 @@ import shallowcraft.itemeconomy.Core.ItemEconomy;
 import shallowcraft.itemeconomy.Core.ItemVault;
 import shallowcraft.itemeconomy.Core.TransactionResult;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Util {
     /**
@@ -30,6 +29,7 @@ public class Util {
      * @param sign sign to check
      * @return container for the sign if available, null otherwise.
      */
+    //not my code
     public static Block chestBlock(Sign sign) {
         // is sign attached to a valid vault container?
         Block signBlock = sign.getBlock();
@@ -204,4 +204,37 @@ public class Util {
                 return EconomyResponse.ResponseType.FAILURE;
         }
     }
+
+    public static ItemVault.VaultType getVaultType(String vaultType){
+        if(vaultType == null)
+            return ItemVault.VaultType.REGULAR;
+
+        if(vaultType.isEmpty())
+            return ItemVault.VaultType.REGULAR;
+
+
+        switch (vaultType){
+            case "[Withdraw]":
+                return ItemVault.VaultType.WITHDRAW_ONLY;
+            case "[Deposit]":
+                return ItemVault.VaultType.DEPOSIT_ONLY;
+            default:
+                return ItemVault.VaultType.REGULAR;
+        }
+    }
+
+    //not my code
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+        List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
+        list.sort(Map.Entry.comparingByValue());
+
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+
+        return result;
+    }
+
+
 }
