@@ -18,14 +18,14 @@ Item Vault creation sign:
 Commands:
   - /ItemEconomy balance
   - /ItemEconomy baltop
-  - /ItemEconomy create_account
+  - /ItemEconomy create_account <Name>
   - /ItemEconomy list_accounts
   - /ItemEconomy create_account_all
   - /ItemEconomy reload
   - /ItemEconomy save
-  - /ItemEconomy remove_account
-  - /ItemEconomy deposit
-  - /ItemEconomy withdraw
+  - /ItemEconomy remove_account <Name>
+  - /ItemEconomy deposit <Name> <Amount>
+  - /ItemEconomy withdraw <Name> <Amount>
 
 
 
