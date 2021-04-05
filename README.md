@@ -15,27 +15,20 @@ Item Vault creation sign:
     - for withdraw or deposit only vaults
 
   
-name: ItemEconomy
-version: ${project.version}
-main: shallowcraft.itemeconomy.ItemEconomy
-api-version: 1.16
-authors: [ BlackShadow2941 ]
-description: An item based economy for minecraft with potential for vault support
-depend: [Vault]
-commands:
-  ItemEconomy:
-    aliases: [ie, IE, itemeconomy, money, eco, economy]
-    usage: |
-      /ItemEconomy balance
-      /ItemEconomy baltop
-      /ItemEconomy create_account
-      /ItemEconomy list_accounts
-      /ItemEconomy create_account_all
-      /ItemEconomy reload
-      /ItemEconomy save
-      /ItemEconomy remove_account
-      /ItemEconomy deposit
-      /ItemEconomy withdraw
+Commands:
+  - /ItemEconomy balance
+  - /ItemEconomy baltop
+  - /ItemEconomy create_account
+  - /ItemEconomy list_accounts
+  - /ItemEconomy create_account_all
+  - /ItemEconomy reload
+  - /ItemEconomy save
+  - /ItemEconomy remove_account
+  - /ItemEconomy deposit
+  - /ItemEconomy withdraw
+
+
+
 permissions:
   itemeconomy.admin:
     default: op
