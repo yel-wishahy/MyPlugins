@@ -1,7 +1,6 @@
 package shallowcraft.itemeconomy.Util;
 
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -10,15 +9,16 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.WallSign;
-import org.bukkit.entity.Item;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.Accounts.TaxAccount;
 import shallowcraft.itemeconomy.Config;
-import shallowcraft.itemeconomy.Core.Account;
-import shallowcraft.itemeconomy.Core.ItemEconomy;
-import shallowcraft.itemeconomy.Core.ItemVault;
-import shallowcraft.itemeconomy.Core.TransactionResult;
+import shallowcraft.itemeconomy.ItemEconomy;
+import shallowcraft.itemeconomy.Transaction.ResultType;
+import shallowcraft.itemeconomy.Vault.Vault;
+import shallowcraft.itemeconomy.Vault.VaultType;
 
 import java.util.*;
 
@@ -51,8 +51,8 @@ public class Util {
 
     public static boolean isVault(Block containerVault, List<Account> accounts){
         for (Account acc:accounts) {
-            for (ItemVault vault:acc.getVaults()) {
-                if(vault.containerVault.getLocation().equals(containerVault.getLocation())){
+            for (Vault vault:acc.getVaults()) {
+                if(vault.getContainer().getLocation().equals(containerVault.getLocation())){
                     ItemEconomy.log.info("IS A VAULT");
                     return true;
 
@@ -92,18 +92,19 @@ public class Util {
         return header != null && header.equals(Config.vaultHeader);
     }
 
-    public static boolean hasAccount(OfflinePlayer player, List<Account> accounts) {
+    public static boolean hasAccount(String id, List<Account> accounts) {
         for (Account acc : accounts) {
-            if (acc.getPlayer().getUniqueId().equals(player.getUniqueId()))
+            if (acc.getID().equals(id)) {
                 return true;
+            }
         }
 
         return false;
     }
 
-    public static Account getAccount(OfflinePlayer player, List<Account> accounts) {
+    public static Account getAccount(String id, List<Account> accounts) {
         for (Account acc : accounts) {
-            if (acc.getPlayer().getUniqueId().equals(player.getUniqueId())) {
+            if (acc.getID().equals(id)) {
                 return acc;
             }
         }
@@ -188,7 +189,7 @@ public class Util {
     }
 
 
-    public static EconomyResponse.ResponseType convertResponse(TransactionResult.ResultType resultType) {
+    public static EconomyResponse.ResponseType convertResponse(ResultType resultType) {
         switch (resultType) {
             case FAILURE:
                 return EconomyResponse.ResponseType.FAILURE;
@@ -205,21 +206,21 @@ public class Util {
         }
     }
 
-    public static ItemVault.VaultType getVaultType(String vaultType){
+    public static VaultType getVaultType(String vaultType){
         if(vaultType == null)
-            return ItemVault.VaultType.REGULAR;
+            return VaultType.REGULAR;
 
         if(vaultType.isEmpty())
-            return ItemVault.VaultType.REGULAR;
+            return VaultType.REGULAR;
 
 
         switch (vaultType){
             case "[Withdraw]":
-                return ItemVault.VaultType.WITHDRAW_ONLY;
+                return VaultType.WITHDRAW_ONLY;
             case "[Deposit]":
-                return ItemVault.VaultType.DEPOSIT_ONLY;
+                return VaultType.DEPOSIT_ONLY;
             default:
-                return ItemVault.VaultType.REGULAR;
+                return VaultType.REGULAR;
         }
     }
 
@@ -234,6 +235,33 @@ public class Util {
         }
 
         return result;
+    }
+
+    public static int getAllVaultsBalance(List<Vault> vaults){
+        int count = 0;
+        for (Vault vault:new ArrayList<>(vaults)) {
+            int current = vault.getVaultBalance();
+            if(current > 0)
+                count+=current;
+        }
+        return count;
+    }
+
+    public static List<String> getAllPlayerNames(){
+        List<String> output = new ArrayList<>();
+        for (OfflinePlayer p: ItemEconomy.getInstance().getServer().getOfflinePlayers()) {
+            output.add(p.getName());
+        }
+
+        return output;
+    }
+
+    public static boolean hasTaxAccount(List<Account> accounts){
+        for (Account acc:accounts)
+            if(acc instanceof TaxAccount)
+                return true;
+
+        return false;
     }
 
 

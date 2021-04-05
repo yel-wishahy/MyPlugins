@@ -1,15 +1,20 @@
-package shallowcraft.itemeconomy.Core;
+package shallowcraft.itemeconomy.Transaction;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import shallowcraft.itemeconomy.Config;
+import shallowcraft.itemeconomy.Vault.Vault;
+import shallowcraft.itemeconomy.Vault.VaultType;
 import shallowcraft.itemeconomy.Util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Transaction {
 
     public static TransactionResult withdraw(Inventory inventory, int amount) {
         if(amount == 0)
-            return new TransactionResult(0, TransactionResult.ResultType.SUCCESS, "withdraw");
+            return new TransactionResult(0, ResultType.SUCCESS, "withdraw");
 
         //ItemEconomy.log.info("Trying to withdraw " + amount + "from " + inventory.getType().name() + " with total of " + Util.countItem(inventory));
         int numRemoved = 0;
@@ -55,17 +60,17 @@ public class Transaction {
 
         if(numRemoved == amount){
             //ItemEconomy.log.info("NOW HAS:  " + Util.countItem(inventory));
-            return new TransactionResult(numRemoved, TransactionResult.ResultType.SUCCESS, "withdraw");
+            return new TransactionResult(numRemoved, ResultType.SUCCESS, "withdraw");
         }
 
         //ItemEconomy.log.info("NOW HAS:  " + Util.countItem(inventory));
-        return new TransactionResult(numRemoved, TransactionResult.ResultType.FAILURE, "withdraw");
+        return new TransactionResult(numRemoved, ResultType.FAILURE, "withdraw");
     }
 
 
     public static TransactionResult deposit(Inventory inventory, int amount){
         if(amount == 0)
-            return new TransactionResult(0, TransactionResult.ResultType.SUCCESS, "deposit");
+            return new TransactionResult(0, ResultType.SUCCESS, "deposit");
 
         //ItemEconomy.log.info("Trying to deposit " + amount + " into " + inventory.getType().name() + " with total of " + Util.countItem(inventory));
         int numAdded = 0;
@@ -108,10 +113,69 @@ public class Transaction {
         if(numAdded == amount){
             //ItemEconomy.log.info("Success: Deposited " + numAdded + " into " + inventory.getType().name());
             //ItemEconomy.log.info("NOW HAS:  " + Util.countItem(inventory));
-            return new TransactionResult(numAdded, TransactionResult.ResultType.SUCCESS, "deposit");
+            return new TransactionResult(numAdded, ResultType.SUCCESS, "deposit");
         }
 
         //ItemEconomy.log.info("NOW HAS:  " + Util.countItem(inventory));
-        return new TransactionResult(numAdded, TransactionResult.ResultType.INSUFFICIENT_SPACE, "deposit");
+        return new TransactionResult(numAdded, ResultType.INSUFFICIENT_SPACE, "deposit");
+    }
+
+    public static TransactionResult depositAllVaults(int amount, List<Vault> vaults){
+        if(amount < 1)
+            return new TransactionResult(0, ResultType.SUCCESS, "deposit");
+
+        int numAdded = 0;
+
+        for (Vault vault:new ArrayList<>(vaults)) {
+            if(numAdded >= amount)
+                break;
+
+            if(vault.getVaultType() == VaultType.DEPOSIT_ONLY)
+                numAdded+=vault.deposit(amount - numAdded).amount;
+        }
+
+        for (Vault vault:new ArrayList<>(vaults)) {
+            if(numAdded >= amount)
+                break;
+
+            if(vault.getVaultType() != VaultType.WITHDRAW_ONLY)
+                numAdded+=vault.deposit(amount - numAdded).amount;
+        }
+
+        if(numAdded < amount)
+            return new TransactionResult(numAdded, ResultType.INSUFFICIENT_SPACE, "deposit");
+
+        return new TransactionResult(numAdded, ResultType.SUCCESS, "deposit");
+    }
+
+    public static TransactionResult withdrawAllVaults(int amount, int currentBalance, List<Vault> vaults){
+        if(currentBalance < amount)
+            return new TransactionResult(0, ResultType.INSUFFICIENT_FUNDS, "withdraw");
+
+        int numRemoved = 0;
+
+        for (Vault vault:new ArrayList<>(vaults)) {
+            if(numRemoved >= amount)
+                break;
+
+            if(vault.getVaultType() == VaultType.WITHDRAW_ONLY){
+                int toRemove = Util.amountToRemove(vault.getVaultBalance(), amount - numRemoved);
+                numRemoved += vault.withdraw(toRemove).amount;
+            }
+        }
+
+        for (Vault vault:new ArrayList<>(vaults)) {
+            if(numRemoved >= amount)
+                break;
+            if(vault.getVaultType() != VaultType.DEPOSIT_ONLY){
+                int toRemove = Util.amountToRemove(vault.getVaultBalance(), amount - numRemoved);
+                numRemoved += vault.withdraw(toRemove).amount;
+            }
+        }
+
+        if(numRemoved < amount)
+            return new TransactionResult(numRemoved, ResultType.INSUFFICIENT_FUNDS, "withdraw");
+
+        return new TransactionResult(numRemoved, ResultType.SUCCESS, "withdraw");
     }
 }

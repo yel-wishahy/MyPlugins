@@ -1,17 +1,17 @@
-package shallowcraft.itemeconomy.Core;
+package shallowcraft.itemeconomy.Vault;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import shallowcraft.itemeconomy.Config;
+import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.ItemEconomy;
+import shallowcraft.itemeconomy.Transaction.Transaction;
+import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
 
-import java.util.ListIterator;
-
-public class ItemVault {
+public class ContainerVault implements Vault {
     public final Block containerVault;
     public final Sign vaultSign;
     public final Account holder;
@@ -19,7 +19,7 @@ public class ItemVault {
     public final VaultType vaultType;
 
 
-    public ItemVault(Block container, Sign vaultSign, Account holder, Material itemCurrency){
+    public ContainerVault(Block container, Sign vaultSign, Account holder, Material itemCurrency){
         this.containerVault = container;
         this.vaultSign = vaultSign;
         this.holder = holder;
@@ -27,7 +27,7 @@ public class ItemVault {
         this.vaultType = VaultType.REGULAR;
     }
 
-    public ItemVault(Block container, Sign vaultSign, Account holder, Material itemCurrency, VaultType vaultType){
+    public ContainerVault(Block container, Sign vaultSign, Account holder, Material itemCurrency, VaultType vaultType){
         this.containerVault = container;
         this.vaultSign = vaultSign;
         this.holder = holder;
@@ -35,58 +35,62 @@ public class ItemVault {
         this.vaultType = vaultType;
     }
 
+    @Override
     public int getVaultBalance(){
-        if(Util.isValidVaultSign(vaultSign) && containerVault.equals(Util.chestBlock(vaultSign))){
-            Inventory inventory =  ((Container) containerVault.getState()).getInventory();
+        if(checkVault()) {
+            Inventory inventory = ((Container) containerVault.getState()).getInventory();
             return Util.countItem(inventory);
-        } else{
+        }
+
+        return -1;
+    }
+
+    @Override
+    public boolean checkVault(){
+        if(Util.isValidVaultSign(vaultSign) && containerVault.equals(Util.chestBlock(vaultSign)))
+            return true;
+        else{
             destroy();
-            return -1;
+            return false;
         }
     }
 
+    @Override
     public TransactionResult withdraw(int amount){
         Inventory inventory =  ((Container) containerVault.getState()).getInventory();
         return Transaction.withdraw(inventory, amount);
     }
 
+    @Override
     public TransactionResult deposit(int amount){
         Inventory inventory =  ((Container) containerVault.getState()).getInventory();
         return Transaction.deposit(inventory, amount);
     }
 
-    private void destroy(){
-        ItemEconomy.log.info("DESTROYING VAULT");
+    @Override
+    public void destroy(){
+        ItemEconomy.log.info("DESTROYING A VAULT");
         holder.removeVault(this);
     }
 
-    public static enum VaultType {
-        REGULAR(1),
-        DEPOSIT_ONLY(2),
-        WITHDRAW_ONLY(3);
+    @Override
+    public VaultType getVaultType() {
+        return vaultType;
+    }
 
-        private int id;
+    @Override
+    public Sign getSign() {
+        return vaultSign;
+    }
 
-        VaultType(int id) {
-            this.id = id;
-        }
+    @Override
+    public Block getContainer() {
+        return containerVault;
+    }
 
-        public int getId() {
-            return id;
-        }
-
-        public static ItemVault.VaultType fromID(int id){
-            switch (id){
-                case 1:
-                    return REGULAR;
-                case 2:
-                    return DEPOSIT_ONLY;
-                case 3:
-                    return WITHDRAW_ONLY;
-                default:
-                    return REGULAR;
-            }
-        }
+    @Override
+    public Account getHolder() {
+        return holder;
     }
 
 }
