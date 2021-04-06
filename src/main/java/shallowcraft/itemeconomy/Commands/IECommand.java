@@ -63,7 +63,7 @@ public class IECommand implements CommandExecutor {
                     OfflinePlayer p = null;
 
                     if (name.equals(Config.taxID)){
-                        if(accounts.containsKey(Config.taxID)){
+                        if(!accounts.containsKey(Config.taxID)){
                             accounts.put(Config.taxID,new TaxAccount());
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a NEW Tax account ");
                         } else
@@ -73,7 +73,7 @@ public class IECommand implements CommandExecutor {
                     }
 
                     try{
-                        if(accounts.containsKey(sender.getServer().getPlayerUniqueId(name).toString()))
+                        if(!accounts.containsKey(sender.getServer().getPlayerUniqueId(name).toString()))
                             p = sender.getServer().getPlayer(name);
                     } catch (Exception ignored){
                     }
@@ -89,7 +89,7 @@ public class IECommand implements CommandExecutor {
 
                 if(!addedAccount){
                     if (isPlayer) {
-                        if (accounts.containsKey(player.getUniqueId().toString())) {
+                        if (!accounts.containsKey(player.getUniqueId().toString())) {
                             Account acc = new PlayerAccount(player, Config.currency);
                             accounts.put(acc.getID(), acc);
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a NEW bank account! Lucky spending!");

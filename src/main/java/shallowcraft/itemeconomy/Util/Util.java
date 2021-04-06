@@ -74,29 +74,34 @@ public class Util {
     }
 
 
+//    public static boolean isValidVaultSign(Sign sign) {
+//        boolean isVaultSign = false;
+//
+//        ItemEconomy.log.info("CHECKING SIGN");
+//
+//        String dataString = sign.getPersistentDataContainer().get(new NamespacedKey(ItemEconomy.getInstance(), Config.PDCSignKey), PersistentDataType.STRING);
+//        ItemEconomy.log.info("PDC DATA: " + dataString);
+//
+//        if (dataString != null)
+//            isVaultSign = Boolean.parseBoolean(dataString);
+//
+//
+//        return isVaultSign;
+//    }
+
+    //temp fix until i figure out meta data
     public static boolean isValidVaultSign(Sign sign) {
-        boolean isVaultSign = false;
+        if(sign.isPlaced()){
+            Block container = Util.chestBlock(sign);
+            return Util.isVault(container, ItemEconomy.getInstance().getAccounts());
+        }
 
-        ItemEconomy.log.info("CHECKING SIGN");
-
-        String dataString = sign.getPersistentDataContainer().get(new NamespacedKey(ItemEconomy.getInstance(), Config.PDCSignKey), PersistentDataType.STRING);
-        ItemEconomy.log.info("PDC DATA: " + dataString);
-
-        if (dataString != null)
-            isVaultSign = Boolean.parseBoolean(dataString);
-        else
-            sign.getPersistentDataContainer().set(new NamespacedKey(ItemEconomy.getInstance(), Config.PDCSignKey), PersistentDataType.STRING, "false");
-
-
-        return isVaultSign;
+        return false;
     }
 
 
     public static boolean isValidVaultSignText(SignChangeEvent sign) {
         String header = ((TextComponent) Objects.requireNonNull(sign.line(0))).content();
-        ((Sign) sign.getBlock().getState()).getPersistentDataContainer().set(new NamespacedKey(ItemEconomy.getInstance(),
-                Config.PDCSignKey), PersistentDataType.STRING, "true");
-        sign.getBlock().getState().update();
 
         return header.equals(Config.vaultHeader);
     }

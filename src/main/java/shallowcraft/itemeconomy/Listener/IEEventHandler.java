@@ -42,14 +42,11 @@ public class IEEventHandler implements Listener {
             }
 
             if(holder == null)
-                holder = accounts.get(player.getUniqueId().toString());
+                holder = accounts.get(id);
 
             Block container = Util.chestBlock(sign);
 
             if (holder != null && container != null && !Util.isVault(container, accounts)) {
-                sign.getPersistentDataContainer().set(new NamespacedKey(ItemEconomy.getInstance(), Config.PDCSignKey), PersistentDataType.STRING, "true");
-                sign.getBlock().getState().update();
-
                 holder.addVault(new ContainerVault(container, sign, holder, Config.currency, Util.getVaultType(vaultType)));
                 player.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a new Vault!");
             } else {
@@ -57,8 +54,6 @@ public class IEEventHandler implements Listener {
                     player.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot create a vault without an account!");
                 if (container == null)
                     player.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot create a vault here!");
-
-                sign.getPersistentDataContainer().set(new NamespacedKey(ItemEconomy.getInstance(), Config.PDCSignKey), PersistentDataType.STRING, "false");
             }
         }
     }
@@ -71,7 +66,7 @@ public class IEEventHandler implements Listener {
         Map<String, Account> accounts = ItemEconomy.getInstance().getAccounts();
 
 
-        if(block.getState() instanceof Sign && Util.isValidVaultSign((Sign) block.getState() )){
+        if(block.getState() instanceof Sign && Util.isValidVaultSign((Sign) block.getState())){
             ItemEconomy.log.info("inside");
             Sign sign = (Sign) block.getState();
             Vault toDestroy = Util.getVaultFromSign(sign, accounts);

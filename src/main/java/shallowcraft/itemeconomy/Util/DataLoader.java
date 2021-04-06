@@ -29,7 +29,7 @@ public class DataLoader {
         Map<String, Map<String, String>> jsonData = gson.fromJson(reader, Map.class);
         reader.close();
 
-        if(jsonData == null || jsonData.isEmpty())
+        if (jsonData == null || jsonData.isEmpty())
             throw new InvalidDataException("[ItemEconomy] Failed to load data due to invalid file.");
 
         for (String id : jsonData.keySet()) {
@@ -39,7 +39,7 @@ public class DataLoader {
             assert currency != null;
             //ItemEconomy.log.info("[ItemEconomy] Loaded currency with material ID: " + currency.name());
 
-            if(id.equals(Config.taxID)){
+            if (id.equals(Config.taxID)) {
                 double taxBuffer = Double.parseDouble(inputData.get("Tax Buffer"));
 
                 Account acc = new TaxAccount(taxBuffer);
@@ -50,7 +50,7 @@ public class DataLoader {
             } else {
                 OfflinePlayer player = server.getOfflinePlayer(UUID.fromString(id));
 
-                if(player != null){
+                if (player != null) {
                     //ItemEconomy.log.info("[ItemEconomy] Loaded data for account with ID: " + id);
 
                     int personalBalance = 0;
@@ -78,13 +78,13 @@ public class DataLoader {
             String id = acc.getID();
             //ItemEconomy.log.info("[ItemEconomy] Saving account with ID: " + id);
 
-            if(acc instanceof PlayerAccount){
+            if (acc instanceof PlayerAccount) {
                 PlayerAccount playerAccount = (PlayerAccount) acc;
 
                 String personalBalance = String.valueOf(playerAccount.getLastPersonalBalance());
                 outputData.put("personal_balance", personalBalance);
-               // ItemEconomy.log.info("[ItemEconomy] Saving balance");
-            } else if (acc instanceof TaxAccount){
+                // ItemEconomy.log.info("[ItemEconomy] Saving balance");
+            } else if (acc instanceof TaxAccount) {
                 String taxBuffer = String.valueOf(((TaxAccount) acc).taxBuffer);
                 outputData.put("Tax Buffer", taxBuffer);
                 //ItemEconomy.log.info("[ItemEconomy] Saving tax buffer");
@@ -97,7 +97,7 @@ public class DataLoader {
 
             int containerIndex = 0;
             for (Vault vault : acc.getVaults()) {
-                if(vault.checkVault()){
+                if (vault.checkVault()) {
                     //ItemEconomy.log.info("[ItemEconomy] Saving Vault " + containerIndex + " of " + acc.getVaults().size());
                     StringBuilder data = new StringBuilder();
                     String worldName = vault.getSign().getLocation().getWorld().getName();
@@ -132,7 +132,7 @@ public class DataLoader {
         writer.close();
     }
 
-    private static void populateAccount(Account currentAccount, Material currency, Map<String, String> inputData, Server server){
+    private static void populateAccount(Account currentAccount, Material currency, Map<String, String> inputData, Server server) {
         List<Vault> vaults = new ArrayList<>();
 
         int containerIndex = 0;
@@ -149,15 +149,15 @@ public class DataLoader {
                 Location containerLoc = new Location(server.getWorld(data[0]), Integer.parseInt(data[4]), Integer.parseInt(data[5]), Integer.parseInt(data[6]));
 
                 VaultType type = VaultType.REGULAR;
-                if(data.length > 7)
+                if (data.length > 7)
                     type = VaultType.fromID(Integer.parseInt(data[7]));
 
                 Block sign = signLoc.getBlock();
                 Block container = containerLoc.getBlock();
-                if (Util.isValidContainer(container.getType()) && Util.isValidVaultSign((Sign) sign.getState())) {
-                    Vault currentVault = new ContainerVault(container, (Sign) sign.getState(), currentAccount, currency, type);
-                    vaults.add(currentVault);
-                }
+
+                Vault currentVault = new ContainerVault(container, (Sign) sign.getState(), currentAccount, currency, type);
+                vaults.add(currentVault);
+
             }
         }
 
@@ -170,14 +170,12 @@ public class DataLoader {
         dir.mkdirs(); // Creates all directories that do not exist
         dataFile.createNewFile(); // Creates a new file if it does not already exist; throws IOException
 
-        return  dataFile;
+        return dataFile;
     }
 
-    public static File getDataFile(String fileName) throws IOException{
-        return  new File("plugins/ItemEconomy/" + fileName + ".json");
+    public static File getDataFile(String fileName) throws IOException {
+        return new File("plugins/ItemEconomy/" + fileName + ".json");
     }
-
-
 
 
 }

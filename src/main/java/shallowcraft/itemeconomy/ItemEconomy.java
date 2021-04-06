@@ -144,6 +144,7 @@ public class ItemEconomy extends JavaPlugin{
         return getBalance(player) >= amount;
     }
 
+
     public TransactionResult withdrawPlayer(OfflinePlayer player, double amount){
         Account holder = accounts.get(player.getUniqueId().toString());
 

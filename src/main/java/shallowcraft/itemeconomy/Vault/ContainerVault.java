@@ -1,11 +1,15 @@
 package shallowcraft.itemeconomy.Vault;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
+import org.bukkit.block.Hopper;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.persistence.PersistentDataType;
 import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
@@ -25,6 +29,7 @@ public class ContainerVault implements Vault {
         this.holder = holder;
         this.itemCurrency = itemCurrency;
         this.vaultType = VaultType.REGULAR;
+        setPDC(true);
     }
 
     public ContainerVault(Block container, Sign vaultSign, Account holder, Material itemCurrency, VaultType vaultType){
@@ -33,6 +38,12 @@ public class ContainerVault implements Vault {
         this.holder = holder;
         this.itemCurrency = itemCurrency;
         this.vaultType = vaultType;
+        setPDC(true);
+    }
+
+    public void setPDC(boolean value){
+        vaultSign.getPersistentDataContainer().set(new NamespacedKey(ItemEconomy.getInstance(), Config.PDCSignKey), PersistentDataType.STRING, String.valueOf(value));
+        vaultSign.update();
     }
 
     @Override
@@ -69,6 +80,7 @@ public class ContainerVault implements Vault {
 
     @Override
     public void destroy(){
+        setPDC(false);
         ItemEconomy.log.info("DESTROYING A VAULT");
         holder.removeVault(this);
     }
