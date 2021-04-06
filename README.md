@@ -14,8 +14,21 @@ Item Vault creation sign:
   - Line 3 (optional, defaults to regular): Vault type: "[Withdraw]" or "[Deposit]" 
     - for withdraw or deposit only vaults
 
-Commands : 
-  - "\create_account"
-  - "\create_account_all"
-  - "\balance"
-  - "\baltop"
+  
+Commands:
+  - /ItemEconomy balance
+  - /ItemEconomy baltop
+  - /ItemEconomy create_account <Name>
+  - /ItemEconomy list_accounts
+  - /ItemEconomy create_account_all
+  - /ItemEconomy reload
+  - /ItemEconomy save
+  - /ItemEconomy remove_account <Name>
+  - /ItemEconomy deposit <Name> <Amount>
+  - /ItemEconomy withdraw <Name> <Amount>
+
+
+
+permissions:
+  itemeconomy.admin:
+    default: op
