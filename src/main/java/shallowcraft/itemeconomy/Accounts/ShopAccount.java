@@ -1,7 +1,7 @@
 package shallowcraft.itemeconomy.Accounts;
 
 import org.bukkit.Material;
-import shallowcraft.itemeconomy.Config;
+import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Transaction.Transaction;
@@ -11,7 +11,6 @@ import shallowcraft.itemeconomy.Vault.Vault;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class ShopAccount implements Account{
     private List<Vault> vaults;

@@ -3,15 +3,14 @@ package shallowcraft.itemeconomy.Commands;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Accounts.TaxAccount;
-import shallowcraft.itemeconomy.Config;
+import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
@@ -19,22 +18,33 @@ import shallowcraft.itemeconomy.Util.Util;
 
 import java.util.*;
 
-public class Commands {
-    public static boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args, List<Account> accounts) {
-        if(Config.IECommandAliases.contains(commandLabel))
-            return onIECommand(sender, command, commandLabel, args, accounts);
-        else if (Config.IEShopCommandAliases.contains(commandLabel))
+public class IECommand implements CommandExecutor {
+
+    /**
+     * Executes the given command, returning its success.
+     * <br>
+     * If false is returned, then the "usage" plugin.yml entry for this command
+     * (if defined) will be sent to the player.
+     *
+     * @param sender  Source of the command
+     * @param command Command which was executed
+     * @param label   Alias of the command which was used
+     * @param args    Passed command arguments
+     * @return true if a valid command, otherwise false
+     */
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        Map<String,Account> accounts = ItemEconomy.getInstance().getAccounts();
+        if(Config.IECommandAliases.contains(label))
+            return onIECommand(sender, command, label, args, accounts);
+        else if (Config.IEShopCommandAliases.contains(label))
             //fix this
             return false;
 
         return false;
     }
 
-//    private static boolean onShopCommand(CommandSender sender, Command command, String commandLabel, String[] args, List<PlayerAccount> accounts){
-//
-//    }
-
-    private static boolean onIECommand(CommandSender sender, Command command, String commandLabel, String[] args, List<Account> accounts){
+    private static boolean onIECommand(CommandSender sender, Command command, String commandLabel, String[] args, Map<String,Account>  accounts){
         boolean isPlayer = isPlayer(sender);
         Player player = null;
 
@@ -52,9 +62,9 @@ public class Commands {
                     String name = args[1];
                     OfflinePlayer p = null;
 
-                    if (name.equals("Tax")){
-                        if(!Util.hasTaxAccount(accounts)){
-                            accounts.add(new TaxAccount());
+                    if (name.equals(Config.taxID)){
+                        if(accounts.containsKey(Config.taxID)){
+                            accounts.put(Config.taxID,new TaxAccount());
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a NEW Tax account ");
                         } else
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Tax account exists.");
@@ -63,13 +73,14 @@ public class Commands {
                     }
 
                     try{
-                        if(!Util.hasAccount(sender.getServer().getPlayer(name).getUniqueId().toString(), accounts))
+                        if(accounts.containsKey(sender.getServer().getPlayerUniqueId(name).toString()))
                             p = sender.getServer().getPlayer(name);
                     } catch (Exception ignored){
                     }
 
                     if(p != null){
-                        accounts.add(new PlayerAccount(p, Config.currency));
+                        Account acc = new PlayerAccount(p, Config.currency);
+                        accounts.put(acc.getID(), acc);
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a NEW bank account " +
                                 ChatColor.AQUA + name + ChatColor.GREEN + " ! Lucky spending!");
                         addedAccount = true;
@@ -78,8 +89,9 @@ public class Commands {
 
                 if(!addedAccount){
                     if (isPlayer) {
-                        if (!Util.hasAccount(player.getUniqueId().toString(), accounts)) {
-                            accounts.add(new PlayerAccount(player, Config.currency));
+                        if (accounts.containsKey(player.getUniqueId().toString())) {
+                            Account acc = new PlayerAccount(player, Config.currency);
+                            accounts.put(acc.getID(), acc);
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a NEW bank account! Lucky spending!");
                             addedAccount = true;
                         }
@@ -92,8 +104,8 @@ public class Commands {
                 return true;
             case "balance":
                 if(isPlayer){
-                    if (Util.hasAccount(player.getUniqueId().toString(), accounts)) {
-                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Your balance is: " + ChatColor.AQUA + Objects.requireNonNull(Util.getAccount(player.getUniqueId().toString(), accounts)).getBalance() + " " + Config.currency.name().toLowerCase());
+                    if (accounts.containsKey(player.getUniqueId().toString())) {
+                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Your balance is: " + ChatColor.AQUA + accounts.get(player.getUniqueId().toString()).getBalance() + " " + Config.currency.name().toLowerCase());
                     } else {
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You do not have a bank account");
                     }
@@ -103,7 +115,7 @@ public class Commands {
                 return true;
             case "list_accounts":
                 StringBuilder message = new StringBuilder();
-                for (Account acc : accounts) {
+                for (Account acc : accounts.values()) {
                     message.append(", ").append(acc.getName());
                 }
 
@@ -112,10 +124,12 @@ public class Commands {
                 return true;
             case "create_account_all":
                 for (OfflinePlayer p : ItemEconomy.getInstance().getServer().getOfflinePlayers()) {
-                    if (Util.hasAccount(player.getUniqueId().toString(), accounts)) {
+                    assert player != null;
+                    if (accounts.containsKey(player.getUniqueId().toString())) {
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.AQUA + p.getName() + ChatColor.GREEN + " is already registered for an account!");
                     } else {
-                        accounts.add(new PlayerAccount(p, Config.currency));
+                        Account acc = new PlayerAccount(p, Config.currency);
+                        accounts.put(acc.getID(), acc);
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a NEW bank account for " + ChatColor.AQUA + p.getName() + ChatColor.GREEN + "!");
                     }
                 }
@@ -126,7 +140,7 @@ public class Commands {
                         String name = args[1];
                         Account toremove = null;
 
-                        for (Account acc : accounts) {
+                        for (Account acc : accounts.values()) {
                             if(acc != null && acc.getName() != null){
                                 if (acc.getName().equals(name))
                                     toremove = acc;
@@ -163,7 +177,7 @@ public class Commands {
                 baltopMessage.append(ChatColor.GOLD).append("[ItemEconomy] ").append(ChatColor.GREEN).append("Global Player Balances: \n");
                 Map<String, Integer> bals = new HashMap<>();
 
-                for (Account acc : accounts) {
+                for (Account acc : accounts.values()) {
                     if (acc != null)
                         bals.put(acc.getName(), acc.getBalance());
                 }
@@ -194,7 +208,7 @@ public class Commands {
                         } catch (Exception ignore){
                         }
 
-                        for (Account acc : accounts) {
+                        for (Account acc : accounts.values()) {
                             if(acc != null && acc.getName() != null){
                                 if (acc.getName().equals(args[1]))
                                     holder = acc;
@@ -231,7 +245,7 @@ public class Commands {
                         } catch (Exception ignore){
                         }
 
-                        for (Account acc : accounts) {
+                        for (Account acc : accounts.values()) {
                             if(acc != null && acc.getName() != null){
                                 if (acc.getName().equals(args[1]))
                                     holder = acc;
@@ -264,30 +278,10 @@ public class Commands {
     private static boolean isAdmin(CommandSender sender) {
         if (!(sender instanceof Player)) {
             return true;
-        } else return ((Player) sender).hasPermission("itemeconomy.admin");
+        } else return sender.hasPermission("itemeconomy.admin");
     }
 
     private static boolean isPlayer(CommandSender sender) {
         return sender instanceof Player;
-    }
-
-    public @Nullable static List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        if(Config.IECommandAliases.contains(alias))
-            return onIECommandTabComplete(args);
-
-        return null;
-    }
-
-    private static List<String> onIECommandTabComplete(@NotNull String[] args){
-        List<String> completions = new ArrayList<>();
-
-        if (args.length == 1)
-            StringUtil.copyPartialMatches(args[0], Config.IECommands, completions);
-        else if(args.length == 2)
-            if(args[0].equals("create_account") || args[0].equals("remove_account") || args[0].equals("deposit") || args[0].equals("withdraw"))
-                completions = Util.getAllPlayerNames();
-
-
-        return completions;
     }
 }

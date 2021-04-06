@@ -1,9 +1,9 @@
-package shallowcraft.itemeconomy.VaultHook;
+package shallowcraft.itemeconomy.VaultEconomyHook;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.OfflinePlayer;
-import shallowcraft.itemeconomy.Config;
+import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;

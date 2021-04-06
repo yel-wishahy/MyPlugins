@@ -3,6 +3,7 @@ package shallowcraft.itemeconomy.Util;
 import net.kyori.adventure.text.TextComponent;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -12,9 +13,9 @@ import org.bukkit.block.data.type.WallSign;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import shallowcraft.itemeconomy.Accounts.Account;
-import shallowcraft.itemeconomy.Accounts.TaxAccount;
-import shallowcraft.itemeconomy.Config;
+import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Vault.Vault;
@@ -49,18 +50,16 @@ public class Util {
         return isValidContainer(blockAttached.getType()) ? blockAttached : isValidContainer(blockBelow.getType()) ? blockBelow : null;
     }
 
-    public static boolean isVault(Block containerVault, List<Account> accounts){
-        for (Account acc:accounts) {
-            for (Vault vault:acc.getVaults()) {
-                if(vault.getContainer().getLocation().equals(containerVault.getLocation())){
-                    ItemEconomy.log.info("IS A VAULT");
+    public static boolean isVault(Block containerVault, Map<String, Account> accounts) {
+        for (Account acc : accounts.values()) {
+            for (Vault vault : acc.getVaults()) {
+                if (vault.getContainer().getLocation().equals(containerVault.getLocation())) {
                     return true;
 
                 }
 
             }
         }
-        ItemEconomy.log.info("IS NOT A VAULT");
         return false;
     }
 
@@ -71,45 +70,35 @@ public class Util {
      * @return whether the given material is a valid container type for item vaults
      */
     public static boolean isValidContainer(Material material) {
-        switch (material) {
-            case CHEST:
-            case TRAPPED_CHEST:
-            case BARREL:
-                return true;
-            default:
-                return false;
-        }
+        return Config.VaultContainerTypes.contains(material);
     }
+
 
     public static boolean isValidVaultSign(Sign sign) {
+        boolean isVaultSign = false;
 
-        return sign != null && sign.isPlaced();
+        ItemEconomy.log.info("CHECKING SIGN");
+
+        String dataString = sign.getPersistentDataContainer().get(new NamespacedKey(ItemEconomy.getInstance(), Config.PDCSignKey), PersistentDataType.STRING);
+        ItemEconomy.log.info("PDC DATA: " + dataString);
+
+        if (dataString != null)
+            isVaultSign = Boolean.parseBoolean(dataString);
+        else
+            sign.getPersistentDataContainer().set(new NamespacedKey(ItemEconomy.getInstance(), Config.PDCSignKey), PersistentDataType.STRING, "false");
+
+
+        return isVaultSign;
     }
 
-    public static boolean isValidVaultSign(SignChangeEvent sign) {
+
+    public static boolean isValidVaultSignText(SignChangeEvent sign) {
         String header = ((TextComponent) Objects.requireNonNull(sign.line(0))).content();
+        ((Sign) sign.getBlock().getState()).getPersistentDataContainer().set(new NamespacedKey(ItemEconomy.getInstance(),
+                Config.PDCSignKey), PersistentDataType.STRING, "true");
+        sign.getBlock().getState().update();
 
-        return header != null && header.equals(Config.vaultHeader);
-    }
-
-    public static boolean hasAccount(String id, List<Account> accounts) {
-        for (Account acc : accounts) {
-            if (acc.getID().equals(id)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public static Account getAccount(String id, List<Account> accounts) {
-        for (Account acc : accounts) {
-            if (acc.getID().equals(id)) {
-                return acc;
-            }
-        }
-
-        return null;
+        return header.equals(Config.vaultHeader);
     }
 
     public static int countItem(Inventory inventory) {
@@ -132,7 +121,7 @@ public class Util {
         //ItemEconomy.log.info("Inventory: " + inStack + " ToRemove: " + toRemove);
         int result = 0;
 
-        if(toRemove <= inStack)
+        if (toRemove <= inStack)
             result = toRemove;
         else
             result = inStack;
@@ -162,10 +151,10 @@ public class Util {
     }
 
     //cannot be more than 5 blocks
-    public static ItemStack convertToItem(int amount, ItemStack blockStack, Inventory inventory){
+    public static ItemStack convertToItem(int amount, ItemStack blockStack, Inventory inventory) {
         int slot = inventory.firstEmpty();
 
-        if(slot != -1){
+        if (slot != -1) {
             blockStack.setAmount(blockStack.getAmount() - amount);
             inventory.setItem(slot, new ItemStack(Config.currency, amount * 9));
             //ItemEconomy.log.info("conversion of 1 " + amount + "blocks to items result: " + (inventory.getItem(slot) != null));
@@ -176,10 +165,10 @@ public class Util {
     }
 
     //amount must be divisible by 9
-    public static ItemStack convertToBlock(int amount, ItemStack itemStack, Inventory inventory){
+    public static ItemStack convertToBlock(int amount, ItemStack itemStack, Inventory inventory) {
         int slot = inventory.firstEmpty();
 
-        if(slot != -1){
+        if (slot != -1) {
             itemStack.setAmount(itemStack.getAmount() - amount);
             inventory.setItem(slot, new ItemStack(Config.currency_block, amount / 9));
             return inventory.getItem(slot);
@@ -206,15 +195,15 @@ public class Util {
         }
     }
 
-    public static VaultType getVaultType(String vaultType){
-        if(vaultType == null)
+    public static VaultType getVaultType(String vaultType) {
+        if (vaultType == null)
             return VaultType.REGULAR;
 
-        if(vaultType.isEmpty())
+        if (vaultType.isEmpty())
             return VaultType.REGULAR;
 
 
-        switch (vaultType){
+        switch (vaultType) {
             case "[Withdraw]":
                 return VaultType.WITHDRAW_ONLY;
             case "[Deposit]":
@@ -237,31 +226,34 @@ public class Util {
         return result;
     }
 
-    public static int getAllVaultsBalance(List<Vault> vaults){
+    public static int getAllVaultsBalance(List<Vault> vaults) {
         int count = 0;
-        for (Vault vault:new ArrayList<>(vaults)) {
+        for (Vault vault : new ArrayList<>(vaults)) {
             int current = vault.getVaultBalance();
-            if(current > 0)
-                count+=current;
+            if (current > 0)
+                count += current;
         }
         return count;
     }
 
-    public static List<String> getAllPlayerNames(){
+    public static List<String> getAllPlayerNames() {
         List<String> output = new ArrayList<>();
-        for (OfflinePlayer p: ItemEconomy.getInstance().getServer().getOfflinePlayers()) {
+        for (OfflinePlayer p : ItemEconomy.getInstance().getServer().getOfflinePlayers()) {
             output.add(p.getName());
         }
 
         return output;
     }
 
-    public static boolean hasTaxAccount(List<Account> accounts){
-        for (Account acc:accounts)
-            if(acc instanceof TaxAccount)
-                return true;
+    public static Vault getVaultFromSign(Sign sign, Map<String, Account> accounts) {
+        for (Account acc : accounts.values()) {
+            for (Vault vault : acc.getVaults()) {
+                if (vault.getSign().getLocation().equals(sign.getLocation()))
+                    return vault;
+            }
+        }
 
-        return false;
+        return null;
     }
 
 

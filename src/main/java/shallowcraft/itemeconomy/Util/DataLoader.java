@@ -10,7 +10,7 @@ import org.bukkit.block.Sign;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Accounts.TaxAccount;
-import shallowcraft.itemeconomy.Config;
+import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Vault.ContainerVault;
 import shallowcraft.itemeconomy.Vault.Vault;
@@ -21,8 +21,8 @@ import java.util.*;
 
 public class DataLoader {
 
-    public static List<Account> loadJSON(File dataFile, Server server) throws IOException, InvalidDataException, NullPointerException {
-        List<Account> accounts = new ArrayList<>();
+    public static Map<String, Account> loadJSON(File dataFile, Server server) throws IOException, InvalidDataException, NullPointerException {
+        Map<String, Account> accounts = new HashMap<>();
 
         Gson gson = new Gson();
         FileReader reader = new FileReader(dataFile);
@@ -44,7 +44,7 @@ public class DataLoader {
 
                 Account acc = new TaxAccount(taxBuffer);
                 populateAccount(acc, currency, inputData, server);
-                accounts.add(acc);
+                accounts.put(acc.getID(), acc);
 
                 //ItemEconomy.log.info("[ItemEconomy] Loaded data for account with ID: " + id);
             } else {
@@ -59,7 +59,7 @@ public class DataLoader {
 
                     Account acc = new PlayerAccount(player, currency, personalBalance);
                     populateAccount(acc, currency, inputData, server);
-                    accounts.add(acc);
+                    accounts.put(acc.getID(), acc);
                 } else
                     ItemEconomy.log.info("[ItemEconomy] Failed to load data for account with ID: " + id);
             }
@@ -68,11 +68,11 @@ public class DataLoader {
         return accounts;
     }
 
-    public static void saveDataToJSON(List<Account> accounts, File dataFile) throws IOException {
+    public static void saveDataToJSON(Map<String, Account> accounts, File dataFile) throws IOException {
         Gson gson = new Gson();
         Map<String, Map<String, String>> output = new HashMap<>();
 
-        for (Account acc : accounts) {
+        for (Account acc : accounts.values()) {
             Map<String, String> outputData = new HashMap<>();
 
             String id = acc.getID();

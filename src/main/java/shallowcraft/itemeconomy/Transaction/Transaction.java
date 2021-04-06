@@ -2,7 +2,7 @@ package shallowcraft.itemeconomy.Transaction;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import shallowcraft.itemeconomy.Config;
+import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Vault.VaultType;
 import shallowcraft.itemeconomy.Util.Util;
