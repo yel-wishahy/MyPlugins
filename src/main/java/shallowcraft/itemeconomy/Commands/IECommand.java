@@ -148,7 +148,7 @@ public class IECommand implements CommandExecutor {
                         }
 
                         if (toremove != null) {
-                            accounts.remove(toremove);
+                            accounts.remove(toremove.getID());
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.AQUA + toremove.getName() + "'s" + ChatColor.GREEN + " Account was removed.");
                         } else {
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "No such account exists.");

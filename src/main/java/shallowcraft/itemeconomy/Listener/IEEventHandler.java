@@ -1,5 +1,6 @@
 package shallowcraft.itemeconomy.Listener;
 
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
@@ -18,7 +19,6 @@ import shallowcraft.itemeconomy.Data.Permissions;
 import shallowcraft.itemeconomy.Util.Util;
 import shallowcraft.itemeconomy.Vault.ContainerVault;
 import shallowcraft.itemeconomy.Vault.Vault;
-
 import java.util.Map;
 import java.util.Objects;
 
@@ -44,6 +44,9 @@ public class IEEventHandler implements Listener {
             if(holder == null)
                 holder = accounts.get(id);
 
+            if(holder == null)
+                holder = accounts.get(player.getUniqueId().toString());
+
             Block container = Util.chestBlock(sign);
 
             if (holder != null && container != null && !Util.isVault(container, accounts)) {
@@ -67,17 +70,14 @@ public class IEEventHandler implements Listener {
 
 
         if(block.getState() instanceof Sign && Util.isValidVaultSign((Sign) block.getState())){
-            ItemEconomy.log.info("inside");
             Sign sign = (Sign) block.getState();
             Vault toDestroy = Util.getVaultFromSign(sign, accounts);
 
             if(toDestroy != null && (!player.hasPermission(Permissions.adminPerm) && !player.getName().equals(toDestroy.getHolder().getName()))){
-                sign.getPersistentDataContainer().set(new NamespacedKey(ItemEconomy.getInstance(), Config.PDCSignKey), PersistentDataType.STRING, "true");
                 sign.getBlock().getState().update();
                 blockBreakEvent.setCancelled(true);
                 player.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You are not allowed to destroy this vault");
             } else if (toDestroy != null){
-                sign.getPersistentDataContainer().set(new NamespacedKey(ItemEconomy.getInstance(), Config.PDCSignKey), PersistentDataType.STRING, "false");
                 sign.getBlock().getState().update();
                 blockBreakEvent.setCancelled(false);
                 toDestroy.destroy();
@@ -85,7 +85,6 @@ public class IEEventHandler implements Listener {
                         + "DESTROYED" + ChatColor.RESET + " " + ChatColor.YELLOW + toDestroy.getHolder().getName()
                         + "'s" + ChatColor.RED + " vault!");
             } else {
-                sign.getPersistentDataContainer().set(new NamespacedKey(ItemEconomy.getInstance(), Config.PDCSignKey), PersistentDataType.STRING, "false");
                 sign.getBlock().getState().update();
                 blockBreakEvent.setCancelled(false);
                 player.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You have " + ChatColor.BOLD

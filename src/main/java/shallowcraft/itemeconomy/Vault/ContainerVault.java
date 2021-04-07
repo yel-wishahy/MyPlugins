@@ -58,7 +58,7 @@ public class ContainerVault implements Vault {
 
     @Override
     public boolean checkVault(){
-        if(Util.isValidVaultSign(vaultSign) && containerVault.equals(Util.chestBlock(vaultSign)))
+        if(Util.isValidVaultSign((Sign) vaultSign.getBlock().getState()) && containerVault.equals(Util.chestBlock(vaultSign)))
             return true;
         else{
             destroy();

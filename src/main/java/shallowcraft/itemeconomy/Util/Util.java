@@ -1,5 +1,6 @@
 package shallowcraft.itemeconomy.Util;
 
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Material;
@@ -101,9 +102,7 @@ public class Util {
 
 
     public static boolean isValidVaultSignText(SignChangeEvent sign) {
-        String header = ((TextComponent) Objects.requireNonNull(sign.line(0))).content();
-
-        return header.equals(Config.vaultHeader);
+        return sign.lines().contains(Component.text(Config.vaultHeader));
     }
 
     public static int countItem(Inventory inventory) {
