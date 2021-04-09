@@ -1,5 +1,7 @@
 package shallowcraft.itemeconomy.Transaction;
 
+import java.util.List;
+
 /**
  * Enum for types of Responses indicating the status of a method call.
  */
@@ -19,4 +21,6 @@ public enum ResultType {
     int getId() {
         return id;
     }
+
+    public static List<ResultType> failureModes = List.of(FAILURE, INSUFFICIENT_SPACE, INSUFFICIENT_FUNDS);
 }

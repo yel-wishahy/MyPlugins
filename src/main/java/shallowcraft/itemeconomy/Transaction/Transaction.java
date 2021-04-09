@@ -3,6 +3,7 @@ package shallowcraft.itemeconomy.Transaction;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import shallowcraft.itemeconomy.Data.Config;
+import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Vault.VaultType;
 import shallowcraft.itemeconomy.Util.Util;
@@ -172,6 +173,7 @@ public class Transaction {
                 numRemoved += vault.withdraw(toRemove).amount;
             }
         }
+
 
         if(numRemoved < amount)
             return new TransactionResult(numRemoved, ResultType.INSUFFICIENT_FUNDS, "withdraw");

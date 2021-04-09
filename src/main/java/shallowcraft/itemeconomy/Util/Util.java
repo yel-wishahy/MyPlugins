@@ -94,7 +94,8 @@ public class Util {
     public static boolean isValidVaultSign(Sign sign) {
         if(sign.isPlaced()){
             Block container = Util.chestBlock(sign);
-            return Util.isVault(container, ItemEconomy.getInstance().getAccounts());
+            if(container != null)
+                return Util.isVault(container, ItemEconomy.getInstance().getAccounts());
         }
 
         return false;
@@ -260,5 +261,15 @@ public class Util {
         return null;
     }
 
+    public static Inventory getInventory(OfflinePlayer player){
+        Inventory inv = null;
+
+        try{
+            inv = player.getPlayer().getInventory();
+        } catch (Exception ignored){
+        }
+
+        return inv;
+    }
 
 }

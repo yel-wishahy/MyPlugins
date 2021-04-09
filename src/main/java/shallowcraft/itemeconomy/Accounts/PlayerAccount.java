@@ -1,7 +1,9 @@
 package shallowcraft.itemeconomy.Accounts;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.ResultType;
@@ -71,12 +73,7 @@ public class PlayerAccount implements Account {
     }
 
     private boolean updatePersonalBalance(){
-        Inventory inventory = null;
-
-        try{
-            inventory = player.getPlayer().getInventory();
-        } catch (Exception ignored){
-        }
+        Inventory inventory = Util.getInventory(player);
 
         if(inventory != null){
             lastPersonalBalance = Util.countItem(inventory);
@@ -112,7 +109,6 @@ public class PlayerAccount implements Account {
 
     @Override
     public TransactionResult withdraw(int amount){
-        //ItemEconomy.log.info("Withdrawing " + amount + " from total of " + balance());
         if(balance() < amount)
             return new TransactionResult(0, ResultType.INSUFFICIENT_FUNDS, "withdraw");
 
@@ -122,12 +118,8 @@ public class PlayerAccount implements Account {
         removed += result.amount;
 
 
-        if(result.type == ResultType.FAILURE){
-            Inventory inventory =  null;
-            try{
-                inventory = player.getPlayer().getInventory();
-            } catch (Exception ignore){
-            }
+        if(ResultType.failureModes.contains(result.type)){
+            Inventory inventory =  Util.getInventory(player);
             if(inventory != null){
                 result = Transaction.withdraw(inventory, amount - removed);
                 removed += result.amount;
@@ -136,15 +128,13 @@ public class PlayerAccount implements Account {
 
         updatePersonalBalance();
         ItemEconomy.getInstance().saveData();
+        if((balance() >= amount - removed) && player.isOnline())
+            player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Failed to withdraw completely! (Determined cause: Deposit only account).");
         return new TransactionResult(removed, result.type, "withdraw");
     }
 
     @Override
     public TransactionResult deposit(int amount){
-        //ItemEconomy.log.info("Depositing " + amount + " into total of " + balance());
-
-
-
         int numAdded = 0;
         TransactionResult result = Transaction.depositAllVaults(amount, vaults);
         numAdded += result.amount;
