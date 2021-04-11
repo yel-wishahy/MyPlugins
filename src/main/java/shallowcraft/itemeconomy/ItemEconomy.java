@@ -194,7 +194,7 @@ public class ItemEconomy extends JavaPlugin{
         return true;
     }
 
-    private boolean tax(double amount){
+    public boolean tax(double amount){
         if(hasAccount(Config.taxID)){
             TaxAccount acc = (TaxAccount) accounts.get(Config.taxID);
             acc.taxBuffer+=amount;

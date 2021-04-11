@@ -7,6 +7,7 @@ import java.util.List;
 
 public class Config {
     public static final String dataFileName = "economyData";
+    public static final double wealthCap = 0.70;
     public static final String taxID = "Tax";
     public static final String shopID = "Shop";
     public static final Material currency = Material.DIAMOND;
@@ -14,7 +15,7 @@ public class Config {
     public static final String vaultHeader = "[Vault]";
     public static final List<String> IESubCommands = List.of("create_account",
             "balance", "list_accounts", "create_account_all", "remove_account",
-            "reload", "save", "baltop", "deposit", "withdraw");
+            "reload", "save", "baltop", "deposit", "withdraw", "redistribute");
     public static final List<String> IECommandAliases = List.of("ItemEconomy", "itemeconomy",
             "IE", "ie", "eco", "money");
     public static final List<String> IEShopCommandAliases = List.of("Shop","ItemEconomyShop", "itemeconomyshop", "ieshop" , "shop", "ss", "buy", "sell");

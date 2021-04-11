@@ -19,7 +19,10 @@ commands:
       /ItemEconomy remove_account
       /ItemEconomy deposit
       /ItemEconomy withdraw
+      /ItemEconomy redistribute
 permissions:
   itemeconomy.admin:
     default: op
+  itemeconomy.player:
+    default: true
 

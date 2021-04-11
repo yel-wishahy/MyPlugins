@@ -16,6 +16,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.ResultType;
@@ -270,6 +271,18 @@ public class Util {
         }
 
         return inv;
+    }
+
+    public static int getTotalCirculation(){
+        int totalCirculation = 0;
+        Map<String, Account> accounts = ItemEconomy.getInstance().getAccounts();
+
+        for (Account acc:accounts.values()) {
+            if(acc instanceof PlayerAccount)
+                totalCirculation += acc.getBalance();
+        }
+
+        return totalCirculation;
     }
 
 }
