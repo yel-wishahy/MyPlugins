@@ -6,20 +6,19 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import shallowcraft.itemeconomy.ItemEconomy;
+import shallowcraft.itemeconomy.Tax.Taxable;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerAccount implements Account {
     private final OfflinePlayer player;
     private List<Vault> vaults;
+    private Map<String, Taxable> taxes;
     private final Material itemCurrency;
     private int lastPersonalBalance;
 
@@ -27,6 +26,7 @@ public class PlayerAccount implements Account {
     public PlayerAccount(OfflinePlayer player, Material itemCurrency){
         this.player = player;
         vaults = new ArrayList<>();
+        taxes = new HashMap<>();
         this.itemCurrency = itemCurrency;
         lastPersonalBalance = 0;
     }
@@ -34,6 +34,7 @@ public class PlayerAccount implements Account {
     public PlayerAccount(OfflinePlayer player, Material itemCurrency, int personalBalance){
         this.player = player;
         vaults = new ArrayList<>();
+        taxes = new HashMap<>();
         this.itemCurrency = itemCurrency;
         lastPersonalBalance = personalBalance;
     }
@@ -41,6 +42,7 @@ public class PlayerAccount implements Account {
     public PlayerAccount(OfflinePlayer player, Material itemCurrency, int personalBalance, List<Vault> vaults){
         this.player = player;
         this.vaults = new ArrayList<>(vaults);
+        taxes = new HashMap<>();
         this.itemCurrency = itemCurrency;
         lastPersonalBalance = personalBalance;
     }
@@ -62,9 +64,35 @@ public class PlayerAccount implements Account {
         return new ArrayList<>(vaults);
     }
 
+    public HashMap<String, Taxable> getTaxes(){return new HashMap<>(taxes);}
+
+    public void addTax(Taxable tax){taxes.put(tax.getTaxName(), tax);}
+
+    public void removeTax(Taxable tax){
+        if(taxes.containsValue(tax))
+            taxes.remove(tax.getTaxName());
+    }
+
+    public void removeTax(String tax){
+        taxes.remove(tax);
+    }
+
     @Override
     public void overrideLoadVaults(List<Vault> override){
         vaults = new ArrayList<>(override);
+    }
+
+    public void overrideLoadTaxes(Map<String, Taxable> taxes){
+        taxes = new HashMap<>(taxes);
+    }
+
+    public TransactionResult taxAll(){
+        int count = 0;
+        for (Taxable tax: taxes.values()) {
+            count += tax.tax().amount;
+        }
+
+        return new TransactionResult(count, ResultType.SUCCESS, "tax all");
     }
 
     @Override

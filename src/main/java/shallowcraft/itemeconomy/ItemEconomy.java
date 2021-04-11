@@ -14,8 +14,8 @@ import java.util.logging.Logger;
 
 import org.bukkit.entity.Player;
 import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
-import shallowcraft.itemeconomy.Accounts.TaxAccount;
 import shallowcraft.itemeconomy.Commands.IECommand;
 import shallowcraft.itemeconomy.Commands.IETabCompleter;
 import shallowcraft.itemeconomy.Data.Config;
@@ -26,7 +26,7 @@ import shallowcraft.itemeconomy.Util.DataLoader;
 import shallowcraft.itemeconomy.Util.InvalidDataException;
 import shallowcraft.itemeconomy.VaultEconomyHook.Economy_ItemEconomy;
 
-public class ItemEconomy extends JavaPlugin{
+public class ItemEconomy extends JavaPlugin {
     public static final Logger log = Logger.getLogger("Minecraft");
     private Map<String, Account> accounts;
     private static ItemEconomy instance;
@@ -36,10 +36,12 @@ public class ItemEconomy extends JavaPlugin{
         return instance;
     }
 
-    public HashMap<String, Account> getAccounts(){return (HashMap<String, Account>) accounts;}
+    public HashMap<String, Account> getAccounts() {
+        return (HashMap<String, Account>) accounts;
+    }
 
     private boolean registerEconomy() {
-        if(getServer().getPluginManager().isPluginEnabled("Vault")) {
+        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
             getServer().getServicesManager().register(Economy.class, new Economy_ItemEconomy(), this, ServicePriority.Normal);
             return true;
         } else {
@@ -47,22 +49,24 @@ public class ItemEconomy extends JavaPlugin{
         }
     }
 
-    private void registerEventHandler(){
+    private void registerEventHandler() {
         getServer().getPluginManager().registerEvents(new IEEventHandler(), this);
     }
 
-    private void registerCommands(){
-        try{
+    private void registerCommands() {
+        try {
             this.getCommand(Config.IECommand).setExecutor(new IECommand());
-        } catch (Exception ignored){
+            this.getCommand(Config.TaxCommand).setExecutor(new IECommand());
+        } catch (Exception ignored) {
             log.info("[ItemEconomy] Failed register Command!");
         }
     }
 
-    private void registerCommandHelper(){
-        try{
+    private void registerCommandHelper() {
+        try {
             getServer().getPluginCommand(Config.IECommand).setTabCompleter(new IETabCompleter());
-        } catch (Exception ignored){
+            getServer().getPluginCommand(Config.TaxCommand).setTabCompleter(new IETabCompleter());
+        } catch (Exception ignored) {
             log.info("[ItemEconomy] Failed register tab completer command helper!");
         }
     }
@@ -85,7 +89,7 @@ public class ItemEconomy extends JavaPlugin{
         }
     }
 
-    public boolean loadData(){
+    public boolean loadData() {
         try {
             File dataFile = DataLoader.getDataFile(Config.dataFileName);
             if (dataFile.exists())
@@ -106,7 +110,7 @@ public class ItemEconomy extends JavaPlugin{
     public void onEnable() {
         instance = this;
 
-        if (!registerEconomy() ) {
+        if (!registerEconomy()) {
             log.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -127,14 +131,14 @@ public class ItemEconomy extends JavaPlugin{
         return accounts.containsKey(id);
     }
 
-    public Account getAccount(OfflinePlayer player){
-        if(hasAccount(player))
+    public Account getAccount(OfflinePlayer player) {
+        if (hasAccount(player))
             return accounts.get(player.getUniqueId().toString());
         return null;
     }
 
     public double getBalance(OfflinePlayer player) {
-        if(hasAccount(player))
+        if (hasAccount(player))
             return Objects.requireNonNull(getAccount(player)).getBalance();
         else
             return 0;
@@ -145,17 +149,17 @@ public class ItemEconomy extends JavaPlugin{
     }
 
 
-    public TransactionResult withdrawPlayer(OfflinePlayer player, double amount){
+    public TransactionResult withdrawPlayer(OfflinePlayer player, double amount) {
         Account holder = accounts.get(player.getUniqueId().toString());
 
         int toWithdraw = (int) Math.round(amount);
         double taxable = amount - toWithdraw;
 
-        if(holder !=null){
-            if(tax(taxable))
-                try{
-                    player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have been taxed " + ChatColor.AQUA + (taxable/amount * 100) + " %!");
-                } catch (Exception ignored){
+        if (holder != null) {
+            if (tax(taxable))
+                try {
+                    player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have been taxed " + ChatColor.AQUA + (taxable / amount * 100) + " %!");
+                } catch (Exception ignored) {
                 }
             return holder.withdraw(toWithdraw);
         } else {
@@ -163,17 +167,17 @@ public class ItemEconomy extends JavaPlugin{
         }
     }
 
-    public TransactionResult depositPlayer(OfflinePlayer player, double amount){
+    public TransactionResult depositPlayer(OfflinePlayer player, double amount) {
         Account holder = accounts.get(player.getUniqueId().toString());
 
         int toDeposit = (int) Math.round(amount);
         double taxable = amount - toDeposit;
 
-        if(holder !=null){
-            if(tax(taxable))
-                try{
-                    player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have been taxed " + ChatColor.AQUA + (taxable/amount * 100) + " %!");
-                } catch (Exception ignored){
+        if (holder != null) {
+            if (tax(taxable))
+                try {
+                    player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have been taxed " + ChatColor.AQUA + (taxable / amount * 100) + " %!");
+                } catch (Exception ignored) {
                 }
             return holder.deposit(toDeposit);
         } else {
@@ -181,7 +185,7 @@ public class ItemEconomy extends JavaPlugin{
         }
     }
 
-    public boolean createPlayerAccount(OfflinePlayer player){
+    public boolean createPlayerAccount(OfflinePlayer player) {
         Player sender = player.getPlayer();
         assert sender != null;
         if (hasAccount(player)) {
@@ -194,15 +198,31 @@ public class ItemEconomy extends JavaPlugin{
         return true;
     }
 
-    private boolean tax(double amount){
-        if(hasAccount(Config.taxID)){
-            TaxAccount acc = (TaxAccount) accounts.get(Config.taxID);
-            acc.taxBuffer+=amount;
-            return true;
+    private boolean tax(double amount) {
+        for (Account acc : accounts.values()) {
+            if (acc instanceof GeneralAccount && ((GeneralAccount) acc).isTaxDeposit) {
+                GeneralAccount account = (GeneralAccount) acc;
+                account.balanceBuffer += amount;
+                return true;
+            }
         }
 
         return false;
     }
+
+    public Account getTaxDeposit() {
+        for (Account acc : accounts.values()) {
+            if (acc instanceof GeneralAccount && ((GeneralAccount) acc).isTaxDeposit) {
+                return acc;
+            }
+        }
+
+        return null;
+    }
+
+
+
+
 
 
 

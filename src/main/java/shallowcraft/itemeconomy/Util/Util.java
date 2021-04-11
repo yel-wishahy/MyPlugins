@@ -250,6 +250,16 @@ public class Util {
         return output;
     }
 
+    public static List<String> getAllPlayerIDs() {
+        List<String> output = new ArrayList<>();
+        for (OfflinePlayer p : ItemEconomy.getInstance().getServer().getOfflinePlayers()) {
+            output.add(p.getUniqueId().toString());
+        }
+
+        return output;
+    }
+
+
     public static Vault getVaultFromSign(Sign sign, Map<String, Account> accounts) {
         for (Account acc : accounts.values()) {
             for (Vault vault : acc.getVaults()) {
@@ -270,6 +280,25 @@ public class Util {
         }
 
         return inv;
+    }
+
+    public static boolean isPlayerName(String name){
+        return Util.getAllPlayerNames().contains(name);
+    }
+
+    public static boolean isPlayerID(String id){
+        return Util.getAllPlayerIDs().contains(id);
+    }
+
+    public static String getPlayerID(String name){
+        String id = null;
+
+        try {
+            id = ItemEconomy.getInstance().getServer().getPlayerUniqueId(name).toString();
+        } catch (Exception ignored){
+        }
+
+        return id;
     }
 
 }

@@ -11,15 +11,26 @@ commands:
     usage: |
       /ItemEconomy balance
       /ItemEconomy baltop
-      /ItemEconomy create_account
+      /ItemEconomy create_account <name>
       /ItemEconomy list_accounts
       /ItemEconomy create_account_all
       /ItemEconomy reload
       /ItemEconomy save
-      /ItemEconomy remove_account
-      /ItemEconomy deposit
-      /ItemEconomy withdraw
+      /ItemEconomy remove_account <name>
+      /ItemEconomy deposit <name> <amount>
+      /ItemEconomy withdraw <name> <amount>
+  Tax:
+    aliases: [tax, ietax, ieTax, taxes, t]
+    usage: |
+      /Tax tax <name> <[optional] tax name>
+      /Tax add_tax <name> <tax name> <rate>
+      /Tax remove_tax <name> <tax name>
+      /Tax tax_info <name> < [optional] tax name>
+      /Tax tax_all
+      /Tax clear_tax <name>
 permissions:
   itemeconomy.admin:
     default: op
+  itemeconomy.message:
+    default: true
 

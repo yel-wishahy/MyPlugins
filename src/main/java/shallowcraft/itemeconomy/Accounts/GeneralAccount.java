@@ -3,42 +3,53 @@ package shallowcraft.itemeconomy.Accounts;
 import org.bukkit.Material;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.Vault.Vault;
+import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
+import shallowcraft.itemeconomy.Vault.Vault;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaxAccount implements Account{
+public class GeneralAccount implements Account{
     private List<Vault> vaults;
     private final Material itemCurrency = Config.currency;
-    private final String name = Config.taxID;
-    public double taxBuffer;
+    private final String name;
+    public double balanceBuffer;
+    public boolean isTaxDeposit;
 
-    public TaxAccount(){
+    public GeneralAccount(String name){
         vaults = new ArrayList<>();
-        taxBuffer = 0;
+        this.name = name;
+        balanceBuffer = 0;
     }
 
-    public TaxAccount(double taxBuffer){
+    public GeneralAccount(double balanceBuffer, String name){
         vaults = new ArrayList<>();
-        this.taxBuffer = taxBuffer;
+        this.name = name;
+        this.balanceBuffer = balanceBuffer;
     }
 
-    private void convertTaxBuffer(){
-        if(taxBuffer > 0){
-            int toConvert = (int) Math.round(taxBuffer);
-            TransactionResult result = deposit(toConvert);
+    private void setTaxDeposit(){
+        if(name.toLowerCase().contains("tax"))
+            isTaxDeposit = true;
+        else
+            isTaxDeposit = false;
+    }
 
-            taxBuffer -= result.amount;
+    private void convertBalanceBuffer(){
+        if(balanceBuffer > 0){
+            int toConvert = (int) Math.round(balanceBuffer);
+            TransactionResult result = depositCurrency(toConvert);
+
+            balanceBuffer -= result.amount;
         }
     }
 
     @Override
     public int getBalance() {
-        convertTaxBuffer();
+        convertBalanceBuffer();
         return Util.getAllVaultsBalance(vaults);
     }
 
@@ -73,9 +84,14 @@ public class TaxAccount implements Account{
         return Transaction.withdrawAllVaults(amount, getBalance(), vaults);
     }
 
+    private TransactionResult depositCurrency(int amount){
+        return Transaction.depositAllVaults(amount, vaults);
+    }
+
     @Override
     public TransactionResult deposit(int amount) {
-        return Transaction.depositAllVaults(amount, vaults);
+        balanceBuffer+=amount;
+        return new TransactionResult(amount, ResultType.SUCCESS, "deposit");
     }
 
     @Override
