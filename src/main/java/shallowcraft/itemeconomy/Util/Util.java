@@ -16,6 +16,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
@@ -312,6 +313,17 @@ public class Util {
         }
 
         return id;
+    }
+
+    public static List<String> getAllGeneralAccountIDs(){
+        List<String> output = new ArrayList<>();
+
+        for (Account acc :ItemEconomy.getInstance().getAccounts().values()) {
+            if(acc instanceof GeneralAccount)
+                output.add(acc.getID());
+        }
+
+        return output;
     }
 
 }

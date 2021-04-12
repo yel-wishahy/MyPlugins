@@ -164,6 +164,7 @@ public class PlayerAccount implements Account {
         return new TransactionResult(removed, result.type, "withdraw");
     }
 
+    @Override
     public TransactionResult forcedWithdraw(int amount){
         if(balance() < amount)
             return new TransactionResult(0, ResultType.INSUFFICIENT_FUNDS, "withdraw");

@@ -8,12 +8,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
-import shallowcraft.itemeconomy.Accounts.TaxAccount;
 import shallowcraft.itemeconomy.Accounts.WealthDistribution;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.Data.Permissions;
@@ -295,7 +293,7 @@ public class IECommand implements CommandExecutor {
             return false;
 
         switch (args[0]) {
-            case "add_tax":
+            case "add":
                 boolean success = false;
                 if (args.length == 4 && sender.hasPermission(Permissions.adminPerm)) {
                     String playerName = args[1];
@@ -318,7 +316,7 @@ public class IECommand implements CommandExecutor {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
 
                 return success;
-            case "remove_tax":
+            case "remove":
                 boolean pass = false;
                 if (args.length == 3 && sender.hasPermission(Permissions.adminPerm)) {
                     String playerName = args[1];
@@ -342,7 +340,7 @@ public class IECommand implements CommandExecutor {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
 
                 return pass;
-            case "clear_tax":
+            case "clear":
                 boolean pass1 = false;
                 if (args.length == 2 && sender.hasPermission(Permissions.adminPerm)) {
                     String playerName = args[1];
@@ -363,7 +361,7 @@ public class IECommand implements CommandExecutor {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
 
                 return pass1;
-            case "tax_info":
+            case "info":
                 boolean pass2 = false;
                 if (args.length == 2 || (args.length == 3 && args[2].equals("all"))) {
                     String playerName = args[1];
@@ -407,7 +405,7 @@ public class IECommand implements CommandExecutor {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
 
                 return pass2;
-            case "tax_all":
+            case "taxall":
                 if(sender.hasPermission(Permissions.adminPerm)){
                     for (Account acc:accounts.values()) {
                         if(acc instanceof PlayerAccount) {
@@ -422,36 +420,38 @@ public class IECommand implements CommandExecutor {
                 }
             case "tax":
                 boolean pass3 = false;
-                if (args.length == 2 || (args.length == 3 && args[2].equals("all"))) {
-                    String playerName = args[1];
+                if(sender.hasPermission(Permissions.adminPerm)){
+                    if (args.length == 2 || (args.length == 3 && args[2].equals("all"))) {
+                        String playerName = args[1];
 
-                    if (accounts.containsKey(Util.getPlayerID(playerName))) {
-                        PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
-                        TransactionResult r = holder.taxAll();
-                        TextComponent t = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "RBME Taxed " + ChatColor.AQUA + holder.getName() + " " +
-                                ChatColor.YELLOW + r.amount + ChatColor.AQUA + " Diamonds!");
-                        sender.sendMessage(t);
-                        pass3 = true;
-                    }
-                } else if (args.length == 3){
-                    String playerName = args[1];
-                    String taxName = args[2];
-
-                    if (accounts.containsKey(Util.getPlayerID(playerName))) {
-                        PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
-
-                        if(holder.getTaxes().containsKey(taxName)){
-                            Taxable tax = holder.getTaxes().get(taxName);
-                            TransactionResult r = tax.tax();
-                            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Tax Rate (%): " + ChatColor.YELLOW
-                                    + tax.getTaxRate() + ChatColor.GREEN + " Next Tax Time: " + ChatColor.YELLOW + Config.taxTimeFormat.format(tax.getNextTaxTime()));
+                        if (accounts.containsKey(Util.getPlayerID(playerName))) {
+                            PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
+                            TransactionResult r = holder.taxAll();
                             TextComponent t = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "RBME Taxed " + ChatColor.AQUA + holder.getName() + " " +
                                     ChatColor.YELLOW + r.amount + ChatColor.AQUA + " Diamonds!");
                             sender.sendMessage(t);
                             pass3 = true;
                         }
-                    }
+                    } else if (args.length == 3){
+                        String playerName = args[1];
+                        String taxName = args[2];
 
+                        if (accounts.containsKey(Util.getPlayerID(playerName))) {
+                            PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
+
+                            if(holder.getTaxes().containsKey(taxName)){
+                                Taxable tax = holder.getTaxes().get(taxName);
+                                TransactionResult r = tax.tax();
+                                sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Tax Rate (%): " + ChatColor.YELLOW
+                                        + tax.getTaxRate() + ChatColor.GREEN + " Next Tax Time: " + ChatColor.YELLOW + Config.taxTimeFormat.format(tax.getNextTaxTime()));
+                                TextComponent t = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "RBME Taxed " + ChatColor.AQUA + holder.getName() + " " +
+                                        ChatColor.YELLOW + r.amount + ChatColor.AQUA + " Diamonds!");
+                                sender.sendMessage(t);
+                                pass3 = true;
+                            }
+                        }
+
+                    }
                 }
 
                 if (!sender.hasPermission(Permissions.adminPerm))
@@ -461,6 +461,56 @@ public class IECommand implements CommandExecutor {
 
                 return pass3;
 
+            case "edit":
+                boolean pass4 = false;
+                Taxable tax = null;
+                if(sender.hasPermission(Permissions.adminPerm)){
+                    if(args.length == 4 && args[3].equals("timeset_now")){
+                        String playerName = args[1];
+                        String taxName = args[2];
+
+                        if (accounts.containsKey(Util.getPlayerID(playerName))) {
+                            PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
+
+                            if(holder.getTaxes().containsKey(taxName)){
+                                tax = holder.getTaxes().get(taxName);
+                                tax.updateTaxTime();
+                                pass4 = true;
+                            }
+                        }
+
+                    } else if(args.length == 5 && args[3].equals("set_rate")){
+                        double taxRate = Double.parseDouble(args[4]);
+                        String playerName = args[1];
+                        String taxName = args[2];
+
+                        if (accounts.containsKey(Util.getPlayerID(playerName))) {
+                            PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
+
+                            if(holder.getTaxes().containsKey(taxName)){
+                                tax = holder.getTaxes().get(taxName);
+                                tax.updateRate(taxRate);
+                                pass4 = true;
+                            }
+                        }
+                    }
+                }
+
+
+                if(pass4){
+                    StringBuilder msg = new StringBuilder();
+                    msg.append(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.AQUA + "Tax credentials updated, new info:\n");
+                    msg.append(ChatColor.GREEN + "* Tax Name: " + ChatColor.AQUA).append(tax.getTaxName()).append(ChatColor.GREEN).append(" Tax %: ").
+                            append(ChatColor.YELLOW).append(tax.getTaxRate()).append(ChatColor.GREEN).append(" Next Tax Time: ").append(ChatColor.YELLOW).
+                            append(Config.taxTimeFormat.format(tax.getNextTaxTime())).append("\n");
+                }
+
+                if (!sender.hasPermission(Permissions.adminPerm))
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot send this command.");
+                else if (!pass4)
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
+
+                return pass4;
             default:
                 return false;
         }

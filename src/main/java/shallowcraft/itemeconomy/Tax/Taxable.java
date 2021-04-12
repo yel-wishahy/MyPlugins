@@ -3,6 +3,7 @@ package shallowcraft.itemeconomy.Tax;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.ResultType;
@@ -13,8 +14,8 @@ import java.util.Date;
 
 public class Taxable {
     private final Account holder;
-    private final String taxName;
-    private final double taxRate;
+    private String taxName;
+    private double taxRate;
     private Date lastTaxTime;
     private Date nextTaxTime;
 
@@ -42,7 +43,7 @@ public class Taxable {
             Account deposit = ItemEconomy.getInstance().getTaxDeposit();
             if(deposit!=null){
                 int taxable = amountToTax();
-                TransactionResult withdrawResult = holder.withdraw(taxable);
+                TransactionResult withdrawResult = holder.forcedWithdraw(taxable);
                 deposit.deposit(withdrawResult.amount);
 
                 setTaxTimes();
@@ -78,6 +79,19 @@ public class Taxable {
     private void setTaxTimes(){
         this.lastTaxTime = new Date();
         this.nextTaxTime = DateUtils.addHours(lastTaxTime, Config.nextTaxHours);
+    }
+
+    public void updateTaxTime(){
+        this.nextTaxTime = new Date();
+        ItemEconomy.getInstance().saveData();
+    }
+
+    public void updateRate(double amount){
+        taxRate = amount;
+    }
+
+    public void updateTaxName(String newName){
+        this.taxName = newName;
     }
 
     @Override

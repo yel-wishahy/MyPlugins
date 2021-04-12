@@ -14,6 +14,7 @@ public interface Account {
     public boolean removeVault(Vault vault);
     public void addVault(Vault vault);
     public TransactionResult withdraw(int amount);
+    public TransactionResult forcedWithdraw(int amount);
     public TransactionResult deposit(int amount);
     public String getID();
     public String getName();

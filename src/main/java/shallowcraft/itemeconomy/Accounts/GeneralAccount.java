@@ -1,6 +1,8 @@
 package shallowcraft.itemeconomy.Accounts;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.inventory.Inventory;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.ResultType;
@@ -83,7 +85,17 @@ public class GeneralAccount implements Account{
 
     @Override
     public TransactionResult withdraw(int amount) {
+        if(getBalance() < amount)
+            return new TransactionResult(0, ResultType.INSUFFICIENT_FUNDS, "withdraw");
         return Transaction.withdrawAllVaults(amount, getBalance(), vaults);
+    }
+
+    @Override
+    public TransactionResult forcedWithdraw(int amount){
+        if(getBalance() < amount)
+            return new TransactionResult(0, ResultType.INSUFFICIENT_FUNDS, "withdraw");
+
+        return Transaction.forceWithdrawAllVaults(amount, getBalance(), vaults);
     }
 
     private TransactionResult depositCurrency(int amount){

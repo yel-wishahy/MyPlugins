@@ -199,7 +199,7 @@ public class ItemEconomy extends JavaPlugin {
         return true;
     }
 
-    private boolean tax(double amount) {
+    public boolean tax(double amount) {
         for (Account acc : accounts.values()) {
             if (acc instanceof GeneralAccount && ((GeneralAccount) acc).isTaxDeposit) {
                 GeneralAccount account = (GeneralAccount) acc;

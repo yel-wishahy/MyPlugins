@@ -24,11 +24,12 @@ commands:
     aliases: [tax, ietax, ieTax, taxes, t]
     usage: |
       /Tax tax <name> <[optional] tax name>
-      /Tax add_tax <name> <tax name> <rate>
-      /Tax remove_tax <name> <tax name>
-      /Tax tax_info <name> < [optional] tax name>
-      /Tax tax_all
-      /Tax clear_tax <name>
+      /Tax add <name> <tax name> <rate>
+      /Tax remove <name> <tax name>
+      /Tax info <name> < [optional] tax name>
+      /Tax taxall
+      /Tax clear <name>
+      /Tax edit <name> <tax name> <args>
 permissions:
   itemeconomy.admin:
     default: op

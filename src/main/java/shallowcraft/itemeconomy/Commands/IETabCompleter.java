@@ -13,7 +13,10 @@ import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class IETabCompleter implements org.bukkit.command.TabCompleter {
     /**
@@ -50,7 +53,7 @@ public class IETabCompleter implements org.bukkit.command.TabCompleter {
             StringUtil.copyPartialMatches(args[0], Config.IESubCommands, completions);
         else if(args.length == 2) {
             if (args[0].equals("create_account") || args[0].equals("remove_account") || args[0].equals("deposit") || args[0].equals("withdraw")) {
-                completions = Util.getAllPlayerNames();
+                completions = Stream.concat(Util.getAllPlayerNames().stream(), Util.getAllGeneralAccountIDs().stream()).collect(Collectors.toList());
             }
         }
 
@@ -63,11 +66,11 @@ public class IETabCompleter implements org.bukkit.command.TabCompleter {
         if (args.length == 1)
             StringUtil.copyPartialMatches(args[0], Config.TaxSubCommands, completions);
         else if(args.length == 2) {
-            if (args[0].equals("add_tax") || args[0].equals("remove_tax") || args[0].equals("tax_info") || args[0].equals("tax") || args[0].equals("clear_tax")) {
+            if (args[0].equals("add") || args[0].equals("remove") || args[0].equals("info") || args[0].equals("tax") || args[0].equals("clear") || args[0].equals("edit")) {
                 completions = Util.getAllPlayerNames();
             }
         } else if(args.length == 3){
-            if(args[0].equals("add_tax") || args[0].equals("remove_tax") || args[0].equals("tax_info") || args[0].equals("tax")){
+            if(args[0].equals("add") || args[0].equals("remove") || args[0].equals("info") || args[0].equals("tax") || args[0].equals("edit") ){
                 if(Util.isPlayerName(args[1])){
 
                     String id = Util.getPlayerID(args[1]);
@@ -78,7 +81,13 @@ public class IETabCompleter implements org.bukkit.command.TabCompleter {
                         }
                     }
                 }
-                completions.add("all");
+
+                if(!args[0].equals("add"))
+                    completions.add("all");
+            }
+        } else if (args.length == 4){
+            if(args[0].equals("edit")){
+                StringUtil.copyPartialMatches(args[3], Config.TaxEditSubCommands, completions);
             }
         }
 

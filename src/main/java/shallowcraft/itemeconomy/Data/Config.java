@@ -23,7 +23,8 @@ public class Config {
     public static final List<String> IECommandAliases = List.of("ItemEconomy", "itemeconomy",
             "IE", "ie", "eco", "money");
     public static final List<String> TaxCommandAliases = List.of("tax", "ietax", "ieTax", "taxes", "t");
-    public static final List<String> TaxSubCommands = List.of("add_tax", "remove_tax", "tax", "tax_all", "tax_info", "clear_tax");
+    public static final List<String> TaxSubCommands = List.of("add", "remove", "tax", "taxall", "info", "clear", "edit");
+    public static final List<String> TaxEditSubCommands = List.of("timeset_now", "set_rate");
     public static final List<String> IEShopCommandAliases = List.of("Shop","ItemEconomyShop", "itemeconomyshop", "ieshop" , "shop", "ss", "buy", "sell");
     public static final String IECommand = "ItemEconomy";
     public static final String TaxCommand = "Tax";
