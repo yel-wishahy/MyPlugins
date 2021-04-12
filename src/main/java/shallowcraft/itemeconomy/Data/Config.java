@@ -11,13 +11,15 @@ public class Config {
     public static int nextTaxHours = 24;
     public static int taxCap = 50;
     public static final String dataFileName = "economyData";
+    public static final double wealthCap = 0.70;
+    public static final String taxID = "Tax";
     public static final String shopID = "Shop";
     public static final Material currency = Material.DIAMOND;
     public static final Material currency_block = Material.DIAMOND_BLOCK;
     public static final String vaultHeader = "[Vault]";
     public static final List<String> IESubCommands = List.of("create_account",
             "balance", "list_accounts", "create_account_all", "remove_account",
-            "reload", "save", "baltop", "deposit", "withdraw");
+            "reload", "save", "baltop", "deposit", "withdraw", "redistribute");
     public static final List<String> IECommandAliases = List.of("ItemEconomy", "itemeconomy",
             "IE", "ie", "eco", "money");
     public static final List<String> TaxCommandAliases = List.of("tax", "ietax", "ieTax", "taxes", "t");

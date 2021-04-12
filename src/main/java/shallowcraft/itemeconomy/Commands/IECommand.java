@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
+import shallowcraft.itemeconomy.Accounts.TaxAccount;
+import shallowcraft.itemeconomy.Accounts.WealthDistribution;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.Data.Permissions;
 import shallowcraft.itemeconomy.ItemEconomy;
@@ -272,6 +274,10 @@ public class IECommand implements CommandExecutor {
                 } else
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot send this command here");
 
+                return true;
+            case "redistribute":
+                if(sender.hasPermission(Permissions.adminPerm))
+                    WealthDistribution.redistribute(accounts);
                 return true;
             default:
                 return false;

@@ -159,7 +159,32 @@ public class PlayerAccount implements Account {
 
         updatePersonalBalance();
         ItemEconomy.getInstance().saveData();
-        if((balance() >= amount - removed) && player.isOnline())
+        if((amount - removed > 0) && player.isOnline())
+            player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Failed to withdraw completely! (Determined cause: Deposit only account).");
+        return new TransactionResult(removed, result.type, "withdraw");
+    }
+
+    public TransactionResult forcedWithdraw(int amount){
+        if(balance() < amount)
+            return new TransactionResult(0, ResultType.INSUFFICIENT_FUNDS, "withdraw");
+
+        int removed = 0;
+
+        TransactionResult result = Transaction.forceWithdrawAllVaults(amount, balance(), vaults);
+        removed += result.amount;
+
+
+        if(ResultType.failureModes.contains(result.type)){
+            Inventory inventory =  Util.getInventory(player);
+            if(inventory != null){
+                result = Transaction.withdraw(inventory, amount - removed);
+                removed += result.amount;
+            }
+        }
+
+        updatePersonalBalance();
+        ItemEconomy.getInstance().saveData();
+        if((amount - removed > 0) && player.isOnline())
             player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Failed to withdraw completely! (Determined cause: Deposit only account).");
         return new TransactionResult(removed, result.type, "withdraw");
     }

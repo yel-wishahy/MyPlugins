@@ -19,6 +19,7 @@ commands:
       /ItemEconomy remove_account <name>
       /ItemEconomy deposit <name> <amount>
       /ItemEconomy withdraw <name> <amount>
+      /ItemEconomy redistribute
   Tax:
     aliases: [tax, ietax, ieTax, taxes, t]
     usage: |
@@ -32,5 +33,7 @@ permissions:
   itemeconomy.admin:
     default: op
   itemeconomy.message:
+    default: true
+  itemeconomy.player:
     default: true
 

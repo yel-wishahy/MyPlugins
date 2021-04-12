@@ -180,4 +180,26 @@ public class Transaction {
 
         return new TransactionResult(numRemoved, ResultType.SUCCESS, "withdraw");
     }
+
+    public static TransactionResult forceWithdrawAllVaults(int amount, int currentBalance, List<Vault> vaults){
+        if(currentBalance < amount)
+            return new TransactionResult(0, ResultType.INSUFFICIENT_FUNDS, "withdraw");
+
+
+        int numRemoved = 0;
+
+        for (Vault vault:new ArrayList<>(vaults)) {
+            if(numRemoved >= amount)
+                break;
+
+            int toRemove = Util.amountToRemove(vault.getVaultBalance(), amount - numRemoved);
+            numRemoved += vault.withdraw(toRemove).amount;
+        }
+
+
+        if(numRemoved < amount)
+            return new TransactionResult(numRemoved, ResultType.INSUFFICIENT_FUNDS, "withdraw");
+
+        return new TransactionResult(numRemoved, ResultType.SUCCESS, "withdraw");
+    }
 }
