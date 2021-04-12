@@ -7,6 +7,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Item;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
@@ -34,14 +35,19 @@ public class DataLoader {
         if (jsonData == null || jsonData.isEmpty())
             throw new InvalidDataException("[ItemEconomy] Failed to load data due to invalid file.");
 
-        for (String id : jsonData.keySet()) {
+        for (String key : jsonData.keySet()) {
+            ItemEconomy.log.info(Arrays.toString(key.split(",")));
+            String id = key.split(",")[1];
+            String type = key.split(",")[0];
+
             Map<String, String> inputData = jsonData.get(id);
 
             Material currency = Material.getMaterial(inputData.get("currency"));
             assert currency != null;
             //ItemEconomy.log.info("[ItemEconomy] Loaded currency with material ID: " + currency.name());
 
-            if (!Util.isPlayerID(id)) {
+
+            if (type.equals("General Account")) {
                 double buffer = Double.parseDouble(inputData.get("Buffer"));
 
                 Account acc = new GeneralAccount(buffer, id);
@@ -76,8 +82,8 @@ public class DataLoader {
 
         for (Account acc : accounts.values()) {
             Map<String, String> outputData = new HashMap<>();
+            String id = acc.getAccountType() + "," + acc.getID();
 
-            String id = acc.getID();
             //ItemEconomy.log.info("[ItemEconomy] Saving account with ID: " + id);
 
             if (acc instanceof PlayerAccount) {
@@ -87,8 +93,8 @@ public class DataLoader {
                 outputData.put("personal_balance", personalBalance);
                 // ItemEconomy.log.info("[ItemEconomy] Saving balance");
             } else if (acc instanceof GeneralAccount) {
-                String taxBuffer = String.valueOf(((GeneralAccount) acc).balanceBuffer);
-                outputData.put("Buffer", taxBuffer);
+                String buffer = String.valueOf(((GeneralAccount) acc).balanceBuffer);
+                outputData.put("Buffer", buffer);
                 //ItemEconomy.log.info("[ItemEconomy] Saving tax buffer");
             }
 
@@ -114,6 +120,7 @@ public class DataLoader {
 
     private static void populateAccount(Account currentAccount, Material currency, Map<String, String> inputData, Server server) {
         List<Vault> vaults = new ArrayList<>();
+        Map<String, Taxable> taxes = new HashMap<>();
 
         int containerIndex = 0;
         int taxIndex = 0;
@@ -159,11 +166,14 @@ public class DataLoader {
                 else
                     tax = new Taxable(holder, name, rate);
 
-                holder.addTax(tax);
+                taxes.put(tax.getTaxName(), tax);
             }
         }
 
         currentAccount.overrideLoadVaults(vaults);
+
+        if(currentAccount instanceof PlayerAccount)
+            ((PlayerAccount) currentAccount).overrideLoadTaxes(taxes);
     }
 
     private static void logVaults(Account acc, Map<String, String> outputData) {

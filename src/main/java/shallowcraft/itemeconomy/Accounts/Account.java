@@ -18,4 +18,5 @@ public interface Account {
     public String getID();
     public String getName();
     public int hashCode();
+    public String getAccountType();
 }

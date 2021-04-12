@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public class Config {
-    public static final SimpleDateFormat taxTimeFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    public static final SimpleDateFormat taxTimeFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
     public static int nextTaxHours = 24;
     public static int taxCap = 50;
     public static final String dataFileName = "economyData";

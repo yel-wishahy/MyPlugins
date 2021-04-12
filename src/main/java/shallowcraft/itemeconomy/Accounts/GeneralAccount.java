@@ -23,12 +23,14 @@ public class GeneralAccount implements Account{
         vaults = new ArrayList<>();
         this.name = name;
         balanceBuffer = 0;
+        setTaxDeposit();
     }
 
     public GeneralAccount(double balanceBuffer, String name){
         vaults = new ArrayList<>();
         this.name = name;
         this.balanceBuffer = balanceBuffer;
+        setTaxDeposit();
     }
 
     private void setTaxDeposit(){
@@ -108,4 +110,21 @@ public class GeneralAccount implements Account{
     public int hashCode() {
         return name.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "GeneralAccount{" +
+                "vaults=" + vaults +
+                ", itemCurrency=" + itemCurrency +
+                ", name='" + name + '\'' +
+                ", balanceBuffer=" + balanceBuffer +
+                ", isTaxDeposit=" + isTaxDeposit +
+                '}';
+    }
+
+    @Override
+    public String getAccountType() {
+        return "General Account";
+    }
+
 }

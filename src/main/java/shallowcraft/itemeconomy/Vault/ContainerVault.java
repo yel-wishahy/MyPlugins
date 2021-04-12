@@ -105,4 +105,14 @@ public class ContainerVault implements Vault {
         return holder;
     }
 
+    @Override
+    public String toString() {
+        return "ContainerVault{" +
+                "containerVault=" + containerVault +
+                ", vaultSign=" + vaultSign +
+                ", holder=" + holder +
+                ", itemCurrency=" + itemCurrency +
+                ", vaultType=" + vaultType +
+                '}';
+    }
 }

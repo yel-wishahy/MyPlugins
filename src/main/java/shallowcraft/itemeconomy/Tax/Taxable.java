@@ -24,6 +24,7 @@ public class Taxable {
         this.taxRate = tax;
         this.taxName = name;
         setTaxTimes();
+        ItemEconomy.log.info(this.toString());
     }
 
     public Taxable(Account holder, String name, double tax, Date lastTaxTime, Date nextTaxTime) {
@@ -32,6 +33,7 @@ public class Taxable {
         this.taxName = name;
         this.lastTaxTime = lastTaxTime;
         this.nextTaxTime = nextTaxTime;
+        ItemEconomy.log.info(this.toString());
     }
 
     public TransactionResult tax(){
@@ -52,16 +54,16 @@ public class Taxable {
         return new TransactionResult(0, ResultType.FAILURE, "tax");
     }
 
-    public String getLastTaxTime() {
-        return Config.taxTimeFormat.format(lastTaxTime);
+    public Date getLastTaxTime() {
+        return lastTaxTime;
     }
 
     public double getTaxRate(){
         return taxRate;
     }
 
-    public String getNextTaxTime() {
-        return Config.taxTimeFormat.format(nextTaxTime);
+    public Date getNextTaxTime() {
+        return nextTaxTime;
     }
 
     public String getTaxName(){
@@ -78,4 +80,14 @@ public class Taxable {
         this.nextTaxTime = DateUtils.addHours(lastTaxTime, Config.nextTaxHours);
     }
 
+    @Override
+    public String toString() {
+        return "Taxable{" +
+                "holder=" + holder.getName() +
+                ", taxName='" + taxName + '\'' +
+                ", taxRate=" + taxRate +
+                ", lastTaxTime=" + lastTaxTime.toString() +
+                ", nextTaxTime=" + nextTaxTime.toString() +
+                '}';
+    }
 }

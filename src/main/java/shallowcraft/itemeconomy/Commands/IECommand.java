@@ -368,9 +368,12 @@ public class IECommand implements CommandExecutor {
                         msg.append(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.AQUA + "List of TAXES:\n");
 
                         for (Taxable tax : holder.getTaxes().values()) {
-                            if (tax != null)
+                            if (tax != null){
                                 msg.append(ChatColor.GREEN + "* Tax Name: " + ChatColor.AQUA).append(tax.getTaxName()).append(ChatColor.GREEN).append(" Tax %: ").
-                                        append(ChatColor.YELLOW).append(tax.getTaxRate()).append(ChatColor.GREEN).append(" Next Tax Time: ").append(ChatColor.YELLOW).append(Config.taxTimeFormat.format(tax.getNextTaxTime())).append("\n");
+                                        append(ChatColor.YELLOW).append(tax.getTaxRate()).append(ChatColor.GREEN).append(" Next Tax Time: ").append(ChatColor.YELLOW).
+                                        append(Config.taxTimeFormat.format(tax.getNextTaxTime())).append("\n");
+                            }
+
                         }
                         sender.sendMessage(msg.toString());
                         pass2 = true;

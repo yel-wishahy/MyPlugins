@@ -66,7 +66,10 @@ public class PlayerAccount implements Account {
 
     public HashMap<String, Taxable> getTaxes(){return new HashMap<>(taxes);}
 
-    public void addTax(Taxable tax){taxes.put(tax.getTaxName(), tax);}
+    public void addTax(Taxable tax){
+        taxes.put(tax.getTaxName(), tax);
+        ItemEconomy.getInstance().saveData();
+    }
 
     public void removeTax(Taxable tax){
         if(taxes.containsValue(tax))
@@ -79,11 +82,11 @@ public class PlayerAccount implements Account {
 
     @Override
     public void overrideLoadVaults(List<Vault> override){
-        vaults = new ArrayList<>(override);
+        this.vaults = new ArrayList<>(override);
     }
 
-    public void overrideLoadTaxes(Map<String, Taxable> taxes){
-        taxes = new HashMap<>(taxes);
+    public void overrideLoadTaxes(Map<String, Taxable> override){
+        this.taxes = new HashMap<>(override);
     }
 
     public TransactionResult taxAll(){
@@ -167,7 +170,7 @@ public class PlayerAccount implements Account {
         TransactionResult result = Transaction.depositAllVaults(amount, vaults);
         numAdded += result.amount;
 
-        if(result.type == ResultType.FAILURE){
+        if(ResultType.failureModes.contains(result.type)){
             Inventory inventory =  null;
             try{
                 inventory = player.getPlayer().getInventory();
@@ -198,5 +201,21 @@ public class PlayerAccount implements Account {
     @Override
     public int hashCode() {
         return UUID.fromString(getID()).hashCode();
+    }
+
+    @Override
+    public String getAccountType() {
+        return "Player Account";
+    }
+
+    @Override
+    public String toString() {
+        return "PlayerAccount{" +
+                "player=" + player +
+                ", vaults=" + vaults +
+                ", taxes=" + taxes +
+                ", itemCurrency=" + itemCurrency +
+                ", lastPersonalBalance=" + lastPersonalBalance +
+                '}';
     }
 }
