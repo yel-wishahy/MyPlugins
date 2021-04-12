@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import org.bukkit.entity.Player;
+import org.maxgamer.quickshop.api.QuickShopAPI;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
