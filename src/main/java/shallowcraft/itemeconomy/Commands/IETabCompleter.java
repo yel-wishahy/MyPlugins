@@ -67,7 +67,7 @@ public class IETabCompleter implements org.bukkit.command.TabCompleter {
             StringUtil.copyPartialMatches(args[0], Config.TaxSubCommands, completions);
         else if(args.length == 2) {
             if (args[0].equals("add") || args[0].equals("remove") || args[0].equals("info") || args[0].equals("tax") || args[0].equals("clear") || args[0].equals("edit")) {
-                completions = Util.getAllPlayerNames();
+                StringUtil.copyPartialMatches(args[1], Util.getAllPlayerNames(), completions);
             }
         } else if(args.length == 3){
             if(args[0].equals("add") || args[0].equals("remove") || args[0].equals("info") || args[0].equals("tax") || args[0].equals("edit") ){
@@ -77,12 +77,12 @@ public class IETabCompleter implements org.bukkit.command.TabCompleter {
                     if(id != null && ItemEconomy.getInstance().hasAccount(id)){
                         PlayerAccount holder = (PlayerAccount) ItemEconomy.getInstance().getAccounts().get(id);
                         if(holder != null){
-                            completions = new ArrayList<>(holder.getTaxes().keySet());
+                            StringUtil.copyPartialMatches(args[2], new ArrayList<>(holder.getTaxes().keySet()), completions);
                         }
                     }
                 }
 
-                if(!args[0].equals("add"))
+                if(!args[0].equals("add") && !args[0].equals("edit") )
                     completions.add("all");
             }
         } else if (args.length == 4){

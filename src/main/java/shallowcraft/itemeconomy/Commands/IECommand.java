@@ -12,11 +12,12 @@ import org.jetbrains.annotations.NotNull;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
-import shallowcraft.itemeconomy.Accounts.WealthDistribution;
+import shallowcraft.itemeconomy.Tax.Taxable;
+import shallowcraft.itemeconomy.Tax.Taxation;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.Data.Permissions;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.Tax.Taxable;
+import shallowcraft.itemeconomy.Tax.GeneralTax;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
@@ -273,10 +274,6 @@ public class IECommand implements CommandExecutor {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot send this command here");
 
                 return true;
-            case "redistribute":
-                if(sender.hasPermission(Permissions.adminPerm))
-                    WealthDistribution.redistribute(accounts);
-                return true;
             default:
                 return false;
         }
@@ -293,6 +290,14 @@ public class IECommand implements CommandExecutor {
             return false;
 
         switch (args[0]) {
+            case "taxprofits":
+                if(sender.hasPermission(Permissions.adminPerm))
+                    Taxation.taxAllProfits(accounts);
+                return true;
+            case "redistribute":
+                if(sender.hasPermission(Permissions.adminPerm))
+                    Taxation.redistribute(accounts);
+                return true;
             case "add":
                 boolean success = false;
                 if (args.length == 4 && sender.hasPermission(Permissions.adminPerm)) {
@@ -300,13 +305,20 @@ public class IECommand implements CommandExecutor {
                     String taxName = args[2];
                     double taxRate = Double.parseDouble(args[3]);
 
-                    if (accounts.containsKey(Util.getPlayerID(playerName)) && taxRate > 0 && taxRate <= Config.taxCap) {
+                    if (accounts.containsKey(Util.getPlayerID(playerName)) && taxRate > 0) {
                         PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
-                        holder.addTax(new Taxable(holder, taxName, taxRate));
 
-                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully added new tax: " + ChatColor.YELLOW + taxName + ChatColor.GREEN +
-                                " with rate " + ChatColor.YELLOW + taxRate + ChatColor.GREEN + " to " + ChatColor.AQUA + holder.getName() + "'s" + ChatColor.GREEN + " account!");
-                        success = true;
+                        if(Util.totalTaxRate(holder) + taxRate <= Config.taxCap){
+                            holder.addTax(new GeneralTax(holder, taxName, taxRate));
+
+                            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully added new tax: " + ChatColor.YELLOW + taxName + ChatColor.GREEN +
+                                    " with rate " + ChatColor.YELLOW + taxRate + ChatColor.GREEN + " to " + ChatColor.AQUA + holder.getName() + "'s" + ChatColor.GREEN + " account!");
+                            success = true;
+                        } else {
+                            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED
+                                    + "Total player tax rate cannot exceed + " + ChatColor.YELLOW + Config.taxCap + " %!!");
+                        }
+
                     }
                 }
 
@@ -371,7 +383,7 @@ public class IECommand implements CommandExecutor {
                         StringBuilder msg = new StringBuilder();
                         msg.append(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.AQUA + "List of TAXES:\n");
 
-                        for (Taxable tax : holder.getTaxes().values()) {
+                        for (GeneralTax tax : holder.getTaxes().values()) {
                             if (tax != null){
                                 msg.append(ChatColor.GREEN + "* Tax Name: " + ChatColor.AQUA).append(tax.getTaxName()).append(ChatColor.GREEN).append(" Tax %: ").
                                         append(ChatColor.YELLOW).append(tax.getTaxRate()).append(ChatColor.GREEN).append(" Next Tax Time: ").append(ChatColor.YELLOW).
@@ -390,7 +402,7 @@ public class IECommand implements CommandExecutor {
                         PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
 
                         if(holder.getTaxes().containsKey(taxName)){
-                            Taxable tax = holder.getTaxes().get(taxName);
+                            GeneralTax tax = holder.getTaxes().get(taxName);
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Tax Rate (%): " + ChatColor.YELLOW
                                     + tax.getTaxRate() + ChatColor.GREEN + " Next Tax Time: " + ChatColor.YELLOW + Config.taxTimeFormat.format(tax.getNextTaxTime()));
                             pass2 = true;
@@ -440,7 +452,7 @@ public class IECommand implements CommandExecutor {
                             PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
 
                             if(holder.getTaxes().containsKey(taxName)){
-                                Taxable tax = holder.getTaxes().get(taxName);
+                                GeneralTax tax = holder.getTaxes().get(taxName);
                                 TransactionResult r = tax.tax();
                                 sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Tax Rate (%): " + ChatColor.YELLOW
                                         + tax.getTaxRate() + ChatColor.GREEN + " Next Tax Time: " + ChatColor.YELLOW + Config.taxTimeFormat.format(tax.getNextTaxTime()));
@@ -463,7 +475,7 @@ public class IECommand implements CommandExecutor {
 
             case "edit":
                 boolean pass4 = false;
-                Taxable tax = null;
+                GeneralTax tax = null;
                 if(sender.hasPermission(Permissions.adminPerm)){
                     if(args.length == 4 && args[3].equals("timeset_now")){
                         String playerName = args[1];
@@ -489,8 +501,13 @@ public class IECommand implements CommandExecutor {
 
                             if(holder.getTaxes().containsKey(taxName)){
                                 tax = holder.getTaxes().get(taxName);
-                                tax.updateRate(taxRate);
-                                pass4 = true;
+
+                                if(Util.totalTaxRate(holder) + taxRate - tax.getTaxRate() <= Config.taxCap){
+                                    tax.updateRate(taxRate);
+                                    pass4 = true;
+                                } else
+                                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED
+                                            + "Total player tax rate cannot exceed + " + ChatColor.YELLOW + Config.taxCap + " %!!");
                             }
                         }
                     }
@@ -503,6 +520,7 @@ public class IECommand implements CommandExecutor {
                     msg.append(ChatColor.GREEN + "* Tax Name: " + ChatColor.AQUA).append(tax.getTaxName()).append(ChatColor.GREEN).append(" Tax %: ").
                             append(ChatColor.YELLOW).append(tax.getTaxRate()).append(ChatColor.GREEN).append(" Next Tax Time: ").append(ChatColor.YELLOW).
                             append(Config.taxTimeFormat.format(tax.getNextTaxTime())).append("\n");
+                    sender.sendMessage(msg.toString());
                 }
 
                 if (!sender.hasPermission(Permissions.adminPerm))

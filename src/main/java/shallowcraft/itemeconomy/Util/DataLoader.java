@@ -7,13 +7,12 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.Item;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.Tax.Taxable;
+import shallowcraft.itemeconomy.Tax.GeneralTax;
 import shallowcraft.itemeconomy.Vault.ContainerVault;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Vault.VaultType;
@@ -40,7 +39,8 @@ public class DataLoader {
             String id = key.split(",")[1];
             String type = key.split(",")[0];
 
-            Map<String, String> inputData = jsonData.get(id);
+            ItemEconomy.log.info(id);
+            Map<String, String> inputData = jsonData.get(key);
 
             Material currency = Material.getMaterial(inputData.get("currency"));
             assert currency != null;
@@ -62,10 +62,15 @@ public class DataLoader {
                     //ItemEconomy.log.info("[ItemEconomy] Loaded data for account with ID: " + id);
 
                     int personalBalance = 0;
+                    int lastSavings = 0;
                     personalBalance = Integer.parseInt(inputData.get("personal_balance"));
+
+                    try { lastSavings = Integer.parseInt(inputData.get("Last Savings"));}
+                    catch (Exception ignored){}
+
                     //ItemEconomy.log.info("[ItemEconomy] Loaded last known personal balance of " + personalBalance + " Diamonds");
 
-                    Account acc = new PlayerAccount(player, currency, personalBalance);
+                    Account acc = new PlayerAccount(player, currency, personalBalance, lastSavings);
                     populateAccount(acc, currency, inputData, server);
                     accounts.put(acc.getID(), acc);
                 } else
@@ -90,7 +95,9 @@ public class DataLoader {
                 PlayerAccount playerAccount = (PlayerAccount) acc;
 
                 String personalBalance = String.valueOf(playerAccount.getLastPersonalBalance());
+                String lastSavings = String.valueOf(playerAccount.getLastSavings());
                 outputData.put("personal_balance", personalBalance);
+                outputData.put("Last Savings", lastSavings);
                 // ItemEconomy.log.info("[ItemEconomy] Saving balance");
             } else if (acc instanceof GeneralAccount) {
                 String buffer = String.valueOf(((GeneralAccount) acc).balanceBuffer);
@@ -120,7 +127,7 @@ public class DataLoader {
 
     private static void populateAccount(Account currentAccount, Material currency, Map<String, String> inputData, Server server) {
         List<Vault> vaults = new ArrayList<>();
-        Map<String, Taxable> taxes = new HashMap<>();
+        Map<String, GeneralTax> taxes = new HashMap<>();
 
         int containerIndex = 0;
         int taxIndex = 0;
@@ -149,7 +156,7 @@ public class DataLoader {
                 PlayerAccount holder = (PlayerAccount) currentAccount;
                 taxIndex++;
                 String[] data = inputData.get(identifier).split(",");
-                Taxable tax = null;
+                GeneralTax tax = null;
 
                 String name = data[0];
                 double rate = Double.parseDouble(data[1]);
@@ -162,9 +169,9 @@ public class DataLoader {
                 }
 
                 if(last != null && next != null)
-                    tax = new Taxable(holder, name, rate, last, next);
+                    tax = new GeneralTax(holder, name, rate, last, next);
                 else
-                    tax = new Taxable(holder, name, rate);
+                    tax = new GeneralTax(holder, name, rate);
 
                 taxes.put(tax.getTaxName(), tax);
             }
@@ -207,7 +214,7 @@ public class DataLoader {
 
     private static void logTaxes(PlayerAccount acc, Map<String, String> outputData) {
         int index = 0;
-        for (Taxable tax : acc.getTaxes().values()) {
+        for (GeneralTax tax : acc.getTaxes().values()) {
             //ItemEconomy.log.info("[ItemEconomy] Saving Vault " + containerIndex + " of " + acc.getVaults().size());
             StringBuilder data = new StringBuilder();
             String taxName = tax.getTaxName();

@@ -1,10 +1,8 @@
 package shallowcraft.itemeconomy.Util;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -14,12 +12,13 @@ import org.bukkit.block.data.type.WallSign;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
+import org.checkerframework.checker.units.qual.A;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
+import shallowcraft.itemeconomy.Tax.GeneralTax;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Vault.VaultType;
@@ -233,6 +232,7 @@ public class Util {
         return result;
     }
 
+
     public static int getAllVaultsBalance(List<Vault> vaults) {
         int count = 0;
         for (Vault vault : new ArrayList<>(vaults)) {
@@ -321,6 +321,37 @@ public class Util {
         for (Account acc :ItemEconomy.getInstance().getAccounts().values()) {
             if(acc instanceof GeneralAccount)
                 output.add(acc.getID());
+        }
+
+        return output;
+    }
+
+    public static double totalTaxRate(PlayerAccount account){
+        double sum = 0;
+        for (GeneralTax tax:account.getTaxes().values()) {
+            sum+=tax.getTaxRate();
+        }
+
+        return sum;
+    }
+
+    public static List<PlayerAccount> getPlayerAccounts(){
+        List<PlayerAccount> output = new ArrayList<>();
+
+        for (Account acc:ItemEconomy.getInstance().getAccounts().values()) {
+            if(acc instanceof PlayerAccount)
+                output.add((PlayerAccount) acc);
+        }
+
+        return output;
+    }
+
+    public static Map<String, Integer> getProfits(){
+        Map<String, Integer> output = new HashMap<>();
+
+        for (PlayerAccount acc:getPlayerAccounts()) {
+            if(acc != null)
+                output.put(acc.getID(), acc.getDailyProfit());
         }
 
         return output;

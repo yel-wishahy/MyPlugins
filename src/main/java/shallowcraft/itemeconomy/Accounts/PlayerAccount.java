@@ -3,10 +3,9 @@ package shallowcraft.itemeconomy.Accounts;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.Tax.Taxable;
+import shallowcraft.itemeconomy.Tax.GeneralTax;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Transaction.Transaction;
@@ -18,9 +17,10 @@ import java.util.*;
 public class PlayerAccount implements Account {
     private final OfflinePlayer player;
     private List<Vault> vaults;
-    private Map<String, Taxable> taxes;
+    private Map<String, GeneralTax> taxes;
     private final Material itemCurrency;
     private int lastPersonalBalance;
+    private int lastSavings;
 
 
     public PlayerAccount(OfflinePlayer player, Material itemCurrency){
@@ -29,6 +29,7 @@ public class PlayerAccount implements Account {
         taxes = new HashMap<>();
         this.itemCurrency = itemCurrency;
         lastPersonalBalance = 0;
+        lastSavings = balance();
     }
 
     public PlayerAccount(OfflinePlayer player, Material itemCurrency, int personalBalance){
@@ -37,6 +38,16 @@ public class PlayerAccount implements Account {
         taxes = new HashMap<>();
         this.itemCurrency = itemCurrency;
         lastPersonalBalance = personalBalance;
+        lastSavings = balance();
+    }
+
+    public PlayerAccount(OfflinePlayer player, Material itemCurrency, int personalBalance, int lastProfit){
+        this.player = player;
+        vaults = new ArrayList<>();
+        taxes = new HashMap<>();
+        this.itemCurrency = itemCurrency;
+        lastPersonalBalance = personalBalance;
+        lastSavings = lastProfit;
     }
 
     public PlayerAccount(OfflinePlayer player, Material itemCurrency, int personalBalance, List<Vault> vaults){
@@ -45,6 +56,24 @@ public class PlayerAccount implements Account {
         taxes = new HashMap<>();
         this.itemCurrency = itemCurrency;
         lastPersonalBalance = personalBalance;
+        lastSavings = balance();
+    }
+
+    public PlayerAccount(OfflinePlayer player, Material itemCurrency, int personalBalance, int lastProfit, List<Vault> vaults){
+        this.player = player;
+        this.vaults = new ArrayList<>(vaults);
+        taxes = new HashMap<>();
+        this.itemCurrency = itemCurrency;
+        lastPersonalBalance = personalBalance;
+        this.lastSavings = lastProfit;
+    }
+
+    public void updateLastSavings(){
+        lastSavings = balance();
+    }
+
+    public int getLastSavings(){
+        return lastSavings;
     }
 
 
@@ -64,14 +93,14 @@ public class PlayerAccount implements Account {
         return new ArrayList<>(vaults);
     }
 
-    public HashMap<String, Taxable> getTaxes(){return new HashMap<>(taxes);}
+    public HashMap<String, GeneralTax> getTaxes(){return new HashMap<>(taxes);}
 
-    public void addTax(Taxable tax){
+    public void addTax(GeneralTax tax){
         taxes.put(tax.getTaxName(), tax);
         ItemEconomy.getInstance().saveData();
     }
 
-    public void removeTax(Taxable tax){
+    public void removeTax(GeneralTax tax){
         if(taxes.containsValue(tax))
             taxes.remove(tax.getTaxName());
     }
@@ -85,13 +114,13 @@ public class PlayerAccount implements Account {
         this.vaults = new ArrayList<>(override);
     }
 
-    public void overrideLoadTaxes(Map<String, Taxable> override){
+    public void overrideLoadTaxes(Map<String, GeneralTax> override){
         this.taxes = new HashMap<>(override);
     }
 
     public TransactionResult taxAll(){
         int count = 0;
-        for (Taxable tax: taxes.values()) {
+        for (GeneralTax tax: taxes.values()) {
             count += tax.tax().amount;
         }
 
@@ -121,6 +150,12 @@ public class PlayerAccount implements Account {
             count+=lastPersonalBalance;
 
         return count + getAllVaultBalance();
+    }
+
+    public int getDailyProfit(){
+        int profit = balance() - lastSavings;
+        updateLastSavings();
+        return profit;
     }
 
     private int getAllVaultBalance(){
@@ -242,6 +277,7 @@ public class PlayerAccount implements Account {
                 ", taxes=" + taxes +
                 ", itemCurrency=" + itemCurrency +
                 ", lastPersonalBalance=" + lastPersonalBalance +
+                ", lastSavings=" + lastSavings +
                 '}';
     }
 }
