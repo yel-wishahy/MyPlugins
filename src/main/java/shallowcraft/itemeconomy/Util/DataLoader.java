@@ -13,6 +13,7 @@ import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Tax.GeneralTax;
+import shallowcraft.itemeconomy.Tax.Taxable;
 import shallowcraft.itemeconomy.Vault.ContainerVault;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Vault.VaultType;
@@ -35,11 +36,9 @@ public class DataLoader {
             throw new InvalidDataException("[ItemEconomy] Failed to load data due to invalid file.");
 
         for (String key : jsonData.keySet()) {
-            ItemEconomy.log.info(Arrays.toString(key.split(",")));
             String id = key.split(",")[1];
             String type = key.split(",")[0];
 
-            ItemEconomy.log.info(id);
             Map<String, String> inputData = jsonData.get(key);
 
             Material currency = Material.getMaterial(inputData.get("currency"));
@@ -63,7 +62,9 @@ public class DataLoader {
 
                     int personalBalance = 0;
                     int lastSavings = 0;
-                    personalBalance = Integer.parseInt(inputData.get("personal_balance"));
+
+                    try{ personalBalance = Integer.parseInt(inputData.get("Personal Balance"));}
+                    catch (Exception ignored){}
 
                     try { lastSavings = Integer.parseInt(inputData.get("Last Savings"));}
                     catch (Exception ignored){}
@@ -96,7 +97,7 @@ public class DataLoader {
 
                 String personalBalance = String.valueOf(playerAccount.getLastPersonalBalance());
                 String lastSavings = String.valueOf(playerAccount.getLastSavings());
-                outputData.put("personal_balance", personalBalance);
+                outputData.put("Personal Balance", personalBalance);
                 outputData.put("Last Savings", lastSavings);
                 // ItemEconomy.log.info("[ItemEconomy] Saving balance");
             } else if (acc instanceof GeneralAccount) {
@@ -214,7 +215,7 @@ public class DataLoader {
 
     private static void logTaxes(PlayerAccount acc, Map<String, String> outputData) {
         int index = 0;
-        for (GeneralTax tax : acc.getTaxes().values()) {
+        for (Taxable tax : acc.getTaxes().values()) {
             //ItemEconomy.log.info("[ItemEconomy] Saving Vault " + containerIndex + " of " + acc.getVaults().size());
             StringBuilder data = new StringBuilder();
             String taxName = tax.getTaxName();

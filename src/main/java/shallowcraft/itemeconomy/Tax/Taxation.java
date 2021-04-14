@@ -2,6 +2,7 @@ package shallowcraft.itemeconomy.Tax;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
@@ -98,7 +99,8 @@ public class Taxation {
 
     public static TransactionResult taxAllProfits(Map<String, Account> accounts){
         int totalCirculation = Util.getTotalCirculation();
-        TextComponent starting = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Starting daily profit tax!. Total currency " +
+        TextComponent starting = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Starting daily" + ChatColor.BOLD + " " +
+                ChatColor.RED + "Income Tax!" + ChatColor.RESET + " " + ChatColor.GREEN + "Total currency " +
                 "in circulation right now is: " + ChatColor.YELLOW + totalCirculation + ChatColor.AQUA + " Diamonds.");
         ItemEconomy.getInstance().getServer().broadcast(starting, Permissions.playerPerm);
 
@@ -116,15 +118,17 @@ public class Taxation {
             int profit = profits.get(id);
             if (profit >= Config.minimumProfit) {
                 PlayerAccount holder = (PlayerAccount) accounts.get(id);
+
                 double rate = getProportionalRate(profit, maxProfit);
                 int taxable = amountToTax(profit, rate);
+
                 TransactionResult result = holder.forcedWithdraw(taxable);
                 ItemEconomy.getInstance().tax(result.amount);
                 totalTaxed += result.amount;
 
-                TextComponent announcement = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Player: " + ChatColor.YELLOW + holder.getName() +
-                        ChatColor.GREEN + " has been taxed " + ChatColor.YELLOW + result.amount + ChatColor.AQUA + " Diamonds " + ChatColor.GREEN + " at a rate of " +
-                        ChatColor.YELLOW + rate + " %" + ChatColor.GREEN + " applied to a profit of " + ChatColor.YELLOW + profit + ChatColor.AQUA + " Diamonds \n");
+                TextComponent announcement = Component.text(ChatColor.GREEN + "* Player: " + ChatColor.YELLOW + holder.getName() +
+                        ChatColor.GREEN + " has been taxed " + ChatColor.YELLOW + result.amount + ChatColor.AQUA + " Diamonds" + ChatColor.GREEN + " at a rate of " +
+                        ChatColor.YELLOW + (rate * 100) + " %" + ChatColor.GREEN + " applied to an income of " + ChatColor.YELLOW + profit + ChatColor.AQUA + " Diamonds \n");
 
                 ItemEconomy.getInstance().getServer().broadcast(announcement, Permissions.playerPerm);
             }
@@ -147,5 +151,14 @@ public class Taxation {
             rate = ratio * Config.maxProfitTax;
 
         return rate;
+    }
+
+    public static void resetSavings(){
+        for (Account acc:ItemEconomy.getInstance().getAccounts().values()) {
+            if(acc instanceof PlayerAccount){
+                PlayerAccount holder = (PlayerAccount) acc;
+                holder.updateSavings();
+             }
+        }
     }
 }

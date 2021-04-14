@@ -7,10 +7,13 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.persistence.PersistentDataType;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Data.Config;
@@ -19,6 +22,8 @@ import shallowcraft.itemeconomy.Data.Permissions;
 import shallowcraft.itemeconomy.Util.Util;
 import shallowcraft.itemeconomy.Vault.ContainerVault;
 import shallowcraft.itemeconomy.Vault.Vault;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -49,7 +54,7 @@ public class IEEventHandler implements Listener {
 
             Block container = Util.chestBlock(sign);
 
-            if (holder != null && container != null && !Util.isVault(container, accounts)) {
+            if (holder != null && container != null && !Util.isVault(container)) {
                 holder.addVault(new ContainerVault(container, sign, holder, Config.currency, Util.getVaultType(vaultType)));
                 player.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a new Vault!");
             } else {
@@ -71,7 +76,7 @@ public class IEEventHandler implements Listener {
 
         if(block.getState() instanceof Sign && Util.isValidVaultSign((Sign) block.getState())){
             Sign sign = (Sign) block.getState();
-            Vault toDestroy = Util.getVaultFromSign(sign, accounts);
+            Vault toDestroy = Util.getVaultFromSign(sign);
 
             if(toDestroy != null && (!player.hasPermission(Permissions.adminPerm) && !player.getName().equals(toDestroy.getHolder().getName()))){
                 sign.getBlock().getState().update();

@@ -179,7 +179,9 @@ public class IECommand implements CommandExecutor {
                 return true;
             case "baltop":
                 StringBuilder baltopMessage = new StringBuilder();
-                baltopMessage.append(ChatColor.GOLD).append("[ItemEconomy] ").append(ChatColor.GREEN).append("Global Player Balances: \n");
+                baltopMessage.append(ChatColor.GOLD).append("[ItemEconomy] ").append(ChatColor.GREEN).append("Total Currency in Circulation:")
+                        .append(ChatColor.YELLOW).append(" ").append(Util.getTotalCirculation()).append(ChatColor.AQUA).append(" Diamonds\n \n")
+                        .append(ChatColor.GREEN).append("Global Player Balances: \n");
                 Map<String, Integer> bals = new HashMap<>();
 
                 for (Account acc : accounts.values()) {
@@ -195,7 +197,7 @@ public class IECommand implements CommandExecutor {
                     String name = names.get(i);
                     if (name != null) {
                         baltopMessage.append(j).append(". ").append(ChatColor.GOLD).append(name).append(" ".repeat(20 - name.length()));
-                        baltopMessage.append(ChatColor.AQUA).append(bals.get(name)).append(" ").append(Config.currency.name().toLowerCase()).append("\n");
+                        baltopMessage.append(ChatColor.YELLOW).append(bals.get(name)).append(ChatColor.AQUA).append(" ").append(Config.currency.name().toLowerCase()).append("\n");
                         j++;
                     }
                 }
@@ -290,6 +292,10 @@ public class IECommand implements CommandExecutor {
             return false;
 
         switch (args[0]) {
+            case "resetprofits":
+                if(sender.hasPermission(Permissions.adminPerm))
+                    Taxation.resetSavings();
+                return true;
             case "taxprofits":
                 if(sender.hasPermission(Permissions.adminPerm))
                     Taxation.taxAllProfits(accounts);
@@ -383,7 +389,7 @@ public class IECommand implements CommandExecutor {
                         StringBuilder msg = new StringBuilder();
                         msg.append(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.AQUA + "List of TAXES:\n");
 
-                        for (GeneralTax tax : holder.getTaxes().values()) {
+                        for (Taxable tax : holder.getTaxes().values()) {
                             if (tax != null){
                                 msg.append(ChatColor.GREEN + "* Tax Name: " + ChatColor.AQUA).append(tax.getTaxName()).append(ChatColor.GREEN).append(" Tax %: ").
                                         append(ChatColor.YELLOW).append(tax.getTaxRate()).append(ChatColor.GREEN).append(" Next Tax Time: ").append(ChatColor.YELLOW).
@@ -402,7 +408,7 @@ public class IECommand implements CommandExecutor {
                         PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
 
                         if(holder.getTaxes().containsKey(taxName)){
-                            GeneralTax tax = holder.getTaxes().get(taxName);
+                            Taxable tax = holder.getTaxes().get(taxName);
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Tax Rate (%): " + ChatColor.YELLOW
                                     + tax.getTaxRate() + ChatColor.GREEN + " Next Tax Time: " + ChatColor.YELLOW + Config.taxTimeFormat.format(tax.getNextTaxTime()));
                             pass2 = true;
@@ -452,7 +458,7 @@ public class IECommand implements CommandExecutor {
                             PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
 
                             if(holder.getTaxes().containsKey(taxName)){
-                                GeneralTax tax = holder.getTaxes().get(taxName);
+                                Taxable tax = holder.getTaxes().get(taxName);
                                 TransactionResult r = tax.tax();
                                 sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Tax Rate (%): " + ChatColor.YELLOW
                                         + tax.getTaxRate() + ChatColor.GREEN + " Next Tax Time: " + ChatColor.YELLOW + Config.taxTimeFormat.format(tax.getNextTaxTime()));
@@ -475,7 +481,7 @@ public class IECommand implements CommandExecutor {
 
             case "edit":
                 boolean pass4 = false;
-                GeneralTax tax = null;
+                Taxable tax = null;
                 if(sender.hasPermission(Permissions.adminPerm)){
                     if(args.length == 4 && args[3].equals("timeset_now")){
                         String playerName = args[1];

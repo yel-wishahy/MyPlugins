@@ -12,5 +12,4 @@ public interface Taxable {
     public String getTaxName();
     public void updateTaxTime();
     public void updateRate(double amount);
-
 }

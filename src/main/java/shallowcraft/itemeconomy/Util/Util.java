@@ -19,6 +19,7 @@ import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Tax.GeneralTax;
+import shallowcraft.itemeconomy.Tax.Taxable;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Vault.VaultType;
@@ -52,8 +53,8 @@ public class Util {
         return isValidContainer(blockAttached.getType()) ? blockAttached : isValidContainer(blockBelow.getType()) ? blockBelow : null;
     }
 
-    public static boolean isVault(Block containerVault, Map<String, Account> accounts) {
-        for (Account acc : accounts.values()) {
+    public static boolean isVault(Block containerVault) {
+        for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
             for (Vault vault : acc.getVaults()) {
                 if (vault.getContainer().getLocation().equals(containerVault.getLocation())) {
                     return true;
@@ -96,7 +97,7 @@ public class Util {
         if(sign.isPlaced()){
             Block container = Util.chestBlock(sign);
             if(container != null)
-                return Util.isVault(container, ItemEconomy.getInstance().getAccounts());
+                return Util.isVault(container);
         }
 
         return false;
@@ -262,8 +263,8 @@ public class Util {
     }
 
 
-    public static Vault getVaultFromSign(Sign sign, Map<String, Account> accounts) {
-        for (Account acc : accounts.values()) {
+    public static Vault getVaultFromSign(Sign sign) {
+        for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
             for (Vault vault : acc.getVaults()) {
                 if (vault.getSign().getLocation().equals(sign.getLocation()))
                     return vault;
@@ -289,7 +290,7 @@ public class Util {
         Map<String, Account> accounts = ItemEconomy.getInstance().getAccounts();
 
         for (Account acc:accounts.values()) {
-            if(acc instanceof PlayerAccount)
+            if(acc != null)
                 totalCirculation += acc.getBalance();
         }
 
@@ -328,7 +329,7 @@ public class Util {
 
     public static double totalTaxRate(PlayerAccount account){
         double sum = 0;
-        for (GeneralTax tax:account.getTaxes().values()) {
+        for (Taxable tax:account.getTaxes().values()) {
             sum+=tax.getTaxRate();
         }
 
