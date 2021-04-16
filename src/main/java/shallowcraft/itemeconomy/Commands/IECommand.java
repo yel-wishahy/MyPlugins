@@ -21,6 +21,8 @@ import shallowcraft.itemeconomy.Tax.GeneralTax;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
+import shallowcraft.itemeconomy.Vault.Vault;
+import shallowcraft.itemeconomy.Vault.VaultType;
 
 import java.util.*;
 
@@ -60,6 +62,72 @@ public class IECommand implements CommandExecutor {
             return false;
 
         switch (args[0]) {
+            case "transfer":
+                TransactionResult r = new TransactionResult(0, ResultType.FAILURE, "transfer");
+                if (args.length == 4) {
+                    if(Util.isPlayerName(sender.getName())){
+                        String id = Util.getPlayerID(sender.getName());
+                        Account holder = accounts.get(id);
+                        VaultType source = Util.getVaultTypeFromArgs(args[1]);
+                        VaultType destination = Util.getVaultTypeFromArgs(args[2]);
+                        int amount = Integer.parseInt(args[3]);
+
+                        if(holder != null && amount > 0 && source != destination && holder.getBalance(source) >= amount){
+                            r = holder.transfer(source, destination, amount);
+
+                            if(holder.getChequingBalance() <= amount && ResultType.failureModes.contains(r.type))
+                                sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Encountered insufficient funds in specified vault type");
+                        }
+                    }
+                }
+
+                if(r.type == ResultType.SUCCESS){
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You successfully transferred " + ChatColor.YELLOW + r.amount +
+                            ChatColor.AQUA + " diamonds " + ChatColor.GREEN + " between accounts!");
+                } else {
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Transfer failed.");
+                }
+
+                return true;
+            case "admintransfer":
+                TransactionResult result1 = new TransactionResult(0, ResultType.FAILURE, "transfer");
+
+                if (args.length == 5 && sender.hasPermission(Permissions.adminPerm)) {
+                    String name = args[1];
+                    VaultType source = Util.getVaultTypeFromArgs(args[2]);
+                    VaultType destination = Util.getVaultTypeFromArgs(args[3]);
+                    int amount = Integer.parseInt(args[4]);
+                    Account holder = null;
+
+                    try {
+                        holder = accounts.get(Util.getPlayerID(name));
+                    } catch (Exception ignored) {
+                    }
+
+                    if(holder != null){
+                        ItemEconomy.log.info(amount + "   " + holder.getBalance(source) + " " + source.toString() + " " + destination.toString());
+                    }
+
+
+                    if(holder != null && amount > 0 && source != destination && holder.getBalance(source) >= amount){
+                        ItemEconomy.log.info("in here");
+                        result1 = holder.transfer(source, destination, amount);
+
+                        if(holder.getChequingBalance() <= amount && ResultType.failureModes.contains(result1.type))
+                            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Encountered insufficient funds in specified vault type");
+                    }
+                }
+
+                if(result1.type == ResultType.SUCCESS){
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully transferred " + ChatColor.YELLOW + result1.amount +
+                            ChatColor.AQUA + " diamonds " + ChatColor.GREEN + " between accounts!");
+                } else if (!sender.hasPermission(Permissions.adminPerm)) {
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You do not have permission to execute this command.");
+                } else {
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Transfer failed.");
+                }
+
+                return true;
             case "create_account":
                 boolean addedAccount = false;
 
@@ -108,9 +176,46 @@ public class IECommand implements CommandExecutor {
 
                 return true;
             case "balance":
-                if (isPlayer) {
+                if(args.length == 1 && isPlayer){
                     if (accounts.containsKey(player.getUniqueId().toString())) {
-                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Your balance is: " + ChatColor.AQUA + accounts.get(player.getUniqueId().toString()).getBalance() + " " + Config.currency.name().toLowerCase());
+                        Account holder = accounts.get(player.getUniqueId().toString());
+                        List<Vault> vaults =  holder.getVaults();
+                        int deposit = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
+                        int withdraw = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.WITHDRAW_ONLY, vaults));
+                        int regular = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.REGULAR, vaults));
+
+                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Your chequing balance is " + ChatColor.YELLOW +
+                                holder.getChequingBalance() + " " + ChatColor.AQUA + "Diamonds." + ChatColor.GREEN + " \n Total Holdings: " + ChatColor.YELLOW + holder.getBalance() +
+                                ChatColor.GREEN +
+                                "\n Vaults ->  Regular: " + ChatColor.YELLOW + regular +
+                                ChatColor.GREEN + " , Deposit: " + ChatColor.YELLOW + deposit + ChatColor.GREEN + " , Withdraw: " + ChatColor.YELLOW + withdraw
+                                + ChatColor.GREEN + ".");
+                    } else {
+                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You do not have a bank account");
+                    }
+                } else if (args.length == 2){
+                    Account holder = null;
+
+                    try{
+                        if(Util.isPlayerName(args[1]))
+                            holder = accounts.get(Util.getPlayerID(args[1]));
+                        else
+                            holder = accounts.get(args[1]);
+                    } catch (Exception ignored){
+                    }
+
+                    if (holder != null){
+                        List<Vault> vaults =  holder.getVaults();
+                        int deposit = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
+                        int withdraw = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.WITHDRAW_ONLY, vaults));
+                        int regular = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.REGULAR, vaults));
+
+                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.YELLOW + holder.getName() + ChatColor.GREEN + "'s chequing balance is " + ChatColor.YELLOW +
+                                holder.getChequingBalance() + " " + ChatColor.AQUA + "Diamonds: " + ChatColor.GREEN + "(Total Holdings: " + ChatColor.YELLOW + holder.getBalance() +
+                                ChatColor.GREEN +
+                                "\nVaults ->  Regular: " + ChatColor.YELLOW + regular +
+                                ChatColor.GREEN + " , Deposit: " + ChatColor.YELLOW + deposit + ChatColor.GREEN + " , Withdraw: " + ChatColor.YELLOW + withdraw
+                                + ChatColor.GREEN + " ).");
                     } else {
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You do not have a bank account");
                     }
@@ -181,7 +286,7 @@ public class IECommand implements CommandExecutor {
                 StringBuilder baltopMessage = new StringBuilder();
                 baltopMessage.append(ChatColor.GOLD).append("[ItemEconomy] ").append(ChatColor.GREEN).append("Total Currency in Circulation:")
                         .append(ChatColor.YELLOW).append(" ").append(Util.getTotalCirculation()).append(ChatColor.AQUA).append(" Diamonds\n \n")
-                        .append(ChatColor.GREEN).append("Global Player Balances: \n");
+                        .append(ChatColor.GREEN).append("Global Player Holdings: \n");
                 Map<String, Integer> bals = new HashMap<>();
 
                 for (Account acc : accounts.values()) {
@@ -217,7 +322,7 @@ public class IECommand implements CommandExecutor {
 
                         for (Account acc : accounts.values()) {
                             if (acc != null && acc.getName() != null) {
-                                if (acc.getName().equals(args[1]))
+                                if (acc.getName().equals(args[1]) || acc.getID().equals(args[1]))
                                     holder = acc;
                             }
                         }
@@ -254,7 +359,7 @@ public class IECommand implements CommandExecutor {
 
                         for (Account acc : accounts.values()) {
                             if (acc != null && acc.getName() != null) {
-                                if (acc.getName().equals(args[1]))
+                                if (acc.getName().equals(args[1]) || acc.getID().equals(args[1]))
                                     holder = acc;
                             }
                         }
@@ -262,7 +367,7 @@ public class IECommand implements CommandExecutor {
                         TransactionResult result = null;
 
                         if (holder != null && amount > 0) {
-                            result = holder.withdraw(amount);
+                            result = holder.forcedWithdraw(amount);
                         }
 
                         if (result != null && result.type.equals(ResultType.SUCCESS)) {
@@ -428,11 +533,6 @@ public class IECommand implements CommandExecutor {
                     for (Account acc:accounts.values()) {
                         if(acc instanceof PlayerAccount) {
                             TransactionResult r = ((PlayerAccount) acc).taxAll();
-                            TextComponent t = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "RBME Taxed " + ChatColor.AQUA + acc.getName() + " " +
-                                    ChatColor.YELLOW + r.amount + ChatColor.AQUA + " Diamonds!");
-                            sender.getServer().broadcast(t, Permissions.msgPerm);
-
-
                         }
                     }
                 }
@@ -445,9 +545,6 @@ public class IECommand implements CommandExecutor {
                         if (accounts.containsKey(Util.getPlayerID(playerName))) {
                             PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
                             TransactionResult r = holder.taxAll();
-                            TextComponent t = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "RBME Taxed " + ChatColor.AQUA + holder.getName() + " " +
-                                    ChatColor.YELLOW + r.amount + ChatColor.AQUA + " Diamonds!");
-                            sender.sendMessage(t);
                             pass3 = true;
                         }
                     } else if (args.length == 3){
@@ -460,11 +557,6 @@ public class IECommand implements CommandExecutor {
                             if(holder.getTaxes().containsKey(taxName)){
                                 Taxable tax = holder.getTaxes().get(taxName);
                                 TransactionResult r = tax.tax();
-                                sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Tax Rate (%): " + ChatColor.YELLOW
-                                        + tax.getTaxRate() + ChatColor.GREEN + " Next Tax Time: " + ChatColor.YELLOW + Config.taxTimeFormat.format(tax.getNextTaxTime()));
-                                TextComponent t = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "RBME Taxed " + ChatColor.AQUA + holder.getName() + " " +
-                                        ChatColor.YELLOW + r.amount + ChatColor.AQUA + " Diamonds!");
-                                sender.sendMessage(t);
                                 pass3 = true;
                             }
                         }

@@ -2,7 +2,6 @@ package shallowcraft.itemeconomy.Tax;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
@@ -10,12 +9,10 @@ import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.Data.Permissions;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.ResultType;
-import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +47,7 @@ public class Taxation {
 
 
         for (PlayerAccount hoarder:hoarders) {
-            if(isHoarding(hoarder.getBalance(), totalCirculation)){
+            if(isHoarding(hoarder.getChequingBalance(), totalCirculation)){
                 double percent = ((double) hoarder.getBalance())/((double)totalCirculation);
                 percent-=Config.wealthCap;
                 if(percent > 0 && percent <= 1){

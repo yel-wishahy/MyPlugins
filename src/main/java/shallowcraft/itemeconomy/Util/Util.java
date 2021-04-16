@@ -12,13 +12,11 @@ import org.bukkit.block.data.type.WallSign;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.checkerframework.checker.units.qual.A;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.Tax.GeneralTax;
 import shallowcraft.itemeconomy.Tax.Taxable;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Vault.Vault;
@@ -356,6 +354,39 @@ public class Util {
         }
 
         return output;
+    }
+
+    public static List<Vault> getVaultsOfType(VaultType vaultType, List<Vault> vaults){
+        List<Vault> output = new ArrayList<>();
+
+        for (Vault v:vaults) {
+            if(v != null && v.getVaultType() == vaultType)
+                output.add(v);
+        }
+
+        return output;
+    }
+
+    public static List<Vault> getVaultsOfNotType(VaultType vaultType, List<Vault> vaults){
+        List<Vault> output = new ArrayList<>();
+
+        for (Vault v:vaults) {
+            if(v != null && v.getVaultType() != vaultType)
+                output.add(v);
+        }
+
+        return output;
+    }
+
+    public static VaultType getVaultTypeFromArgs(String arg){
+        switch (arg){
+            case "Deposit-Vault":
+                return VaultType.DEPOSIT_ONLY;
+            case "Withdraw-Vault":
+                return VaultType.WITHDRAW_ONLY;
+            default:
+                return VaultType.REGULAR;
+        }
     }
 
 }

@@ -7,12 +7,12 @@ import org.bukkit.inventory.Inventory;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Tax.GeneralTax;
 import shallowcraft.itemeconomy.Tax.Taxable;
-import shallowcraft.itemeconomy.Tax.Taxation;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
+import shallowcraft.itemeconomy.Vault.VaultType;
 
 import java.util.*;
 
@@ -31,7 +31,7 @@ public class PlayerAccount implements Account {
         taxes = new HashMap<>();
         this.itemCurrency = itemCurrency;
         lastPersonalBalance = 0;
-        lastSavings = balance();
+        lastSavings = getChequingBalance();
     }
 
     public PlayerAccount(OfflinePlayer player, Material itemCurrency, int personalBalance, int lastProfit){
@@ -48,9 +48,30 @@ public class PlayerAccount implements Account {
     }
 
     @Override
-    public int getBalance() {
-        return balance();
+    public int getChequingBalance() {
+        int count = 0;
+
+        if(updatePersonalBalance())
+            count+=lastPersonalBalance;
+
+        return count + Util.getAllVaultsBalance(Util.getVaultsOfNotType(VaultType.DEPOSIT_ONLY, vaults));
     }
+
+    @Override
+    public int getBalance() {
+        return getForcedBalance();
+    }
+
+    @Override
+    public int getBalance(VaultType vaultType) {
+        int count = 0;
+
+        if(updatePersonalBalance())
+            count+=lastPersonalBalance;
+
+        return count + Util.getAllVaultsBalance(Util.getVaultsOfType(vaultType, vaults));
+    }
+
 
     public int getLastPersonalBalance(){return lastPersonalBalance;}
 
@@ -113,29 +134,26 @@ public class PlayerAccount implements Account {
         return false;
     }
 
-    private int balance(){
+    private int getForcedBalance(){
         int count = 0;
 
         if(updatePersonalBalance())
             count+=lastPersonalBalance;
 
-        return count + getAllVaultBalance();
+        return count + Util.getAllVaultsBalance(vaults);
     }
 
     public int getDailyProfit(){
-        int profit = balance() - lastSavings;
+        int profit = getBalance() - lastSavings;
         updateSavings();
         return profit;
     }
 
     public void updateSavings(){
-        lastSavings = balance();
+        lastSavings = getChequingBalance();
     }
 
 
-    private int getAllVaultBalance(){
-        return Util.getAllVaultsBalance(vaults);
-    }
 
     @Override
     public boolean removeVault(Vault vault){
@@ -150,12 +168,12 @@ public class PlayerAccount implements Account {
 
     @Override
     public TransactionResult withdraw(int amount){
-        if(balance() < amount)
+        if(getChequingBalance() < amount)
             return new TransactionResult(0, ResultType.INSUFFICIENT_FUNDS, "withdraw");
 
         int removed = 0;
 
-        TransactionResult result = Transaction.withdrawAllVaults(amount, balance(), vaults);
+        TransactionResult result = Transaction.withdrawAllVaults(amount, getChequingBalance(), vaults);
         removed += result.amount;
 
 
@@ -177,12 +195,12 @@ public class PlayerAccount implements Account {
 
     @Override
     public TransactionResult forcedWithdraw(int amount){
-        if(balance() < amount)
+        if(getBalance() < amount)
             return new TransactionResult(0, ResultType.INSUFFICIENT_FUNDS, "withdraw");
 
         int removed = 0;
 
-        TransactionResult result = Transaction.forceWithdrawAllVaults(amount, balance(), vaults);
+        TransactionResult result = Transaction.forceWithdrawAllVaults(amount, getBalance(), vaults);
         removed += result.amount;
 
 
@@ -243,6 +261,13 @@ public class PlayerAccount implements Account {
     @Override
     public String getAccountType() {
         return "Player Account";
+    }
+
+    @Override
+    public TransactionResult transfer(VaultType source, VaultType destination, int amount) {
+        List<Vault> sources = Util.getVaultsOfType(source, vaults);
+        List<Vault> destinations = Util.getVaultsOfType(destination, vaults);
+        return Transaction.transferVaults(sources, destinations, amount);
     }
 
     @Override

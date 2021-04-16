@@ -19,6 +19,8 @@ commands:
       /ItemEconomy remove_account <name>
       /ItemEconomy deposit <name> <amount>
       /ItemEconomy withdraw <name> <amount>
+      /ItemEconomy transfer <vault tpye> <vault type> <amount>
+      /ItemEconomy admintransfer <name> <vault tpye> <vault type> <amount>
   Tax:
     aliases: [tax, ietax, ieTax, taxes, t]
     usage: |

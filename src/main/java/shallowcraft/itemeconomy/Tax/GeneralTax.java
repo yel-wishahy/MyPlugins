@@ -1,15 +1,16 @@
 package shallowcraft.itemeconomy.Tax;
 
-import org.apache.commons.lang.time.DateFormatUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.apache.commons.lang.time.DateUtils;
+import org.bukkit.ChatColor;
 import shallowcraft.itemeconomy.Accounts.Account;
-import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;
+import shallowcraft.itemeconomy.Data.Permissions;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 
-import java.text.DateFormat;
 import java.util.Date;
 
 public class GeneralTax implements Taxable {
@@ -49,6 +50,10 @@ public class GeneralTax implements Taxable {
 
                 setTaxTimes();
 
+                TextComponent announcement = Component.text(ChatColor.GREEN + "* Player: " + ChatColor.YELLOW + holder.getName() +
+                        ChatColor.GREEN + " has been taxed " + ChatColor.YELLOW + withdrawResult.amount + ChatColor.AQUA + " Diamonds" + ChatColor.GREEN + " at a rate of " +
+                        ChatColor.YELLOW + taxRate + " %" + ChatColor.GREEN + " as a result of the" + ChatColor.RED + " " + ChatColor.BOLD + taxName + " TAX \n");
+                ItemEconomy.getInstance().getServer().broadcast(announcement, Permissions.msgPerm);
                 return new TransactionResult(withdrawResult.amount, ResultType.SUCCESS, "tax");
             }
         }
@@ -77,7 +82,7 @@ public class GeneralTax implements Taxable {
     }
 
     private int amountToTax(){
-        int bal = holder.getBalance();
+        int bal = holder.getChequingBalance();
         return (int) (bal * taxRate/100.0);
     }
 

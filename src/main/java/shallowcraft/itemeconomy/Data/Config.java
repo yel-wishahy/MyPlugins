@@ -21,7 +21,7 @@ public class Config {
     public static final String vaultHeader = "[Vault]";
     public static final List<String> IESubCommands = List.of("create_account",
             "balance", "list_accounts", "create_account_all", "remove_account",
-            "reload", "save", "baltop", "deposit", "withdraw");
+            "reload", "save", "baltop", "deposit", "withdraw", "transfer", "admintransfer");
     public static final List<String> IECommandAliases = List.of("ItemEconomy", "itemeconomy",
             "IE", "ie", "eco", "money");
     public static final List<String> TaxCommandAliases = List.of("tax", "ietax", "ieTax", "taxes", "t");
@@ -32,4 +32,5 @@ public class Config {
     public static final String TaxCommand = "Tax";
     public static final String PDCSignKey = "IsVaultSign";
     public static HashSet<Material> VaultContainerTypes = new HashSet<>(List.of(Material.CHEST, Material.TRAPPED_CHEST, Material.BARREL));
+    public static final List<String> vaultTypes = List.of("Deposit-Vault", "Withdraw-Vault", "Regular-Vault");
 }

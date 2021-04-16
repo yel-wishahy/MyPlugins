@@ -13,7 +13,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import org.bukkit.entity.Player;
-import org.maxgamer.quickshop.api.QuickShopAPI;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
@@ -140,7 +139,7 @@ public class ItemEconomy extends JavaPlugin {
 
     public double getBalance(OfflinePlayer player) {
         if (hasAccount(player))
-            return Objects.requireNonNull(getAccount(player)).getBalance();
+            return Objects.requireNonNull(getAccount(player)).getChequingBalance();
         else
             return 0;
     }

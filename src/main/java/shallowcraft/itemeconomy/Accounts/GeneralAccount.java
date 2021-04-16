@@ -1,8 +1,6 @@
 package shallowcraft.itemeconomy.Accounts;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.inventory.Inventory;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.ResultType;
@@ -10,6 +8,7 @@ import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
 import shallowcraft.itemeconomy.Vault.Vault;
+import shallowcraft.itemeconomy.Vault.VaultType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +51,21 @@ public class GeneralAccount implements Account{
     }
 
     @Override
+    public int getChequingBalance() {
+        convertBalanceBuffer();
+        return Util.getAllVaultsBalance(Util.getVaultsOfNotType(VaultType.DEPOSIT_ONLY, vaults));
+    }
+
+    @Override
     public int getBalance() {
         convertBalanceBuffer();
         return Util.getAllVaultsBalance(vaults);
+    }
+
+    @Override
+    public int getBalance(VaultType vaultType) {
+        convertBalanceBuffer();
+        return Util.getAllVaultsBalance(Util.getVaultsOfType(vaultType, vaults));
     }
 
     @Override
@@ -85,9 +96,9 @@ public class GeneralAccount implements Account{
 
     @Override
     public TransactionResult withdraw(int amount) {
-        if(getBalance() < amount)
+        if(getChequingBalance() < amount)
             return new TransactionResult(0, ResultType.INSUFFICIENT_FUNDS, "withdraw");
-        return Transaction.withdrawAllVaults(amount, getBalance(), vaults);
+        return Transaction.withdrawAllVaults(amount, getChequingBalance(), vaults);
     }
 
     @Override
@@ -137,6 +148,13 @@ public class GeneralAccount implements Account{
     @Override
     public String getAccountType() {
         return "General Account";
+    }
+
+    @Override
+    public TransactionResult transfer(VaultType source, VaultType destination, int amount) {
+        List<Vault> sources = Util.getVaultsOfType(source, vaults);
+        List<Vault> destinations = Util.getVaultsOfType(destination, vaults);
+        return Transaction.transferVaults(sources, destinations, amount);
     }
 
 }
