@@ -169,6 +169,19 @@ public class Util {
         return null;
     }
 
+    public static int getSlotToConvertToItem(int amount, ItemStack blockStack, int blockSlot, Inventory inventory) {
+        int slot = inventory.firstEmpty();
+
+        if (slot != -1) {
+            blockStack.setAmount(blockStack.getAmount() - amount);
+            inventory.setItem(blockSlot, blockStack);
+            //ItemEconomy.log.info("conversion of 1 " + amount + "blocks to items result: " + (inventory.getItem(slot) != null));
+            return slot;
+        }
+
+        return -1;
+    }
+
     //amount must be divisible by 9
     public static ItemStack convertToBlock(int amount, ItemStack itemStack, Inventory inventory) {
         int slot = inventory.firstEmpty();

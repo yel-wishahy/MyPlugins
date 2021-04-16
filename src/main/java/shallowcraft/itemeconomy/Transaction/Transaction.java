@@ -20,20 +20,20 @@ public class Transaction {
         ItemEconomy.log.info("Trying to withdraw " + amount + "from " + inventory.getType().name() + " with total of " + Util.countItem(inventory));
         int numRemoved = 0;
 
-        for (ItemStack stack : inventory) {
+        for (int i = 0; i < inventory.getSize(); i++) {
             if (numRemoved >= amount)
                 break;
 
+            ItemStack stack = inventory.getItem(i);
+
             if (stack != null && stack.getType().equals(Config.currency)) {
-                ItemEconomy.log.info(" start stack is" + (stack.getAmount()));
+                //ItemEconomy.log.info(" start stack is" + (stack.getAmount()));
                 int toRemove = Util.amountToRemove(stack.getAmount(), amount - numRemoved);
-                ItemEconomy.log.info("items: " + toRemove);
-                if(stack.getAmount() == toRemove)
-                    inventory.remove(stack);
-                else
-                    stack.setAmount(stack.getAmount() - toRemove);
+                //ItemEconomy.log.info("items: " + toRemove);
+                stack.setAmount(stack.getAmount() - toRemove);
+                inventory.setItem(i,stack);
                 numRemoved += toRemove;
-                ItemEconomy.log.info("stack is" + (stack.getAmount()));
+               // ItemEconomy.log.info("stack is" + (stack.getAmount()));
             } else if (stack != null && stack.getType().equals(Config.currency_block)) {
                 ItemEconomy.log.info(" start stack is" + (stack.getAmount()));
                 int toRemove = Util.amountToRemove(stack.getAmount() * 9, amount - numRemoved);
@@ -44,24 +44,26 @@ public class Transaction {
                 int toConvert = 0;
                 ItemEconomy.log.info("items: " + itemsToRemove + " blocks: " + blocksToRemove);
 
-
                 if(itemsToRemove > 0)
                     toConvert = (int) Math.ceil(itemsToRemove/9.0);
 
+                ItemEconomy.log.info("to convert " + toConvert);
 
-                ItemStack itemStack = null;
-                if(toConvert > 0){
-                    if(stack.getAmount() - toConvert > blocksToRemove)
-                        blocksToRemove -=  toConvert;
-                    itemStack = Util.convertToItem(toConvert, stack, inventory);
+                int itemStack = -1;
+                if(toConvert > 0) {
+                    if (stack.getAmount() - toConvert < blocksToRemove && blocksToRemove >= toConvert)
+                        blocksToRemove -= toConvert;
+                    itemStack = Util.getSlotToConvertToItem(toConvert, stack, i, inventory);
                 }
 
-                if(itemStack != null && stack.getAmount() >= blocksToRemove && itemStack.getAmount() >= itemsToRemove){
+                if(itemStack != -1 && stack.getAmount() >= blocksToRemove){
                     stack.setAmount(stack.getAmount() - blocksToRemove);
-                    itemStack.setAmount(itemStack.getAmount() - itemsToRemove);
+                    inventory.setItem(i, stack);
+                    inventory.setItem(itemStack, new ItemStack(Config.currency, toConvert * 9 - itemsToRemove));
                     numRemoved += itemsToRemove + blocksToRemove * 9;
                 } else if (itemsToRemove == 0 && stack.getAmount() >= blocksToRemove) {
                     stack.setAmount(stack.getAmount() - blocksToRemove);
+                    inventory.setItem(i, stack);
                     numRemoved += itemsToRemove + blocksToRemove * 9;
                 }
 
