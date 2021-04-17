@@ -24,6 +24,7 @@ import shallowcraft.itemeconomy.Util.Util;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Vault.VaultType;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class IECommand implements CommandExecutor {
@@ -122,7 +123,7 @@ public class IECommand implements CommandExecutor {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully transferred " + ChatColor.YELLOW + result1.amount +
                             ChatColor.AQUA + " diamonds " + ChatColor.GREEN + " between accounts!");
                 } else if (!sender.hasPermission(Permissions.adminPerm)) {
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You do not have permission to execute this command.");
+                    sender.sendMessage(Permissions.invalidPerm);
                 } else {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Transfer failed.");
                 }
@@ -138,9 +139,9 @@ public class IECommand implements CommandExecutor {
                     if (!Util.isPlayerName(name) && sender.hasPermission(Permissions.adminPerm)) {
                         if (!accounts.containsKey(name)) {
                             accounts.put(name, new GeneralAccount(name));
-                            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a NEW Tax account ");
+                            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a NEW General account ");
                         } else
-                            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Tax account exists.");
+                            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "This account exists.");
 
                         return true;
                     }
@@ -154,7 +155,7 @@ public class IECommand implements CommandExecutor {
                     if (p != null) {
                         Account acc = new PlayerAccount(p, Config.currency);
                         accounts.put(acc.getID(), acc);
-                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a NEW bank account " +
+                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have created a NEW bank account for " +
                                 ChatColor.AQUA + name + ChatColor.GREEN + " ! Lucky spending!");
                         addedAccount = true;
                     }
@@ -301,8 +302,32 @@ public class IECommand implements CommandExecutor {
                 for (int i = names.size() - 1; i >= 0; i--) {
                     String name = names.get(i);
                     if (name != null) {
+                        String rateofchange = " ";
+
+                        if(Util.isPlayerName(name)) {
+                            PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(name));
+                            double upBy = 0.0;
+                            if(holder.getLastSavings() != 0)
+                                upBy = holder.getDailyProfit() / ((double) holder.getLastSavings()) * 100;
+                            String percentage = (new DecimalFormat("#.##")).format(upBy);
+                            StringBuilder s = new StringBuilder();
+                            s.append(ChatColor.GOLD).append(" ( ");
+
+                            if (upBy == 0)
+                                s.append(ChatColor.YELLOW).append(percentage).append(" %");
+                            else if (upBy > 0)
+                                s.append(ChatColor.GREEN).append("↑ ").append(percentage).append(ChatColor.YELLOW).append(" %");
+                            else if (upBy < 0)
+                                s.append(ChatColor.RED).append("↓ ").append(percentage).append(ChatColor.YELLOW).append(" %");
+
+                            s.append(ChatColor.GOLD).append(" ) ");
+
+                            rateofchange = s.toString();
+                        }
+
                         baltopMessage.append(j).append(". ").append(ChatColor.GOLD).append(name).append(" ".repeat(20 - name.length()));
-                        baltopMessage.append(ChatColor.YELLOW).append(bals.get(name)).append(ChatColor.AQUA).append(" ").append(Config.currency.name().toLowerCase()).append("\n");
+                        baltopMessage.append(ChatColor.YELLOW).append(bals.get(name)).append(ChatColor.AQUA).append(" ").append(Config.currency.name().toLowerCase()).
+                                append(rateofchange).append("\n");
                         j++;
                     }
                 }
@@ -343,7 +368,7 @@ public class IECommand implements CommandExecutor {
 
                     }
                 } else
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot send this command here");
+                    sender.sendMessage(Permissions.invalidPerm);
 
                 return true;
             case "withdraw":
@@ -378,7 +403,7 @@ public class IECommand implements CommandExecutor {
                         }
                     }
                 } else
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot send this command here");
+                    sender.sendMessage(Permissions.invalidPerm);
 
                 return true;
             default:
@@ -400,14 +425,20 @@ public class IECommand implements CommandExecutor {
             case "resetprofits":
                 if(sender.hasPermission(Permissions.adminPerm))
                     Taxation.resetSavings();
+                else
+                    sender.sendMessage(Permissions.invalidPerm);
                 return true;
             case "taxprofits":
                 if(sender.hasPermission(Permissions.adminPerm))
                     Taxation.taxAllProfits(accounts);
+                else
+                    sender.sendMessage(Permissions.invalidPerm);
                 return true;
             case "redistribute":
                 if(sender.hasPermission(Permissions.adminPerm))
                     Taxation.redistribute(accounts);
+                else
+                    sender.sendMessage(Permissions.invalidPerm);
                 return true;
             case "add":
                 boolean success = false;
@@ -458,7 +489,7 @@ public class IECommand implements CommandExecutor {
                 }
 
                 if (!sender.hasPermission(Permissions.adminPerm))
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot send this command.");
+                    sender.sendMessage(Permissions.invalidPerm);
                 else if (!pass)
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
 
@@ -479,7 +510,7 @@ public class IECommand implements CommandExecutor {
                 }
 
                 if (!sender.hasPermission(Permissions.adminPerm))
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot send this command.");
+                    sender.sendMessage(Permissions.invalidPerm);
                 else if (!pass1)
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
 
@@ -535,7 +566,8 @@ public class IECommand implements CommandExecutor {
                             TransactionResult r = ((PlayerAccount) acc).taxAll();
                         }
                     }
-                }
+                } else
+                    sender.sendMessage(Permissions.invalidPerm);
             case "tax":
                 boolean pass3 = false;
                 if(sender.hasPermission(Permissions.adminPerm)){
@@ -565,7 +597,7 @@ public class IECommand implements CommandExecutor {
                 }
 
                 if (!sender.hasPermission(Permissions.adminPerm))
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot send this command.");
+                    sender.sendMessage(Permissions.invalidPerm);
                 else if (!pass3)
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
 
@@ -622,7 +654,7 @@ public class IECommand implements CommandExecutor {
                 }
 
                 if (!sender.hasPermission(Permissions.adminPerm))
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot send this command.");
+                    sender.sendMessage(Permissions.invalidPerm);
                 else if (!pass4)
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
 

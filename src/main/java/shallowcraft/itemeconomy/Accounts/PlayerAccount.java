@@ -144,13 +144,11 @@ public class PlayerAccount implements Account {
     }
 
     public int getDailyProfit(){
-        int profit = getBalance() - lastSavings;
-        updateSavings();
-        return profit;
+        return getBalance() - lastSavings;
     }
 
     public void updateSavings(){
-        lastSavings = getChequingBalance();
+        lastSavings = getBalance();
     }
 
 

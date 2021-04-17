@@ -3,6 +3,7 @@ package shallowcraft.itemeconomy.Tax;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;

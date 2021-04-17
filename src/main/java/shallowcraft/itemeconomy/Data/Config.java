@@ -7,13 +7,16 @@ import java.util.HashSet;
 import java.util.List;
 
 public class Config {
-    public static final SimpleDateFormat taxTimeFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
+    //modifiable
     public static int nextTaxHours = 24;
     public static int taxCap = 50;
     public static double maxProfitTax = 0.2;
     public static int minimumProfit = 5;
+    public static double wealthCap = 0.70;
+
+    //finals (dont change)
+    public static final SimpleDateFormat taxTimeFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
     public static final String dataFileName = "economyData";
-    public static final double wealthCap = 0.70;
     public static final String taxID = "Tax";
     public static final String shopID = "Shop";
     public static final Material currency = Material.DIAMOND;

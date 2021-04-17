@@ -362,8 +362,11 @@ public class Util {
         Map<String, Integer> output = new HashMap<>();
 
         for (PlayerAccount acc:getPlayerAccounts()) {
-            if(acc != null)
+            if(acc != null){
                 output.put(acc.getID(), acc.getDailyProfit());
+                acc.updateSavings();
+            }
+
         }
 
         return output;
