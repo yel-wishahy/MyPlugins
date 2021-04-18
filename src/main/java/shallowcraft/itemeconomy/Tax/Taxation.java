@@ -132,6 +132,8 @@ public class Taxation {
             }
         }
 
+        Util.updateAllPlayerSavings();
+
         return new TransactionResult(totalTaxed, ResultType.SUCCESS, "profit tax");
     }
 

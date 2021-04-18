@@ -366,12 +366,21 @@ public class Util {
         for (PlayerAccount acc:getPlayerAccounts()) {
             if(acc != null){
                 output.put(acc.getID(), acc.getDailyProfit());
-                acc.updateSavings();
             }
 
         }
 
         return output;
+    }
+
+    public static void updateAllPlayerSavings(){
+        for (PlayerAccount acc:getPlayerAccounts()) {
+            if(acc != null){
+                acc.updateSavings();
+            }
+
+        }
+
     }
 
     public static List<Vault> getVaultsOfType(VaultType vaultType, List<Vault> vaults){

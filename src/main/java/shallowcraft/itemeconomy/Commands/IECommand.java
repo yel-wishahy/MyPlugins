@@ -316,7 +316,7 @@ public class IECommand implements CommandExecutor {
 
                         if(Util.isPlayerName(name)) {
                             PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(name));
-                            Util.getPercentChangeMessage(holder);
+                            rateofchange =  Util.getPercentChangeMessage(holder);
                         }
 
                         baltopMessage.append(j).append(". ").append(ChatColor.GOLD).append(name).append(" ".repeat(20 - name.length()));
