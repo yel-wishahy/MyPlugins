@@ -143,7 +143,7 @@ public class PlayerAccount implements Account {
         return count + Util.getAllVaultsBalance(vaults);
     }
 
-    public int getDailyProfit(){
+    public int getProfit(){
         return getBalance() - lastSavings;
     }
 

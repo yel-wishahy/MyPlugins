@@ -1,6 +1,7 @@
 package shallowcraft.itemeconomy.Util;
 
 import net.kyori.adventure.text.Component;
+import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,6 +20,7 @@ import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Tax.Taxable;
+import shallowcraft.itemeconomy.Tax.Taxation;
 import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Vault.VaultType;
@@ -365,7 +367,7 @@ public class Util {
 
         for (PlayerAccount acc:getPlayerAccounts()) {
             if(acc != null){
-                output.put(acc.getID(), acc.getDailyProfit());
+                output.put(acc.getID(), acc.getProfit());
             }
 
         }
@@ -419,7 +421,7 @@ public class Util {
     public static String getPercentChangeMessage(PlayerAccount holder){
         double upBy = 0.0;
         if(holder.getLastSavings() != 0)
-            upBy = holder.getDailyProfit() / ((double) holder.getLastSavings()) * 100;
+            upBy = holder.getProfit() / ((double) holder.getLastSavings()) * 100;
         String percentage = (new DecimalFormat("#.##")).format(upBy);
         StringBuilder s = new StringBuilder();
         s.append(ChatColor.GOLD).append(" ( ");
@@ -434,6 +436,38 @@ public class Util {
         s.append(ChatColor.GOLD).append(" ) ");
 
         return s.toString();
+    }
+
+    public static String getTaxInfo(PlayerAccount holder){
+        StringBuilder msg = new StringBuilder();
+
+        msg.append(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.AQUA + "Tax Information for: " + ChatColor.YELLOW + holder.getName() + " \n");
+        int taxable = 0;
+
+        try{
+            taxable = Taxation.getTaxableProfits().get(holder.getID());
+        } catch (Exception ignored){ }
+
+        msg.append(ChatColor.GREEN + " Calculated Income: " + ChatColor.YELLOW + holder.getProfit() + getPercentChangeMessage(holder) + " \n");
+        msg.append(ChatColor.GREEN + " Estimated Income Tax: " + ChatColor.YELLOW + taxable).append(ChatColor.GOLD).append(" ( ").append(ChatColor.YELLOW).
+                append(((double) taxable)/holder.getProfit() * 100).append(" %").append(ChatColor.GOLD).append(" ) \n");
+
+        if(holder.getTaxes().isEmpty())
+            msg.append(ChatColor.GRAY + " No General Taxes (yay) \n");
+        else
+            msg.append(ChatColor.GREEN + " General Taxes: \n");
+
+        for (Taxable tax : holder.getTaxes().values()) {
+            if (tax != null){
+                msg.append(ChatColor.GREEN + "* Tax Name: " + ChatColor.AQUA).append(tax.getTaxName()).append(ChatColor.GREEN).append(" Tax %: ").
+                        append(ChatColor.YELLOW).append(tax.getTaxRate()).append(ChatColor.GREEN).append(" Next Tax Time: ").append(ChatColor.YELLOW).
+                        append(Config.taxTimeFormat.format(tax.getNextTaxTime())).append("\n");
+            }
+
+        }
+
+
+        return msg.toString();
     }
 
 }

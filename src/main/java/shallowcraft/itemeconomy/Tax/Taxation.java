@@ -3,7 +3,6 @@ package shallowcraft.itemeconomy.Tax;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.Config;
@@ -14,6 +13,7 @@ import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -102,31 +102,22 @@ public class Taxation {
                 "in circulation right now is: " + ChatColor.YELLOW + totalCirculation + ChatColor.AQUA + " Diamonds.");
         ItemEconomy.getInstance().getServer().broadcast(starting, Permissions.playerPerm);
 
+        Map<String, Integer> taxables = getTaxableProfits();
         int totalTaxed = 0;
-        Map<String, Integer> profits = Util.sortByValue(Util.getProfits());
-        List<String> keys = new ArrayList<>(profits.keySet());
 
-        String maxProfitID = keys.get(keys.size() - 1);
-        int maxProfit = profits.get(maxProfitID);
+        for (String id:taxables.keySet()) {
+            int taxable = taxables.get(id);
+            PlayerAccount holder = (PlayerAccount) accounts.get(id);
 
-        if(maxProfit < Config.minimumProfit)
-            return new TransactionResult(0, ResultType.SUCCESS, "insufficient profits");
-
-        for (String id:keys) {
-            int profit = profits.get(id);
-            if (profit >= Config.minimumProfit) {
-                PlayerAccount holder = (PlayerAccount) accounts.get(id);
-
-                double rate = getProportionalRate(profit, maxProfit);
-                int taxable = amountToTax(profit, rate);
-
+            if (taxable >= 0) {
                 TransactionResult result = holder.forcedWithdraw(taxable);
                 ItemEconomy.getInstance().tax(result.amount);
                 totalTaxed += result.amount;
 
                 TextComponent announcement = Component.text(ChatColor.GREEN + "* Player: " + ChatColor.YELLOW + holder.getName() +
                         ChatColor.GREEN + " has been taxed " + ChatColor.YELLOW + result.amount + ChatColor.AQUA + " Diamonds" + ChatColor.GREEN + " at a rate of " +
-                        ChatColor.YELLOW + (rate * 100) + " %" + ChatColor.GREEN + " applied to an income of " + ChatColor.YELLOW + profit + ChatColor.AQUA + " Diamonds \n");
+                        ChatColor.YELLOW + (((double) taxable)/holder.getProfit() * 100) + " %" + ChatColor.GREEN + " applied to an income of " +
+                        ChatColor.YELLOW + holder.getProfit() + ChatColor.AQUA + " Diamonds \n");
 
                 ItemEconomy.getInstance().getServer().broadcast(announcement, Permissions.playerPerm);
             }
@@ -160,5 +151,33 @@ public class Taxation {
                 holder.updateSavings();
              }
         }
+    }
+
+    //gets amount to tax based on profits
+    public static Map<String, Integer> getTaxableProfits(){
+        Map<String, Integer> outputTaxable = new HashMap<>();
+        Map<String, Account> accounts = ItemEconomy.getInstance().getAccounts();
+        Map<String, Integer> profits = Util.sortByValue(Util.getProfits());
+        List<String> keys = new ArrayList<>(profits.keySet());
+
+        String maxProfitID = keys.get(keys.size() - 1);
+        int maxProfit = profits.get(maxProfitID);
+
+        for (String id:keys) {
+            int profit = profits.get(id);
+            PlayerAccount holder = (PlayerAccount) accounts.get(id);
+
+            if (profit >= Config.minimumProfit) {
+
+                double rate = getProportionalRate(profit, maxProfit);
+                int taxable = amountToTax(profit, rate);
+                outputTaxable.put(holder.getID(), taxable);
+            } else{
+                outputTaxable.put(holder.getID(), 0);
+            }
+        }
+
+
+        return outputTaxable;
     }
 }

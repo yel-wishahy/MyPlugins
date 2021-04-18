@@ -92,12 +92,14 @@ public class IETabCompleter implements org.bukkit.command.TabCompleter {
                     }
                 }
 
-                if(!args[0].equals("add") && !args[0].equals("edit") )
+                if(!args[0].equals("add"))
                     completions.add("all");
             }
         } else if (args.length == 4){
-            if(args[0].equals("edit")){
+            if(args[0].equals("edit") && !args[2].equals("all")){
                 StringUtil.copyPartialMatches(args[3], Config.TaxEditSubCommands, completions);
+            } else if(args[0].equals("edit")){
+                completions.add("timeset_now");
             }
         }
 

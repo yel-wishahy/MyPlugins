@@ -516,18 +516,7 @@ public class IECommand implements CommandExecutor {
 
                     if (accounts.containsKey(Util.getPlayerID(playerName))) {
                         PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
-                        StringBuilder msg = new StringBuilder();
-                        msg.append(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.AQUA + "List of TAXES:\n");
-
-                        for (Taxable tax : holder.getTaxes().values()) {
-                            if (tax != null){
-                                msg.append(ChatColor.GREEN + "* Tax Name: " + ChatColor.AQUA).append(tax.getTaxName()).append(ChatColor.GREEN).append(" Tax %: ").
-                                        append(ChatColor.YELLOW).append(tax.getTaxRate()).append(ChatColor.GREEN).append(" Next Tax Time: ").append(ChatColor.YELLOW).
-                                        append(Config.taxTimeFormat.format(tax.getNextTaxTime())).append("\n");
-                            }
-
-                        }
-                        sender.sendMessage(msg.toString());
+                        sender.sendMessage(Util.getTaxInfo(holder));
                         pass2 = true;
                     }
                 } else if (args.length == 3){
@@ -547,8 +536,6 @@ public class IECommand implements CommandExecutor {
 
                 }
 
-                if (!sender.hasPermission(Permissions.adminPerm))
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot send this command.");
                 else if (!pass2)
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
 
@@ -603,15 +590,28 @@ public class IECommand implements CommandExecutor {
                 if(sender.hasPermission(Permissions.adminPerm)){
                     if(args.length == 4 && args[3].equals("timeset_now")){
                         String playerName = args[1];
-                        String taxName = args[2];
 
-                        if (accounts.containsKey(Util.getPlayerID(playerName))) {
-                            PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
+                        if(args[2].equals("all")){
+                            if (accounts.containsKey(Util.getPlayerID(playerName))) {
+                                PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
 
-                            if(holder.getTaxes().containsKey(taxName)){
-                                tax = holder.getTaxes().get(taxName);
-                                tax.updateTaxTime();
-                                pass4 = true;
+                                for (Taxable t:holder.getTaxes().values()) {
+                                    t.updateTaxTime();
+                                }
+                            }
+
+
+                        } else{
+                            String taxName = args[2];
+
+                            if (accounts.containsKey(Util.getPlayerID(playerName))) {
+                                PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
+
+                                if(holder.getTaxes().containsKey(taxName)){
+                                    tax = holder.getTaxes().get(taxName);
+                                    tax.updateTaxTime();
+                                    pass4 = true;
+                                }
                             }
                         }
 
