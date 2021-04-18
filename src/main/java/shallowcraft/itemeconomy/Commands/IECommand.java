@@ -185,9 +185,14 @@ public class IECommand implements CommandExecutor {
                         int withdraw = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.WITHDRAW_ONLY, vaults));
                         int regular = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.REGULAR, vaults));
 
+                        String rateOfChange = " ";
+                        if(holder instanceof PlayerAccount) {
+                            rateOfChange = Util.getPercentChangeMessage((PlayerAccount) holder);
+                        }
+
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Your chequing balance is " + ChatColor.YELLOW +
                                 holder.getChequingBalance() + " " + ChatColor.AQUA + "Diamonds." + ChatColor.GREEN + " \n Total Holdings: " + ChatColor.YELLOW + holder.getBalance() +
-                                ChatColor.GREEN +
+                                 rateOfChange + ChatColor.GREEN +
                                 "\n Vaults ->  Regular: " + ChatColor.YELLOW + regular +
                                 ChatColor.GREEN + " , Deposit: " + ChatColor.YELLOW + deposit + ChatColor.GREEN + " , Withdraw: " + ChatColor.YELLOW + withdraw
                                 + ChatColor.GREEN + ".");
@@ -211,12 +216,17 @@ public class IECommand implements CommandExecutor {
                         int withdraw = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.WITHDRAW_ONLY, vaults));
                         int regular = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.REGULAR, vaults));
 
+                        String rateOfChange = " ";
+                        if(holder instanceof PlayerAccount) {
+                           rateOfChange = Util.getPercentChangeMessage((PlayerAccount) holder);
+                        }
+
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.YELLOW + holder.getName() + ChatColor.GREEN + "'s chequing balance is " + ChatColor.YELLOW +
-                                holder.getChequingBalance() + " " + ChatColor.AQUA + "Diamonds: " + ChatColor.GREEN + "(Total Holdings: " + ChatColor.YELLOW + holder.getBalance() +
-                                ChatColor.GREEN +
-                                "\nVaults ->  Regular: " + ChatColor.YELLOW + regular +
+                                holder.getChequingBalance() + " " + ChatColor.AQUA + "Diamonds." + ChatColor.GREEN + " \n Total Holdings: " + ChatColor.YELLOW + holder.getBalance() +
+                                rateOfChange + ChatColor.GREEN +
+                                "\n Vaults ->  Regular: " + ChatColor.YELLOW + regular +
                                 ChatColor.GREEN + " , Deposit: " + ChatColor.YELLOW + deposit + ChatColor.GREEN + " , Withdraw: " + ChatColor.YELLOW + withdraw
-                                + ChatColor.GREEN + " ).");
+                                + ChatColor.GREEN + ".");
                     } else {
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You do not have a bank account");
                     }
@@ -306,23 +316,7 @@ public class IECommand implements CommandExecutor {
 
                         if(Util.isPlayerName(name)) {
                             PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(name));
-                            double upBy = 0.0;
-                            if(holder.getLastSavings() != 0)
-                                upBy = holder.getDailyProfit() / ((double) holder.getLastSavings()) * 100;
-                            String percentage = (new DecimalFormat("#.##")).format(upBy);
-                            StringBuilder s = new StringBuilder();
-                            s.append(ChatColor.GOLD).append(" ( ");
-
-                            if (upBy == 0)
-                                s.append(ChatColor.YELLOW).append(percentage).append(" %");
-                            else if (upBy > 0)
-                                s.append(ChatColor.GREEN).append("↑ ").append(percentage).append(ChatColor.YELLOW).append(" %");
-                            else if (upBy < 0)
-                                s.append(ChatColor.RED).append("↓ ").append(percentage).append(ChatColor.YELLOW).append(" %");
-
-                            s.append(ChatColor.GOLD).append(" ) ");
-
-                            rateofchange = s.toString();
+                            Util.getPercentChangeMessage(holder);
                         }
 
                         baltopMessage.append(j).append(". ").append(ChatColor.GOLD).append(name).append(" ".repeat(20 - name.length()));

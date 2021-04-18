@@ -2,6 +2,7 @@ package shallowcraft.itemeconomy.Util;
 
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
@@ -22,6 +23,7 @@ import shallowcraft.itemeconomy.Transaction.ResultType;
 import shallowcraft.itemeconomy.Vault.Vault;
 import shallowcraft.itemeconomy.Vault.VaultType;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class Util {
@@ -403,6 +405,26 @@ public class Util {
             default:
                 return VaultType.REGULAR;
         }
+    }
+
+    public static String getPercentChangeMessage(PlayerAccount holder){
+        double upBy = 0.0;
+        if(holder.getLastSavings() != 0)
+            upBy = holder.getDailyProfit() / ((double) holder.getLastSavings()) * 100;
+        String percentage = (new DecimalFormat("#.##")).format(upBy);
+        StringBuilder s = new StringBuilder();
+        s.append(ChatColor.GOLD).append(" ( ");
+
+        if (upBy == 0)
+            s.append(ChatColor.YELLOW).append(percentage).append(" %");
+        else if (upBy > 0)
+            s.append(ChatColor.GREEN).append("↑ ").append(percentage).append(ChatColor.YELLOW).append(" %");
+        else if (upBy < 0)
+            s.append(ChatColor.RED).append("↓ ").append(percentage).append(ChatColor.YELLOW).append(" %");
+
+        s.append(ChatColor.GOLD).append(" ) ");
+
+        return s.toString();
     }
 
 }
