@@ -1,43 +1,7 @@
-name: ItemEconomy
+name: ShopFind
 version: ${project.version}
-main: shallowcraft.itemeconomy.ItemEconomy
+main: shallowcraft.shopfind.ShopFind
 api-version: 1.16
+depend: [ QuickShop ]
 authors: [ BlackShadow2941 ]
-description: An item based economy for minecraft with potential for vault support
-depend: [Vault]
-commands:
-  ItemEconomy:
-    aliases: [ie, IE, itemeconomy, money, eco, economy]
-    usage: |
-      /ItemEconomy balance
-      /ItemEconomy baltop
-      /ItemEconomy create_account <name>
-      /ItemEconomy list_accounts
-      /ItemEconomy create_account_all
-      /ItemEconomy reload
-      /ItemEconomy save
-      /ItemEconomy remove_account <name>
-      /ItemEconomy deposit <name> <amount>
-      /ItemEconomy withdraw <name> <amount>
-      /ItemEconomy transfer <vault tpye> <vault type> <amount>
-      /ItemEconomy admintransfer <name> <vault tpye> <vault type> <amount>
-  Tax:
-    aliases: [tax, ietax, ieTax, taxes, t]
-    usage: |
-      /Tax tax <name> <[optional] tax name>
-      /Tax add <name> <tax name> <rate>
-      /Tax remove <name> <tax name>
-      /Tax info <name> < [optional] tax name>
-      /Tax taxall
-      /Tax clear <name>
-      /Tax edit <name> <tax name> <args>
-      /Tax redistribute
-      /Tax taxprofits
-permissions:
-  itemeconomy.admin:
-    default: op
-  itemeconomy.message:
-    default: true
-  itemeconomy.player:
-    default: true
-
+description: A better quickshop search addon
