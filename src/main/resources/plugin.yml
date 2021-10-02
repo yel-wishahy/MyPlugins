@@ -1,7 +1,7 @@
 name: ItemEconomy
 version: ${project.version}
 main: shallowcraft.itemeconomy.ItemEconomyPlugin
-api-version: 1.16
+api-version: 1.17
 authors: [ BlackShadow2941 ]
 description: An item based economy for minecraft with potential for vault support
 depend: [Vault, QuickShop]

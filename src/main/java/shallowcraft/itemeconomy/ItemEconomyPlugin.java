@@ -3,6 +3,7 @@ package shallowcraft.itemeconomy;
 import lombok.Getter;
 import lombok.Setter;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import shallowcraft.itemeconomy.Commands.IECommand;
@@ -69,16 +70,16 @@ public class ItemEconomyPlugin extends JavaPlugin {
     }
 
     private void setupSmartShop(){
-        try{
+        if (getServer().getPluginManager().isPluginEnabled("QuickShop")) {
             SmartShop = shallowcraft.itemeconomy.SmartShop.SmartShop.getInstance();
             this.getCommand(SmartShopConfig.command).setExecutor(new SmartShopCommand());
             getServer().getPluginCommand(SmartShopConfig.command).setTabCompleter(new SmartShopTabCompleter());
             getServer().getPluginManager().registerEvents(new SSEventHandler(), this);
 
             if(!SmartShop.isEnabled())
-                SmartShop = null;
-        } catch (Exception e){
-            e.printStackTrace();
+                log.info("[ItemEconomy] Failed to setup smart shop system!");
+
+        } else{
             log.info("[ItemEconomy] Failed to setup smart shop system!");
         }
     }

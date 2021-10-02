@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.StringUtil;
+import org.maxgamer.quickshop.QuickShop;
 import org.maxgamer.quickshop.api.QuickShopAPI;
 import org.maxgamer.quickshop.shop.Shop;
 import shallowcraft.itemeconomy.Accounts.Account;
@@ -23,6 +24,7 @@ public class SmartShopUtil {
     private static List<String> Materials;
 
     public static Map<String, List<Shop>> getShopByAccountID(){
+        assert QuickShopAPI.getShopAPI() != null;
         List<Shop> shops = QuickShopAPI.getShopAPI().getAllShops();
         Map<String, List<Shop>> outputMap = new HashMap<>();
 
@@ -300,7 +302,7 @@ public class SmartShopUtil {
     public static List<Shop> findAllShopsForSimilarMaterial(List<Material> materials){
         List<Shop> output = new ArrayList<>();
 
-        for (Shop shop:QuickShopAPI.getShopAPI().getAllShops()){
+        for (Shop shop: Objects.requireNonNull(QuickShopAPI.getShopAPI()).getAllShops()){
             if(materials.contains(shop.getItem().getType()))
                 output.add(shop);
         }

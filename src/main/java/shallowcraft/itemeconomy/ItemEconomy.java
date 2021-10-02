@@ -121,6 +121,7 @@ public class ItemEconomy {
 
 
     public TransactionResult withdrawPlayer(OfflinePlayer player, double amount) {
+        ItemEconomy.log.info("[ItemEconomy] WITHDRAWING FROM PLAYER");
         Account holder = accounts.get(player.getUniqueId().toString());
 
         int toWithdraw = (int) Math.round(amount);

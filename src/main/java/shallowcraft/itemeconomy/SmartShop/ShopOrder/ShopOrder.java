@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Container;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.maxgamer.quickshop.QuickShop;
 import org.maxgamer.quickshop.api.QuickShopAPI;
 import org.maxgamer.quickshop.shop.Shop;
 import shallowcraft.itemeconomy.Accounts.Account;
@@ -20,7 +21,10 @@ import shallowcraft.itemeconomy.SmartShop.SmartShopConfig;
 import shallowcraft.itemeconomy.SmartShop.SmartShopUtil;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 
 public class ShopOrder implements Serializable<ShopOrder> {
@@ -56,7 +60,8 @@ public class ShopOrder implements Serializable<ShopOrder> {
             String[] locData = inputData.get("Shop Location").split(",");
             Location loc = DataUtil.deserializeLocation(locData);
             //ItemEconomy.log.info("load loc success");
-            quickShop = QuickShopAPI.getShopAPI().getShop(loc);
+            assert QuickShopAPI.getShopAPI().getShop(loc).isPresent();
+            quickShop = QuickShopAPI.getShopAPI().getShop(loc).get();
 
 
             buyer = ItemEconomy.getInstance().getAccounts().get(inputData.get("Buyer"));
@@ -110,7 +115,7 @@ public class ShopOrder implements Serializable<ShopOrder> {
 
             Inventory inv = ((Container) quickShop.getLocation().getBlock().getState()).getInventory();
 
-            if(inv != null){
+            {
                 SmartShopUtil.removeItemStacks(orderItem, orderQuantity, inv);
 
                 isOrderComplete = true;
