@@ -11,7 +11,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.maxgamer.quickshop.QuickShop;
 import org.maxgamer.quickshop.api.QuickShopAPI;
-import org.maxgamer.quickshop.shop.Shop;
+import org.maxgamer.quickshop.api.shop.Shop;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Data.DataUtil;
@@ -60,8 +60,8 @@ public class ShopOrder implements Serializable<ShopOrder> {
             String[] locData = inputData.get("Shop Location").split(",");
             Location loc = DataUtil.deserializeLocation(locData);
             //ItemEconomy.log.info("load loc success");
-            assert QuickShopAPI.getShopAPI().getShop(loc).isPresent();
-            quickShop = QuickShopAPI.getShopAPI().getShop(loc).get();
+            assert QuickShop.getInstance().getShopManager().getShop(loc) != null;
+            quickShop = QuickShop.getInstance().getShopManager().getShop(loc);
 
 
             buyer = ItemEconomy.getInstance().getAccounts().get(inputData.get("Buyer"));
