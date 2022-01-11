@@ -20,7 +20,7 @@ Plugin info:
 - name: ItemEconomy
 - version: ${project.version}
 - main: shallowcraft.itemeconomy.ItemEconomy
-- api-version: 1.16
+- api-version: 1.18
 - authors: [ BlackShadow2941 ]
 - description: An item based economy for minecraft with potential for vault support
 - depend: [Vault]
