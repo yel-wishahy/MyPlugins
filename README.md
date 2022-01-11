@@ -1,6 +1,6 @@
 # ItemEconomy
 
-A minecraft server ecoomy plugin developed for the current 1.16 PaperMC api and hooks to Vault to link with other economy plugins.
+A minecraft server ecoomy plugin working on the current 1.18.1 paper api and hooks to Vault to link with other economy plugins.
 Unlike typical curreency plugins, the currency in this plugin is a physical item or items.
 
 The current Config is set to DIAMOND and DIAMOND_BLOCK.
