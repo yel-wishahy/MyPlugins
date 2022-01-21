@@ -14,6 +14,7 @@ Item Vault creation sign:
   - Line 3 (optional, defaults to regular): Vault type: "[Withdraw]" or "[Deposit]" 
     - for withdraw or deposit only vaults
 
+Demo: https://www.youtube.com/watch?v=MuiKJ1oVDqU
 
 Plugin info:
   
