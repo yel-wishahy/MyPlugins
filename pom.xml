@@ -6,7 +6,7 @@
 
     <groupId>shallowcraft</groupId>
     <artifactId>ItemEconomy</artifactId>
-    <version>6.0-SNAPSHOT</version>
+    <version>7.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>ItemEconomy</name>
@@ -83,7 +83,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.17.1-R0.1-SNAPSHOT</version>
+            <version>1.18.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -106,7 +106,7 @@
         <dependency>
             <groupId>org.maxgamer</groupId>
             <artifactId>QuickShop</artifactId>
-            <version>5.1.0.2</version>
+            <version>5.1.0.4</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

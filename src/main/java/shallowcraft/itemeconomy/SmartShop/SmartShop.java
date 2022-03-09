@@ -2,6 +2,9 @@ package shallowcraft.itemeconomy.SmartShop;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+import org.maxgamer.quickshop.api.QuickShopAPI;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Data.DataSerializer;
 import shallowcraft.itemeconomy.Data.InvalidDataException;
@@ -23,16 +26,28 @@ public class SmartShop {
     @Getter @Setter private Map<String, List<ShopOrder>> shopOrders;
     @Getter @Setter private Account holder;
     @Getter @Setter private ShopOrderLog log;
+    @Getter @Setter public QuickShopAPI QuickShopAPI;
+
 
     private SmartShop() {
         instance = this;
+
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("QuickShop");
+        if(plugin != null){
+            QuickShopAPI = (QuickShopAPI)plugin;
+            ItemEconomy.log.info("Successfully loaded QuickShop api");
+            isEnabled = true;
+        } else {
+            ItemEconomy.log.info("failed to load QuickShop api");
+            isEnabled = false;
+        }
+
         holder = SmartShopUtil.getSmartShopDeposit();
 
         if(holder == null)
             isEnabled = false;
         else {
             ItemEconomy.log.info("loading data for smart shop");
-            isEnabled = true;
             loadData();
         }
 

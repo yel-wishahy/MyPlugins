@@ -1,10 +1,7 @@
 package shallowcraft.itemeconomy;
 
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.plugin.ServicePriority;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,22 +10,12 @@ import java.util.logging.Logger;
 
 import org.bukkit.entity.Player;
 import shallowcraft.itemeconomy.Accounts.Account;
-import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
-import shallowcraft.itemeconomy.Commands.IECommand;
-import shallowcraft.itemeconomy.Commands.IETabCompleter;
 import shallowcraft.itemeconomy.Data.DataSerializer;
-import shallowcraft.itemeconomy.Listener.IEEventHandler;
-import shallowcraft.itemeconomy.SmartShop.Listener.SSEventHandler;
-import shallowcraft.itemeconomy.SmartShop.SmartShop;
-import shallowcraft.itemeconomy.SmartShop.Commads.SmartShopCommand;
-import shallowcraft.itemeconomy.SmartShop.SmartShopConfig;
-import shallowcraft.itemeconomy.SmartShop.Commads.SmartShopTabCompleter;
 import shallowcraft.itemeconomy.Tax.Taxation;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Data.InvalidDataException;
 import shallowcraft.itemeconomy.Util.Util;
-import shallowcraft.itemeconomy.VaultEconomyHook.Economy_ItemEconomy;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -68,7 +55,7 @@ public class ItemEconomy {
         try {
             File dataFile = DataSerializer.getDataFile(Config.dataFileName);
             if (dataFile.exists())
-                accounts = DataSerializer.loadAccountsFromJSON(dataFile);
+                accounts = DataSerializer.loadDataFromJSON(dataFile);
             else
                 accounts = new HashMap<>();
 

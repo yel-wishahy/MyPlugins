@@ -4,7 +4,9 @@ main: shallowcraft.itemeconomy.ItemEconomyPlugin
 api-version: 1.17
 authors: [ BlackShadow2941 ]
 description: An item based economy for minecraft with potential for vault support
-depend: [Vault, QuickShop]
+depend: [Vault]
+loadbefore: [QuickShop]
+
 commands:
   ItemEconomy:
     aliases: [ie, IE, itemeconomy, money, eco, economy]

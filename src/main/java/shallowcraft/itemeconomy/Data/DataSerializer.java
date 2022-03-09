@@ -6,6 +6,7 @@ import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.SmartShop.ShopOrder.ShopOrder;
+import shallowcraft.itemeconomy.Util.Util;
 
 import java.io.File;
 import java.io.FileReader;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class DataSerializer {
-    public static Map<String, Account> loadAccountsFromJSON(File dataFile) throws IOException, InvalidDataException, NullPointerException {
+    public static Map<String, Account> loadDataFromJSON(File dataFile) throws IOException, InvalidDataException, NullPointerException {
         Map<String, Account> accounts = new HashMap<>();
 
         Gson gson = new Gson();
@@ -45,6 +46,14 @@ public class DataSerializer {
                 newStats.put("Average Balance", avg);
                 newStats.put("Median Balance", median);
                 newStats.put("Last Tax Balance", lastTaxBal);
+
+                if(Util.validateHistoryStats(newStats)) {
+                    newStats = new HashMap<>();
+                    newStats.put("Circulation", "0");
+                    newStats.put("Average Balance", "0");
+                    newStats.put("Median Balance", "0");
+                    newStats.put("Last Tax Balance", "0");
+                }
 
                 ItemEconomy.getInstance().setHistoryStats(newStats);
 

@@ -38,7 +38,8 @@ public class ItemEconomyPlugin extends JavaPlugin {
             log.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
             return;
-        }
+        } else
+            log.info("[ItemEconomy] Vault hook successful.");
 
         registerEventHandler();
         registerCommands();
@@ -80,7 +81,7 @@ public class ItemEconomyPlugin extends JavaPlugin {
                 log.info("[ItemEconomy] Failed to setup smart shop system!");
 
         } else{
-            log.info("[ItemEconomy] Failed to setup smart shop system!");
+            log.info("[ItemEconomy] Failed to setup smart shop system! Could not find QuickShop Plugin");
         }
     }
 

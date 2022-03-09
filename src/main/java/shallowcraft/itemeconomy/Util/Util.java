@@ -662,5 +662,21 @@ public class Util {
         return baltopMessage.toString();
     }
 
+    public static boolean validateHistoryStats(Map<String, String> stats){
+        if(stats == null)
+            return false;
+
+        if(stats.get("Circulation") == null)
+            return false;
+        if(stats.get("Average Balance") == null)
+            return false;
+        if(stats.get("Median Balance") == null)
+            return false;
+
+        return true;
+    }
+
+
+
 
 }
