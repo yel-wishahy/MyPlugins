@@ -47,7 +47,7 @@ public class DataSerializer {
                 newStats.put("Median Balance", median);
                 newStats.put("Last Tax Balance", lastTaxBal);
 
-                if(Util.validateHistoryStats(newStats)) {
+                if(!Util.validateHistoryStats(newStats)) {
                     newStats = new HashMap<>();
                     newStats.put("Circulation", "0");
                     newStats.put("Average Balance", "0");
@@ -81,7 +81,7 @@ public class DataSerializer {
         return accounts;
     }
 
-    public static void saveAccountsToJSON(Map<String, Account> accounts, File dataFile) throws IOException {
+    public static void saveDataToJSON(Map<String, Account> accounts, File dataFile) throws IOException {
         Gson gson = new Gson();
         Map<String, Map<String, String>> output = new HashMap<>();
 

@@ -11,6 +11,7 @@ import shallowcraft.itemeconomy.Util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
+//implementation of vault item economy interface to communicate with other economy related plugins
 public class Economy_ItemEconomy implements Economy {
 
     private final ItemEconomy itemEconomy = ItemEconomy.getInstance();
@@ -24,7 +25,7 @@ public class Economy_ItemEconomy implements Economy {
      */
     @Override
     public boolean isEnabled() {
-        return true;
+        return itemEconomy.isEnabled();
     }
 
     /**

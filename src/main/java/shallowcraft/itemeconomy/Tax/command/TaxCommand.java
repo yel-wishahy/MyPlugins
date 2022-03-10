@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Config;
-import shallowcraft.itemeconomy.Data.Permissions;
+import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Tax.taxable.GeneralTax;
 import shallowcraft.itemeconomy.Tax.taxable.Taxable;

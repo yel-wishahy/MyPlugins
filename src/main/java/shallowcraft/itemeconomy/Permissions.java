@@ -1,4 +1,4 @@
-package shallowcraft.itemeconomy.Data;
+package shallowcraft.itemeconomy;
 
 import net.milkbowl.vault.chat.Chat;
 import org.bukkit.ChatColor;

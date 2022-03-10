@@ -6,7 +6,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.ChatColor;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Config;
-import shallowcraft.itemeconomy.Data.Permissions;
+import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.*;
 import shallowcraft.itemeconomy.Tax.Taxation;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;

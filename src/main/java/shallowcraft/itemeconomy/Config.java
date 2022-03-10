@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.List;
 
+//should probably move this to json, but some things like command aliases etc shouldnt be configurable
 public class Config {
     //enable
     public static final boolean enableTaxes = true;

@@ -19,17 +19,22 @@ import shallowcraft.itemeconomy.Util.Util;
 import lombok.Getter;
 import lombok.Setter;
 
+//singleton itemeconomy class that stores various information about the current item economy session
+//is called in the Vault economy hook
 public class ItemEconomy {
     public static final Logger log = Logger.getLogger("Minecraft");
     public static final String name = "ItemEconomy";
 
     private static ItemEconomy instance;
+    @Getter private boolean isEnabled = false;
+
     @Getter @Setter private Map<String, String> historyStats;
     @Getter @Setter private Map<String, Account> accounts;
 
     private ItemEconomy(){
         instance = this;
         loadData();
+        isEnabled = true;
     }
 
     public static ItemEconomy getInstance(){
@@ -42,7 +47,7 @@ public class ItemEconomy {
     public boolean saveData() {
         try {
             File dataFile = DataSerializer.createDataFile(Config.dataFileName);
-            DataSerializer.saveAccountsToJSON(accounts, dataFile);
+            DataSerializer.saveDataToJSON(accounts, dataFile);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -56,8 +61,9 @@ public class ItemEconomy {
             File dataFile = DataSerializer.getDataFile(Config.dataFileName);
             if (dataFile.exists())
                 accounts = DataSerializer.loadDataFromJSON(dataFile);
-            else
+            else{
                 accounts = new HashMap<>();
+            }
 
             return true;
         } catch (IOException | InvalidDataException e) {
@@ -173,5 +179,13 @@ public class ItemEconomy {
             sender.sendMessage("[ItemEconomy] You have created a NEW bank account! Lucky spending!");
         }
         return true;
+    }
+
+    public void resetHistoryStats(){
+        historyStats = new HashMap<>();
+        historyStats.put("Circulation", "0");
+        historyStats.put("Average Balance", "0");
+        historyStats.put("Median Balance", "0");
+        historyStats.put("Last Tax Balance", "0");
     }
 }

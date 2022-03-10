@@ -12,7 +12,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.Data.Permissions;
+import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.Util.Util;
 import shallowcraft.itemeconomy.BankVault.ContainerVault;
 import shallowcraft.itemeconomy.BankVault.Vault;

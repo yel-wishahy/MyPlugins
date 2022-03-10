@@ -11,6 +11,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.Inventory;
@@ -604,6 +605,9 @@ public class Util {
     }
 
     public static String getServerStatsMessage() {
+        if(!Util.validateHistoryStats(ItemEconomy.getInstance().getHistoryStats()))
+            ItemEconomy.getInstance().resetHistoryStats();
+
         StringBuilder baltopMessage = new StringBuilder();
         baltopMessage.append(ChatColor.GOLD).append("[ItemEconomy] ").append(ChatColor.GREEN).append("Economy Statistics:\n");
 
@@ -666,12 +670,19 @@ public class Util {
         if(stats == null)
             return false;
 
-        if(stats.get("Circulation") == null)
+        String circ = stats.get("Circulation");
+        String avgBal = stats.get("Average Balance");
+        String medBal = stats.get("Median Balance");
+
+        try{
+            Integer.parseInt(circ);
+            Integer.parseInt(avgBal);
+            Integer.parseInt(medBal);
+        } catch (NumberFormatException | NullPointerException e)  {
+            ItemEconomy.log.info("[ItemEconomy] Bad History States format");
+            e.printStackTrace();
             return false;
-        if(stats.get("Average Balance") == null)
-            return false;
-        if(stats.get("Median Balance") == null)
-            return false;
+        }
 
         return true;
     }

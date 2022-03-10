@@ -5,6 +5,8 @@ import org.bukkit.block.Sign;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 
+//vault interface to implement vault types
+//not sure if this is neccessary but its ok
 public interface Vault {
     public int getVaultBalance();
     public boolean checkVault();

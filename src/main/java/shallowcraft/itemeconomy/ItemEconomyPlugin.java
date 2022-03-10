@@ -20,6 +20,7 @@ import shallowcraft.itemeconomy.VaultEconomyHook.Economy_ItemEconomy;
 
 import java.util.logging.Logger;
 
+//plugin class for item economy that extends JavaPlugin, handles actual startup and communication with other plugins
 public class ItemEconomyPlugin extends JavaPlugin {
     public static final Logger log = Logger.getLogger("Minecraft");
     public final static String name = "ItemEconomy";

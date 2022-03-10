@@ -11,7 +11,7 @@ import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
-import shallowcraft.itemeconomy.Data.Permissions;
+import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
@@ -20,6 +20,12 @@ import shallowcraft.itemeconomy.BankVault.VaultType;
 
 import java.util.*;
 
+/**
+ * implementation of command executor for item economy
+ * handles all item economy commands
+ * Author: Yousif El-Wishahy
+ *
+ */
 public class IECommand implements CommandExecutor {
 
     /**

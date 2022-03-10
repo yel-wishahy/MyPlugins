@@ -7,6 +7,9 @@ import shallowcraft.itemeconomy.BankVault.VaultType;
 
 import java.util.List;
 
+/**
+ * interface for accounts, create an account class by implementing this interface
+ */
 public interface Account extends Serializable<Account> {
     public int getChequingBalance();
     public int getBalance();
