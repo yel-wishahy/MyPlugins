@@ -31,7 +31,7 @@ public class Config {
     public static final String vaultHeader = "[Vault]";
     public static final List<String> IESubCommands = List.of("create_account",
             "balance", "list_accounts", "create_account_all", "remove_account",
-            "reload", "save", "baltop", "deposit", "withdraw",
+            "reload", "save", "baltop", "admindeposit", "adminwithdraw","withdraw",
             "transfer", "admintransfer", "statsupdate");
     public static final List<String> IECommandAliases = List.of("ItemEconomy", "itemeconomy",
             "IE", "ie", "eco", "money");

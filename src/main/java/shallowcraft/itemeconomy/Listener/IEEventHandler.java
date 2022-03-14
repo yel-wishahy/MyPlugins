@@ -9,7 +9,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Permissions;
@@ -88,4 +90,27 @@ public class IEEventHandler implements Listener {
                     + "DESTROYED" + ChatColor.RESET + " " + ChatColor.RED + "a vault!");
         }
     }
+
+    @EventHandler
+    public void onOpenVault(InventoryOpenEvent inventoryOpenEvent) {
+        if(Util.isVault(Objects.requireNonNull(inventoryOpenEvent.getInventory().getLocation()).getBlock())){
+            boolean hasAccount = false;
+            Player player = (Player) inventoryOpenEvent.getPlayer();
+            PlayerAccount account = null;
+            try {
+                account = (PlayerAccount)
+                        ItemEconomy.getInstance().getAccount(player.getUniqueId().toString());
+                if(account != null)
+                    hasAccount = true;
+            } catch (Exception e){e.printStackTrace();}
+
+        }
+
+
+
+
+
+
+    }
+
 }

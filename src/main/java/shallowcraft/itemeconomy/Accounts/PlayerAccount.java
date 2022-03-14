@@ -22,7 +22,7 @@ public class PlayerAccount implements Account {
     private List<Vault> vaults;
     private Map<String, Taxable> taxes;
     private int lastPersonalBalance;
-    private int lastSavings;
+    private int lastBalance;
     @Getter @Setter private int netWithdraw;
 
     public PlayerAccount(Map<String, String> inputData, String ID){
@@ -44,7 +44,7 @@ public class PlayerAccount implements Account {
         taxes = new HashMap<>();
         lastPersonalBalance = personalBalance;
         netWithdraw = net;
-        this.lastSavings = lastSavings;
+        this.lastBalance = lastSavings;
 
         DataUtil.populateAccount(this, inputData, ItemEconomyPlugin.getInstance().getServer());
     }
@@ -54,7 +54,7 @@ public class PlayerAccount implements Account {
         vaults = new ArrayList<>();
         taxes = new HashMap<>();
         lastPersonalBalance = 0;
-        lastSavings = getChequingBalance();
+        lastBalance = getChequingBalance();
         netWithdraw = 0;
     }
 
@@ -63,12 +63,12 @@ public class PlayerAccount implements Account {
         vaults = new ArrayList<>();
         taxes = new HashMap<>();
         lastPersonalBalance = personalBalance;
-        lastSavings = lastProfit;
+        lastBalance = lastProfit;
         netWithdraw = 0;
     }
 
-    public int getLastSavings(){
-        return lastSavings;
+    public int getLastBalance(){
+        return lastBalance;
     }
 
     @Override
@@ -163,11 +163,11 @@ public class PlayerAccount implements Account {
     }
 
     public int getProfit(){
-        return getBalance() - lastSavings;
+        return getBalance() - lastBalance;
     }
 
     public void updateSavings(){
-        lastSavings = getBalance();
+        lastBalance = getBalance();
     }
 
 
@@ -261,6 +261,23 @@ public class PlayerAccount implements Account {
         return new TransactionResult(numAdded, result.type, "deposit");
     }
 
+    public TransactionResult depositInventory(int amount){
+        TransactionResult result;
+        Inventory inventory =  null;
+        try{
+            inventory = player.getPlayer().getInventory();
+        } catch (Exception ignore){
+        }
+
+        if(inventory != null){
+            result = Transaction.deposit(inventory, amount);
+        } else{
+            result = new TransactionResult(0, TransactionResult.ResultType.FAILURE, "fail");
+        }
+
+        return result;
+    }
+
     @Override
     public String getID() {
         return player.getUniqueId().toString();
@@ -293,7 +310,7 @@ public class PlayerAccount implements Account {
         Map<String, String> outputData = new HashMap<>();
 
         outputData.put("Personal Balance", String.valueOf(lastPersonalBalance));
-        outputData.put("Last Savings", String.valueOf(lastSavings));
+        outputData.put("Last Savings", String.valueOf(lastBalance));
         outputData.put("Net Withdraw", String.valueOf(netWithdraw));
 
         DataUtil.logVaults(this, outputData);

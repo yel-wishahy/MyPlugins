@@ -11,7 +11,6 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.Inventory;
@@ -448,8 +447,8 @@ public class Util {
 
     public static String getPercentageBalanceChangeMessage(PlayerAccount holder) {
         double upBy = 0.0;
-        if (holder.getLastSavings() != 0)
-            upBy = holder.getProfit() / ((double) holder.getLastSavings()) * 100;
+        if (holder.getLastBalance() != 0)
+            upBy = holder.getProfit() / ((double) holder.getLastBalance()) * 100;
         String percentage = (new DecimalFormat("#.##")).format(upBy);
         StringBuilder s = new StringBuilder();
         s.append(ChatColor.GOLD).append(" ( ");
@@ -581,6 +580,11 @@ public class Util {
         newStats.put("Last Tax Balance", String.valueOf(Objects.requireNonNull(Taxation.getTaxDeposit()).getBalance()));
 
         ItemEconomy.getInstance().setHistoryStats(newStats);
+
+        for (Account p: ItemEconomy.getInstance().getAccounts().values()) {
+            if(p.getAccountType().equals("Player Account"))
+                ((PlayerAccount) p).updateSavings();
+        }
     }
 
     public static String getPercentageChange(double now, double before) {
