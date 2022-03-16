@@ -23,7 +23,7 @@ version: SNAPSHOT-7.2 (works with 1.18.2)
 main: shallowcraft.itemeconomy.ItemEconomyPlugin
 api-version: 1.17
 authors: [ BlackShadow2941 ]
-description: An item based economy for minecraft with potential for vault support
+description: An item based economy for minecraft with vault support and quickshop addon
 depend: [Vault]
 loadbefore: [QuickShop]
 
