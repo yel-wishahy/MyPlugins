@@ -17,55 +17,61 @@ Item Vault creation sign:
 Demo: https://www.youtube.com/watch?v=MuiKJ1oVDqU
 
 Plugin info:
-  
-- name: ItemEconomy
-- version: ${project.version}
-- main: shallowcraft.itemeconomy.ItemEconomy
-- api-version: 1.18
-- authors: [ BlackShadow2941 ]
-- description: An item based economy for minecraft with potential for vault support
-- depend: [Vault]
-- commands:
-  -  ItemEconomy:
-    -    aliases: [ie, IE, itemeconomy, money, eco, economy]
-    -    usage: |
-    -      /ItemEconomy balance
-    -      /ItemEconomy baltop
-    -      /ItemEconomy create_account <name>
-    -      /ItemEconomy list_accounts
-    -      /ItemEconomy create_account_all
-    -      /ItemEconomy reload
-    -      /ItemEconomy save
-    -      /ItemEconomy remove_account <name>
-    -      /ItemEconomy deposit <name> <amount>
-    -      /ItemEconomy withdraw <name> <amount>
-    -      /ItemEconomy transfer <vault tpye> <vault type> <amount>
-    -      /ItemEconomy admintransfer <name> <vault tpye> <vault type> <amount>
-  -  Tax:
+
+name: ItemEconomy
+version: SNAPSHOT-7.2 (works with 1.18.2)
+main: shallowcraft.itemeconomy.ItemEconomyPlugin
+api-version: 1.17
+authors: [ BlackShadow2941 ]
+description: An item based economy for minecraft with potential for vault support
+depend: [Vault]
+loadbefore: [QuickShop]
+
+commands:
+  ItemEconomy:
+    aliases: [ie, IE, itemeconomy, money, eco, economy]
+    usage: |
+      /ItemEconomy balance
+      /ItemEconomy baltop
+      /ItemEconomy create_account <name>
+      /ItemEconomy list_accounts
+      /ItemEconomy create_account_all
+      /ItemEconomy reload
+      /ItemEconomy load
+      /ItemEconomy save
+      /ItemEconomy statsupdate
+      /ItemEconomy remove_account <name>
+      /ItemEconomy admindeposit <name> <amount>
+      /ItemEconomy adminwithdraw <name> <amount>
+      /ItemEconomy withdraw <amount>
+      /ItemEconomy transfer <vault tpye> <vault type> <amount>
+      /ItemEconomy admintransfer <name> <vault tpye> <vault type> <amount>
+  Tax:
     aliases: [tax, ietax, ieTax, taxes, t]
-    -    usage: |
-    -      /Tax tax <name> <[optional] tax name>
-    -      /Tax add <name> <tax name> <rate>
-    -      /Tax remove <name> <tax name>
-    -      /Tax info <name> < [optional] tax name>
-    -      /Tax taxall
-    -      /Tax clear <name>
-    -      /Tax edit <name> <tax name> <args>
-    -      /Tax redistribute
-    -      /Tax taxprofits
-  -  SmartShop:
-    - aliases: [smartShop, s, ss ]
-    - /SmartShop info < [optional] name>
-    - /SmartShop accept <ordername> (or accept all)
-    - /SmartShop decline <ordername> (or decline all)
-    - /SmartShop remove <name> <order name> (or remove all)
-    - /SmartShop generate <name | optional defaults to everyone> <amount | optional defaults to 1>
-    - /SmartShop log <name>
-- permissions:
-    -  itemeconomy.admin:
-      -    default: op
-    -  itemeconomy.message:
-      -    default: true
-    -  itemeconomy.player:
-      -    default: true
+    usage: |
+      /Tax tax <name> <[optional] tax name>
+      /Tax add <name> <tax name> <rate>
+      /Tax remove <name> <tax name>
+      /Tax info <name> < [optional] tax name>
+      /Tax taxall
+      /Tax clear <name>
+      /Tax edit <name> <tax name> <args>
+      /Tax redistribute
+      /Tax taxprofits
+  SmartShop:
+    aliases: [smartShop, s, ss ]
+    usage: |
+      /SmartShop info < [optional] name>
+      /SmartShop accept <ordername> (or accept all)
+      /SmartShop decline <ordername> (or decline all)
+      /SmartShop remove <name> <order name> (or remove all)
+      /SmartShop generate
+      /SmartShop log <name>
+permissions:
+  itemeconomy.admin:
+    default: op
+  itemeconomy.message:
+    default: true
+  itemeconomy.player:
+    default: true
 
