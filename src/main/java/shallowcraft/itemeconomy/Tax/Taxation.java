@@ -1,5 +1,6 @@
 package shallowcraft.itemeconomy.Tax;
 
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.ChatColor;
@@ -20,7 +21,23 @@ import java.util.List;
 import java.util.Map;
 
 public class Taxation {
-    public static TransactionResult redistribute(Map<String, Account> accounts){
+    private static Taxation instance;
+    @Getter private Account mainTaxDeposit;
+
+    private Taxation(){
+        mainTaxDeposit = getTaxDeposit();
+    }
+
+    public static Taxation getInstance(){
+        if(instance == null){
+            instance = new Taxation();
+        }
+
+        return instance;
+    }
+
+
+    public TransactionResult redistribute(Map<String, Account> accounts){
         int totalCirculation = Util.getTotalCirculation();
         TextComponent starting = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Starting daily wealth distribution. Total currency " +
                 "in circulation right now is: " + ChatColor.YELLOW + totalCirculation + ChatColor.AQUA + " Diamonds.");
@@ -78,8 +95,8 @@ public class Taxation {
                 remainder+=split-result.amount;
                 distributed+=result.amount;
 
-                TextComponent saverInfo = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Embezzled " + ChatColor.YELLOW + result.amount + ChatColor.AQUA
-                        + " diamonds " + ChatColor.GREEN + "into " + ChatColor.YELLOW + saver.getName() + "'s " + ChatColor.GREEN + " account!");
+                TextComponent saverInfo = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "'Donated' " + ChatColor.YELLOW + result.amount + ChatColor.AQUA
+                        + " diamonds " + ChatColor.GREEN + "to " + ChatColor.YELLOW + saver.getName() + "'s " + ChatColor.GREEN + " account! Your welcome. ;)");
                 ItemEconomyPlugin.getInstance().getServer().broadcast(saverInfo, Permissions.playerPerm);
             }
 
@@ -93,11 +110,11 @@ public class Taxation {
     }
 
 
-    private static boolean isHoarding(int balance, int circulation){
+    private boolean isHoarding(int balance, int circulation){
         return ((double) balance)/((double) circulation) > Config.wealthCap/100.0;
     }
 
-    public static TransactionResult taxAllProfits(Map<String, Account> accounts){
+    public TransactionResult taxAllProfits(Map<String, Account> accounts){
         int totalCirculation = Util.getTotalCirculation();
         TextComponent starting = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Starting daily" + ChatColor.BOLD + " " +
                 ChatColor.RED + "Income Tax!" + ChatColor.RESET + " " + ChatColor.GREEN + "Total currency " +
@@ -136,11 +153,11 @@ public class Taxation {
         return new TransactionResult(totalTaxed, TransactionResult.ResultType.SUCCESS, "profit tax");
     }
 
-    private static int amountToTax(int profit, double rate){
+    private int amountToTax(int profit, double rate){
         return (int) (profit * rate);
     }
 
-    private static double getProportionalRate(int profit, int maxProfit){
+    private double getProportionalRate(int profit, int maxProfit){
         double ratio = ((double) profit / (double) maxProfit);
         double rate = 0;
 
@@ -152,7 +169,7 @@ public class Taxation {
         return rate;
     }
 
-    public static void resetSavings(){
+    public void resetSavings(){
         for (Account acc:ItemEconomy.getInstance().getAccounts().values()) {
             if(acc instanceof PlayerAccount){
                 PlayerAccount holder = (PlayerAccount) acc;
@@ -162,7 +179,7 @@ public class Taxation {
     }
 
     //gets amount to tax based on profits
-    public static Map<String, Integer> getTaxableProfits(){
+    public Map<String, Integer> getTaxableProfits(){
         Map<String, Integer> outputTaxable = new HashMap<>();
         Map<String, Account> accounts = ItemEconomy.getInstance().getAccounts();
         Map<String, Integer> profits = Util.sortByValue(Util.getProfits());
@@ -189,9 +206,9 @@ public class Taxation {
         return outputTaxable;
     }
 
-    public static boolean tax(double amount) {
+    public boolean tax(double amount) {
         for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
-            if (acc instanceof GeneralAccount && ((GeneralAccount) acc).isTaxDeposit) {
+            if (acc instanceof GeneralAccount && ((GeneralAccount) acc).isMainTaxDeposit) {
                 GeneralAccount account = (GeneralAccount) acc;
                 account.balanceBuffer += amount;
                 return true;
@@ -201,13 +218,24 @@ public class Taxation {
         return false;
     }
 
-    public static Account getTaxDeposit() {
+    public boolean tax(double amount, Account taxDeposit) {
+        if (taxDeposit instanceof GeneralAccount account && ((GeneralAccount) taxDeposit).isMainTaxDeposit) {
+            account.balanceBuffer += amount;
+            return true;
+        }
+
+        return false;
+    }
+
+    private Account getTaxDeposit() {
         for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
-            if (acc instanceof GeneralAccount && ((GeneralAccount) acc).isTaxDeposit) {
+            if (acc instanceof GeneralAccount && ((GeneralAccount) acc).isMainTaxDeposit) {
                 return acc;
             }
         }
 
-        return null;
+        Account deposit = new GeneralAccount(Config.taxID);
+        ItemEconomy.getInstance().getAccounts().put(deposit.getID(),deposit);
+        return deposit;
     }
 }

@@ -156,7 +156,8 @@ public class SmartShopUtil {
     }
 
     public static void createSmartShopDeposit(){
-        ItemEconomy.getInstance().getAccounts().put(SmartShopConfig.smartShopHolderName, new GeneralAccount(SmartShopConfig.smartShopHolderName));
+        Account holder = new GeneralAccount(SmartShopConfig.smartShopHolderName);
+        ItemEconomy.getInstance().getAccounts().put(holder.getID(), holder);
     }
 
     public static void declineOrder(ShopOrder order){

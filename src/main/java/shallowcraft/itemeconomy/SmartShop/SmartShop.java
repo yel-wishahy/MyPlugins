@@ -3,12 +3,18 @@ package shallowcraft.itemeconomy.SmartShop;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.maxgamer.quickshop.api.QuickShopAPI;
 import shallowcraft.itemeconomy.Accounts.Account;
-import shallowcraft.itemeconomy.Data.DataSerializer;
+import shallowcraft.itemeconomy.Data.DataManager;
 import shallowcraft.itemeconomy.Data.InvalidDataException;
 import shallowcraft.itemeconomy.ItemEconomy;
+import shallowcraft.itemeconomy.ItemEconomyPlugin;
+import shallowcraft.itemeconomy.SmartShop.Commads.SmartShopCommand;
+import shallowcraft.itemeconomy.SmartShop.Commads.SmartShopTabCompleter;
+import shallowcraft.itemeconomy.SmartShop.Listener.SSEventHandler;
 import shallowcraft.itemeconomy.SmartShop.ShopOrder.ShopOrder;
 import shallowcraft.itemeconomy.SmartShop.ShopOrder.ShopOrderLog;
 
@@ -28,30 +34,62 @@ public class SmartShop {
     @Getter @Setter private ShopOrderLog log;
     @Getter @Setter public QuickShopAPI QuickShopAPI;
 
+    private int initializeAttempt = 0;
+
 
     private SmartShop() {
         instance = this;
+        isEnabled = false;
+    }
 
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("QuickShop");
-        if(plugin != null){
-            QuickShopAPI = (QuickShopAPI)plugin;
-            ItemEconomy.log.info("Successfully loaded QuickShop api");
-            isEnabled = true;
-        } else {
-            ItemEconomy.log.info("failed to load QuickShop api");
-            isEnabled = false;
+    public void initializeSmartShop() {
+        initializeAttempt++;
+        Server server = Bukkit.getServer();
+
+        if (server.getPluginManager().isPluginEnabled("QuickShop")) {
+            Plugin plugin = Bukkit.getPluginManager().getPlugin("QuickShop");
+
+            if (plugin != null) {
+                QuickShopAPI = (QuickShopAPI) plugin;
+                holder = SmartShopUtil.getSmartShopDeposit();
+
+                loadData();
+
+                log = new ShopOrderLog();
+                log.loadPreviousLogs();
+
+                ItemEconomyPlugin.getInstance().getCommand(SmartShopConfig.command).setExecutor(new SmartShopCommand());
+                server.getPluginCommand(SmartShopConfig.command).setTabCompleter(new SmartShopTabCompleter());
+                server.getPluginManager().registerEvents(new SSEventHandler(), ItemEconomyPlugin.getInstance());
+
+
+                ItemEconomy.log.info("[ItemEconomy: SmartShop] Successfully loaded SmartShop");
+
+                isEnabled = true;
+            }
         }
 
-        holder = SmartShopUtil.getSmartShopDeposit();
-
-        if(holder == null)
-            isEnabled = false;
-        else {
-            ItemEconomy.log.info("loading data for smart shop");
-            loadData();
+        if(!isEnabled && initializeAttempt < SmartShopConfig.maxAllowedInitializeAttempts){
+            BukkitRunnable task = new BukkitRunnable() {
+                /**
+                 * When an object implementing interface {@code Runnable} is used
+                 * to create a thread, starting the thread causes the object's
+                 * {@code run} method to be called in that separately executing
+                 * thread.
+                 * <p>
+                 * The general contract of the method {@code run} is that it may
+                 * take any action whatsoever.
+                 *
+                 * @see Thread#run()
+                 */
+                @Override
+                public void run() {
+                    SmartShop.getInstance().initializeSmartShop();
+                }
+            };
+            task.runTaskLater(ItemEconomyPlugin.getInstance(), SmartShopConfig.initializeTaskDelay);
+            ItemEconomy.log.info("[ItemEconomy: SmartShop] Failed to load SmartShop, will attempt again in 200 ticks");
         }
-
-        log = new ShopOrderLog();
     }
 
     public static SmartShop getInstance() {
@@ -65,8 +103,8 @@ public class SmartShop {
         cleanOrders();
         ShopOrderLog.getInstance().saveLogs();
         try {
-            File dataFile = DataSerializer.createDataFile(SmartShopConfig.dataFileName);
-            DataSerializer.saveShopOrdersToJSON(shopOrders, dataFile);
+            File dataFile = DataManager.createDataFile(SmartShopConfig.dataFileName);
+            DataManager.saveShopOrdersToJSON(shopOrders, dataFile);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -77,9 +115,9 @@ public class SmartShop {
 
     public boolean loadData() {
         try {
-            File dataFile = DataSerializer.getDataFile(SmartShopConfig.dataFileName);
+            File dataFile = DataManager.getDataFile(SmartShopConfig.dataFileName);
             if (dataFile.exists())
-               shopOrders = DataSerializer.loadShopOrdersFromJSON(dataFile);
+               shopOrders = DataManager.loadShopOrdersFromJSON(dataFile);
             else
                 shopOrders = new HashMap<>();
 
@@ -87,7 +125,7 @@ public class SmartShop {
         } catch (IOException | InvalidDataException e) {
             e.printStackTrace();
             shopOrders = new HashMap<>();
-            ItemEconomy.log.info("[ItemEconomy Smart Shop] Failed to load data");
+            ItemEconomy.log.info("[ItemEconomy: Smart Shop] Failed to load data");
             return false;
         }
     }
@@ -147,4 +185,5 @@ public class SmartShop {
         for (int i = 0; i < amount ; i++)
             generateOrderForID(id);
     }
+
 }

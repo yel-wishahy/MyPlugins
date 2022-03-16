@@ -36,7 +36,7 @@ public class IETabCompleter implements org.bukkit.command.TabCompleter {
         if (args.length == 1)
             StringUtil.copyPartialMatches(args[0], Config.IESubCommands, completions);
         else if(args.length == 2) {
-            if (args[0].equals("create_account") || args[0].equals("remove_account") || args[0].equals("deposit") || args[0].equals("withdraw") || args[0].equals("admintransfer")
+            if (args[0].equals("create_account") || args[0].equals("remove_account") || args[0].equals("admindeposit") || args[0].equals("adminwithdraw") || args[0].equals("admintransfer")
                     || args[0].equals("balance")) { ;
                 StringUtil.copyPartialMatches(args[1], Stream.concat(Util.getAllPlayerNames().stream(),
                         Util.getAllGeneralAccountIDs().stream()).collect(Collectors.toList()), completions);

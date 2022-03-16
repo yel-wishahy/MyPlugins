@@ -17,10 +17,13 @@ commands:
       /ItemEconomy list_accounts
       /ItemEconomy create_account_all
       /ItemEconomy reload
+      /ItemEconomy load
       /ItemEconomy save
+      /ItemEconomy statsupdate
       /ItemEconomy remove_account <name>
-      /ItemEconomy deposit <name> <amount>
-      /ItemEconomy withdraw <name> <amount>
+      /ItemEconomy admindeposit <name> <amount>
+      /ItemEconomy adminwithdraw <name> <amount>
+      /ItemEconomy withdraw <amount>
       /ItemEconomy transfer <vault tpye> <vault type> <amount>
       /ItemEconomy admintransfer <name> <vault tpye> <vault type> <amount>
   Tax:

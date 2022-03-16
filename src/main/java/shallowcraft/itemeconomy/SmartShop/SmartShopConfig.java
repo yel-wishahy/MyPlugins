@@ -24,4 +24,8 @@ public class SmartShopConfig {
     public static List<String> subCommands = List.of("info", "accept", "decline", "remove", "generate", "log", "save", "reload", "search");
     public static List<String> aliases = List.of("smartShop", "ss", "s", "SmartShop");
     public static String command = "SmartShop";
+
+
+    public static int maxAllowedInitializeAttempts = 5;
+    public static long initializeTaskDelay = 200; //ticks
 }

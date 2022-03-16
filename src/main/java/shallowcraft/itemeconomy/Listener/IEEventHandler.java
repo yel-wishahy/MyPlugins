@@ -91,26 +91,20 @@ public class IEEventHandler implements Listener {
         }
     }
 
-    @EventHandler
-    public void onOpenVault(InventoryOpenEvent inventoryOpenEvent) {
-        if(Util.isVault(Objects.requireNonNull(inventoryOpenEvent.getInventory().getLocation()).getBlock())){
-            boolean hasAccount = false;
-            Player player = (Player) inventoryOpenEvent.getPlayer();
-            PlayerAccount account = null;
-            try {
-                account = (PlayerAccount)
-                        ItemEconomy.getInstance().getAccount(player.getUniqueId().toString());
-                if(account != null)
-                    hasAccount = true;
-            } catch (Exception e){e.printStackTrace();}
-
-        }
-
-
-
-
-
-
-    }
+//    @EventHandler
+//    public void onOpenVault(InventoryOpenEvent inventoryOpenEvent) {
+//        if(Util.isVault(Objects.requireNonNull(inventoryOpenEvent.getInventory().getLocation()).getBlock())){
+//            boolean hasAccount = false;
+//            Player player = (Player) inventoryOpenEvent.getPlayer();
+//            PlayerAccount account = null;
+//            try {
+//                account = (PlayerAccount)
+//                        ItemEconomy.getInstance().getAccount(player.getUniqueId().toString());
+//                if(account != null)
+//                    hasAccount = true;
+//            } catch (Exception e){e.printStackTrace();}
+//
+//        }
+//    }
 
 }

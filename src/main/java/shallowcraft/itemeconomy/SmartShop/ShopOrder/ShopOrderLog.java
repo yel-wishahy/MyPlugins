@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
-import shallowcraft.itemeconomy.Data.DataSerializer;
+import shallowcraft.itemeconomy.Data.DataManager;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.SmartShop.SmartShopConfig;
 import shallowcraft.itemeconomy.Util.Util;
@@ -26,7 +26,6 @@ public class ShopOrderLog{
 
     public ShopOrderLog(){
         instance = this;
-        loadPreviousLogs();
     }
 
     public void log(ShopOrder order){
@@ -72,9 +71,9 @@ public class ShopOrderLog{
 
     public boolean loadPreviousLogs(){
         try{
-            File dataFile = DataSerializer.getDataFile(SmartShopConfig.logFileName);
+            File dataFile = DataManager.getDataFile(SmartShopConfig.logFileName);
             if(dataFile.exists())
-                orderLogs = DataSerializer.loadShopOrderLogsFromJSON(dataFile);
+                orderLogs = DataManager.loadShopOrderLogsFromJSON(dataFile);
             else
                 orderLogs = new HashMap<>();
             return true;
@@ -88,8 +87,8 @@ public class ShopOrderLog{
 
     public boolean saveLogs(){
         try {
-            File dataFile = DataSerializer.createDataFile(SmartShopConfig.logFileName);
-            DataSerializer.saveShopOrderLogsToJSON(orderLogs, dataFile);
+            File dataFile = DataManager.createDataFile(SmartShopConfig.logFileName);
+            DataManager.saveShopOrderLogsToJSON(orderLogs, dataFile);
             return true;
         } catch (IOException e) {
             e.printStackTrace();

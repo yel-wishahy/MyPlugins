@@ -3,6 +3,7 @@ package shallowcraft.itemeconomy;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -11,7 +12,8 @@ import java.util.logging.Logger;
 import org.bukkit.entity.Player;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
-import shallowcraft.itemeconomy.Data.DataSerializer;
+import shallowcraft.itemeconomy.Data.DataManager;
+import shallowcraft.itemeconomy.Data.DataUtil;
 import shallowcraft.itemeconomy.Tax.Taxation;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Data.InvalidDataException;
@@ -46,8 +48,8 @@ public class ItemEconomy {
 
     public boolean saveData() {
         try {
-            File dataFile = DataSerializer.createDataFile(Config.dataFileName);
-            DataSerializer.saveDataToJSON(accounts, dataFile);
+            File dataFile = DataManager.createDataFile(Config.dataFileName);
+            DataManager.saveDataToJSON(accounts, dataFile);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -58,9 +60,9 @@ public class ItemEconomy {
 
     public boolean loadData() {
         try {
-            File dataFile = DataSerializer.getDataFile(Config.dataFileName);
+            File dataFile = DataManager.getDataFile(Config.dataFileName);
             if (dataFile.exists())
-                accounts = DataSerializer.loadDataFromJSON(dataFile);
+                accounts = DataManager.loadDataFromJSON(dataFile);
             else{
                 accounts = new HashMap<>();
             }
@@ -76,7 +78,8 @@ public class ItemEconomy {
 
 
     public boolean hasAccount(OfflinePlayer player) {
-        return accounts.containsKey(player.getUniqueId().toString());
+
+        return accounts.containsKey(player.getUniqueId().toString()) || accounts.containsKey(player.getName()); //name is for tax account uuid trick, fake player
     }
 
     public boolean hasAccount(String id) {
@@ -84,8 +87,12 @@ public class ItemEconomy {
     }
 
     public Account getAccount(OfflinePlayer player) {
-        if (hasAccount(player))
+        if(accounts.containsKey(player.getUniqueId().toString()))
             return accounts.get(player.getUniqueId().toString());
+
+        if(accounts.containsKey(player.getName()))
+            return accounts.get(player.getName());
+
         return null;
     }
 
@@ -118,10 +125,13 @@ public class ItemEconomy {
         Account holder = accounts.get(player.getUniqueId().toString());
 
         int toWithdraw = (int) Math.round(amount);
+        //why can you tax negative amounts you may ask? well in the event of a round up, the player gains money
+        //i deem that this is fine as long as the tax account loses the same amount of money
+        //essentially, the tax account can be generous
         double taxable = amount - toWithdraw;
 
         if (holder != null) {
-            if (Taxation.tax(taxable))
+            if (Config.enableTaxes && Taxation.getInstance().tax(taxable))
                 try {
                     player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have been taxed " + ChatColor.AQUA + (taxable / amount * 100) + " %!");
                 } catch (Exception ignored) {
@@ -136,10 +146,11 @@ public class ItemEconomy {
         Account holder = accounts.get(player.getUniqueId().toString());
 
         int toDeposit = (int) Math.round(amount);
+        //this isnt really
         double taxable = amount - toDeposit;
 
         if (holder != null) {
-            if (Config.enableTaxes && Taxation.tax(taxable))
+            if (Config.enableTaxes && Taxation.getInstance().tax(taxable))
                 try {
                     player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have been taxed " + ChatColor.AQUA + (taxable / amount * 100) + " %!");
                 } catch (Exception ignored) {
@@ -157,11 +168,8 @@ public class ItemEconomy {
         double taxable = amount - toDeposit;
 
         if (holder != null) {
-            if (Config.enableTaxes &&  Taxation.tax(taxable))
-                try {
-                    ((PlayerAccount) holder).getPlayer().getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have been taxed " + ChatColor.AQUA + (taxable / amount * 100) + " %!");
-                } catch (Exception ignored) {
-                }
+            if (Config.enableTaxes)
+                Taxation.getInstance().tax(taxable);
             return holder.deposit(toDeposit);
         } else {
             return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "playerNotFound");

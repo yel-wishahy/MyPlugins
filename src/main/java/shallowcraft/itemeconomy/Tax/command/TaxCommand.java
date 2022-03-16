@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Permissions;
@@ -36,19 +37,19 @@ public class TaxCommand implements CommandExecutor {
         switch (args[0]) {
             case "resetprofits":
                 if(sender.hasPermission(Permissions.adminPerm))
-                    Taxation.resetSavings();
+                    Taxation.getInstance().resetSavings();
                 else
                     sender.sendMessage(Permissions.invalidPerm);
                 return true;
             case "taxprofits":
                 if(sender.hasPermission(Permissions.adminPerm))
-                    Taxation.taxAllProfits(accounts);
+                    Taxation.getInstance().taxAllProfits(accounts);
                 else
                     sender.sendMessage(Permissions.invalidPerm);
                 return true;
             case "redistribute":
                 if(sender.hasPermission(Permissions.adminPerm))
-                    Taxation.redistribute(accounts);
+                    Taxation.getInstance().redistribute(accounts);
                 else
                     sender.sendMessage(Permissions.invalidPerm);
                 return true;
@@ -82,6 +83,38 @@ public class TaxCommand implements CommandExecutor {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
 
                 return success;
+            case "addcustom":
+                boolean successAddCustom = false;
+                if (args.length == 5 && sender.hasPermission(Permissions.adminPerm)) {
+                    String playerName = args[1];
+                    String depositID = args[2];
+                    String taxName = args[3];
+                    double taxRate = Double.parseDouble(args[4]);
+
+                    if (accounts.containsKey(Util.getPlayerID(playerName)) && taxRate > 0) {
+                        PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
+                        GeneralAccount taxDeposit = (GeneralAccount) accounts.get(depositID);
+
+                        if(Util.totalTaxRate(holder) + taxRate <= Config.taxCap){
+                            holder.addTax(new GeneralTax(holder,taxDeposit, taxName, taxRate));
+
+                            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully added new tax: " + ChatColor.YELLOW + taxName + ChatColor.GREEN +
+                                    " with rate " + ChatColor.YELLOW + taxRate + ChatColor.GREEN + " to " + ChatColor.AQUA + holder.getName() + "'s" + ChatColor.GREEN + " account!");
+                            successAddCustom = true;
+                        } else {
+                            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED
+                                    + "Total player tax rate cannot exceed + " + ChatColor.YELLOW + Config.taxCap + " %!!");
+                        }
+
+                    }
+                }
+
+                if (!sender.hasPermission(Permissions.adminPerm))
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You cannot send this command.");
+                if (!successAddCustom)
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Invalid command format");
+
+                return successAddCustom;
             case "remove":
                 boolean pass = false;
                 if (args.length == 3 && sender.hasPermission(Permissions.adminPerm)) {

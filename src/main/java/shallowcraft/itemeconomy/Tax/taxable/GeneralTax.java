@@ -15,6 +15,7 @@ import java.util.Date;
 
 public class GeneralTax implements Taxable {
     private final Account holder;
+    private final Account taxDeposit;
     private String taxName;
     private double taxRate;
     private Date lastTaxTime;
@@ -25,12 +26,33 @@ public class GeneralTax implements Taxable {
         this.holder = holder;
         this.taxRate = tax;
         this.taxName = name;
+        this.taxDeposit = Taxation.getInstance().getMainTaxDeposit();
+        setTaxTimes();
+        ItemEconomy.log.info(this.toString());
+    }
+
+    public GeneralTax(Account holder,Account taxDeposit, String name, double tax){
+        this.holder = holder;
+        this.taxRate = tax;
+        this.taxName = name;
+        this.taxDeposit = taxDeposit;
         setTaxTimes();
         ItemEconomy.log.info(this.toString());
     }
 
     public GeneralTax(Account holder, String name, double tax, Date lastTaxTime, Date nextTaxTime) {
         this.holder = holder;
+        this.taxDeposit = Taxation.getInstance().getMainTaxDeposit();
+        this.taxRate = tax;
+        this.taxName = name;
+        this.lastTaxTime = lastTaxTime;
+        this.nextTaxTime = nextTaxTime;
+        ItemEconomy.log.info(this.toString());
+    }
+
+    public GeneralTax(Account holder, Account taxDeposit, String name, double tax, Date lastTaxTime, Date nextTaxTime) {
+        this.holder = holder;
+        this.taxDeposit = taxDeposit;
         this.taxRate = tax;
         this.taxName = name;
         this.lastTaxTime = lastTaxTime;
@@ -42,11 +64,10 @@ public class GeneralTax implements Taxable {
     public TransactionResult tax(){
         Date now = new Date();
         if(now.compareTo(nextTaxTime) > 0){
-            Account deposit = Taxation.getTaxDeposit();
-            if(deposit!=null){
+            if(taxDeposit!=null){
                 int taxable = amountToTax();
                 TransactionResult withdrawResult = holder.forcedWithdraw(taxable);
-                deposit.deposit(withdrawResult.amount);
+                taxDeposit.deposit(withdrawResult.amount);
 
                 setTaxTimes();
 
@@ -100,6 +121,11 @@ public class GeneralTax implements Taxable {
     @Override
     public void updateRate(double amount){
         taxRate = amount;
+    }
+
+    @Override
+    public Account getTaxDeposit() {
+        return taxDeposit;
     }
 
     @Override

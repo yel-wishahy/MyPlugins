@@ -30,6 +30,8 @@ public class ItemEconomyPlugin extends JavaPlugin {
     private ItemEconomy ItemEconomy;
     @Getter @Setter
     private SmartShop SmartShop;
+    @Getter @Setter boolean taxesEnabled;
+
 
     @Override
     public void onEnable() {
@@ -46,10 +48,20 @@ public class ItemEconomyPlugin extends JavaPlugin {
         registerCommands();
 
         if(Config.enableSmartShop)
-            setupSmartShop();
+            try {
+                setupSmartShop();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
 
         if(Config.enableTaxes)
-            setupTaxes();
+            try {
+                setupTaxes();
+                taxesEnabled = true;
+            } catch (Exception e){
+                taxesEnabled = false;
+                e.printStackTrace();
+            }
     }
 
     @Override
@@ -72,18 +84,8 @@ public class ItemEconomyPlugin extends JavaPlugin {
     }
 
     private void setupSmartShop(){
-        if (getServer().getPluginManager().isPluginEnabled("QuickShop")) {
-            SmartShop = shallowcraft.itemeconomy.SmartShop.SmartShop.getInstance();
-            this.getCommand(SmartShopConfig.command).setExecutor(new SmartShopCommand());
-            getServer().getPluginCommand(SmartShopConfig.command).setTabCompleter(new SmartShopTabCompleter());
-            getServer().getPluginManager().registerEvents(new SSEventHandler(), this);
-
-            if(!SmartShop.isEnabled())
-                log.info("[ItemEconomy] Failed to setup smart shop system!");
-
-        } else{
-            log.info("[ItemEconomy] Failed to setup smart shop system! Could not find QuickShop Plugin");
-        }
+        SmartShop = shallowcraft.itemeconomy.SmartShop.SmartShop.getInstance();
+        SmartShop.initializeSmartShop();
     }
 
     private void setupTaxes(){

@@ -2,6 +2,7 @@ package shallowcraft.itemeconomy.Util;
 
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -108,7 +109,7 @@ public class Util {
         return false;
     }
 
-    public static Vault getVaultFromContainer(Block block){
+    public static Vault getVaultFromContainer(Block block) {
         for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
             for (Vault vault : acc.getVaults()) {
                 if (vault.getContainer().getLocation().equals(block.getLocation())) {
@@ -472,7 +473,7 @@ public class Util {
         int taxable = 0;
 
         try {
-            taxable = Taxation.getTaxableProfits().get(holder.getID());
+            taxable = Taxation.getInstance().getTaxableProfits().get(holder.getID());
         } catch (Exception ignored) {
         }
 
@@ -552,17 +553,17 @@ public class Util {
         return (new ArrayList<>(bals.values())).get(mid);
     }
 
-    public static Map<String, Integer> getPlayerSpendings(){
+    public static Map<String, Integer> getPlayerSpendings() {
         Map<String, Integer> output = new HashMap<>();
-        for (Account acc:ItemEconomy.getInstance().getAccounts().values()) {
-            if(acc instanceof PlayerAccount)
+        for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
+            if (acc instanceof PlayerAccount)
                 output.put(acc.getID(), ((PlayerAccount) acc).getNetWithdraw());
         }
 
         return output;
     }
 
-    public static int getMedianPlayerSpendings(){
+    public static int getMedianPlayerSpendings() {
         Map<String, Integer> spendings = sortByValue(getPlayerSpendings());
 
         int mid = spendings.size() / 2;
@@ -577,12 +578,12 @@ public class Util {
         newStats.put("Circulation", String.valueOf(getTotalCirculation()));
         newStats.put("Average Balance", String.valueOf(getAveragePlayerBalance()));
         newStats.put("Median Balance", String.valueOf(getMedianPlayerBalance()));
-        newStats.put("Last Tax Balance", String.valueOf(Objects.requireNonNull(Taxation.getTaxDeposit()).getBalance()));
+        newStats.put("Last Tax Balance", String.valueOf(Objects.requireNonNull(Taxation.getInstance().getMainTaxDeposit()).getBalance()));
 
         ItemEconomy.getInstance().setHistoryStats(newStats);
 
-        for (Account p: ItemEconomy.getInstance().getAccounts().values()) {
-            if(p.getAccountType().equals("Player Account"))
+        for (Account p : ItemEconomy.getInstance().getAccounts().values()) {
+            if (p.getAccountType().equals("Player Account"))
                 ((PlayerAccount) p).updateSavings();
         }
     }
@@ -609,7 +610,7 @@ public class Util {
     }
 
     public static String getServerStatsMessage() {
-        if(!Util.validateHistoryStats(ItemEconomy.getInstance().getHistoryStats()))
+        if (!Util.validateHistoryStats(ItemEconomy.getInstance().getHistoryStats()))
             ItemEconomy.getInstance().resetHistoryStats();
 
         StringBuilder baltopMessage = new StringBuilder();
@@ -659,7 +660,7 @@ public class Util {
                     rateofchange = Util.getPercentageBalanceChangeMessage(holder);
                 }
 
-                baltopMessage.append("    ").append(j).append(". ").append(ChatColor.GOLD).append(name).append(" ".repeat(24-name.length()));
+                baltopMessage.append("    ").append(j).append(". ").append(ChatColor.GOLD).append(name).append(" ".repeat(24 - name.length()));
                 baltopMessage.append(ChatColor.YELLOW).append(bals.get(name)).append(ChatColor.AQUA).append(" ").append(Config.currency.name().toLowerCase()).
                         append(rateofchange).append("\n");
                 j++;
@@ -670,19 +671,19 @@ public class Util {
         return baltopMessage.toString();
     }
 
-    public static boolean validateHistoryStats(Map<String, String> stats){
-        if(stats == null)
+    public static boolean validateHistoryStats(Map<String, String> stats) {
+        if (stats == null)
             return false;
 
         String circ = stats.get("Circulation");
         String avgBal = stats.get("Average Balance");
         String medBal = stats.get("Median Balance");
 
-        try{
+        try {
             Integer.parseInt(circ);
             Integer.parseInt(avgBal);
             Integer.parseInt(medBal);
-        } catch (NumberFormatException | NullPointerException e)  {
+        } catch (NumberFormatException | NullPointerException e) {
             ItemEconomy.log.info("[ItemEconomy] Bad History States format");
             e.printStackTrace();
             return false;
@@ -691,7 +692,18 @@ public class Util {
         return true;
     }
 
-
+//    public static GeneralAccount getGeneralAccountFromUUID(UUID uuid) {
+//        String name = Objects.requireNonNull(Bukkit.getPlayer(uuid)).getName();
+//        for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
+//            if (acc instanceof GeneralAccount && acc.getID().equals(name)){
+//                ItemEconomy.log.info("[ItemEconomy] Found a uuid to general account relation, commencing transfer.");
+//                return (GeneralAccount) acc;
+//            }
+//
+//        }
+//
+//        return null;
+//    }
 
 
 }

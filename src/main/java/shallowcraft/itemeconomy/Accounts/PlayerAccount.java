@@ -5,9 +5,12 @@ import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.scheduler.BukkitRunnable;
 import shallowcraft.itemeconomy.Data.DataUtil;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
+import shallowcraft.itemeconomy.SmartShop.SmartShop;
+import shallowcraft.itemeconomy.SmartShop.SmartShopConfig;
 import shallowcraft.itemeconomy.Tax.taxable.GeneralTax;
 import shallowcraft.itemeconomy.Tax.taxable.Taxable;
 import shallowcraft.itemeconomy.BankVault.Vault;
@@ -46,7 +49,18 @@ public class PlayerAccount implements Account {
         netWithdraw = net;
         this.lastBalance = lastSavings;
 
-        DataUtil.populateAccount(this, inputData, ItemEconomyPlugin.getInstance().getServer());
+        DataUtil.populateAccountVaults(this, inputData, ItemEconomyPlugin.getInstance().getServer());
+        DataUtil.populateAccountTaxes(this, inputData);
+
+        //load taxes later, as this requires other accounts to be loaded as well for tax deposit
+        Account thisAccount = this;
+        BukkitRunnable task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                DataUtil.populateAccountTaxes(thisAccount, inputData);
+            }
+        };
+        task.runTaskLater(ItemEconomyPlugin.getInstance(), 100);
     }
 
     public PlayerAccount(OfflinePlayer player){

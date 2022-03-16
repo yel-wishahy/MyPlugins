@@ -31,12 +31,12 @@ public class Config {
     public static final String vaultHeader = "[Vault]";
     public static final List<String> IESubCommands = List.of("create_account",
             "balance", "list_accounts", "create_account_all", "remove_account",
-            "reload", "save", "baltop", "admindeposit", "adminwithdraw","withdraw",
+            "reload", "save","load", "baltop", "admindeposit", "adminwithdraw","withdraw",
             "transfer", "admintransfer", "statsupdate");
     public static final List<String> IECommandAliases = List.of("ItemEconomy", "itemeconomy",
             "IE", "ie", "eco", "money");
     public static final List<String> TaxCommandAliases = List.of("tax", "ietax", "ieTax", "taxes", "t");
-    public static final List<String> TaxSubCommands = List.of("add", "remove", "tax", "taxall", "info", "clear", "edit", "redistribute", "taxprofits", "resetprofits");
+    public static final List<String> TaxSubCommands = List.of("add","addcustom", "remove", "tax", "taxall", "info", "clear", "edit", "redistribute", "taxprofits", "resetprofits");
     public static final List<String> TaxEditSubCommands = List.of("timeset_now", "set_rate");
     public static final List<String> IEShopCommandAliases = List.of("Shop","ItemEconomyShop", "itemeconomyshop", "ieshop" , "shop", "ss", "buy", "sell");
     public static final String IECommand = "ItemEconomy";

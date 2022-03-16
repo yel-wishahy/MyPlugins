@@ -7,7 +7,9 @@ import org.bukkit.block.Sign;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Config;
+import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
+import shallowcraft.itemeconomy.Tax.Taxation;
 import shallowcraft.itemeconomy.Tax.taxable.GeneralTax;
 import shallowcraft.itemeconomy.Tax.taxable.Taxable;
 import shallowcraft.itemeconomy.BankVault.ContainerVault;
@@ -18,57 +20,81 @@ import java.util.*;
 
 public class DataUtil {
 
-    public static void populateAccount(Account currentAccount, Map<String, String> inputData, Server server) {
+    public static void populateAccountVaults(Account currentAccount, Map<String, String> inputData, Server server) {
         List<Vault> vaults = new ArrayList<>();
-        Map<String, GeneralTax> taxes = new HashMap<>();
 
         for (String identifier : inputData.keySet()) {
             if (identifier.contains("Container")) {
-                //ItemEconomy.log.info("[ItemEconomy] Loading Vault " + containerIndex);
-                String[] data = inputData.get(identifier).split(",");
-
-                Location signLoc = new Location(server.getWorld(data[0]), Integer.parseInt(data[1]), Integer.parseInt(data[2]), Integer.parseInt(data[3]));
-                Location containerLoc = new Location(server.getWorld(data[0]), Integer.parseInt(data[4]), Integer.parseInt(data[5]), Integer.parseInt(data[6]));
-
-                VaultType type = VaultType.REGULAR;
-                if (data.length > 7)
-                    type = VaultType.fromID(Integer.parseInt(data[7]));
-
-                Block sign = signLoc.getBlock();
-                Block container = containerLoc.getBlock();
-
-                Vault currentVault = new ContainerVault(container, (Sign) sign.getState(), currentAccount, type);
-                vaults.add(currentVault);
-            } else if (identifier.contains("Tax") && currentAccount instanceof PlayerAccount) {
-                PlayerAccount holder = (PlayerAccount) currentAccount;
-                String[] data = inputData.get(identifier).split(",");
-                GeneralTax tax = null;
-
-                String name = data[0];
-                double rate = Double.parseDouble(data[1]);
-                Date last = null;
-                Date next = null;
                 try {
-                    last = Config.timeFormat.parse(data[2]);
-                    next = Config.timeFormat.parse(data[3]);
-                } catch (Exception ignored) {
-                    ignored.printStackTrace();
+                    //ItemEconomy.log.info("[ItemEconomy] Loading Vault " + containerIndex);
+                    String[] data = inputData.get(identifier).split(",");
+
+                    Location signLoc = new Location(server.getWorld(data[0]), Integer.parseInt(data[1]), Integer.parseInt(data[2]), Integer.parseInt(data[3]));
+                    Location containerLoc = new Location(server.getWorld(data[0]), Integer.parseInt(data[4]), Integer.parseInt(data[5]), Integer.parseInt(data[6]));
+
+                    VaultType type = VaultType.REGULAR;
+                    if (data.length > 7)
+                        type = VaultType.fromID(Integer.parseInt(data[7]));
+
+                    Block sign = signLoc.getBlock();
+                    Block container = containerLoc.getBlock();
+
+                    Vault currentVault = new ContainerVault(container, (Sign) sign.getState(), currentAccount, type);
+                    vaults.add(currentVault);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                if (last != null && next != null)
-                    tax = new GeneralTax(holder, name, rate, last, next);
-                else
-                    tax = new GeneralTax(holder, name, rate);
-
-                taxes.put(tax.getTaxName(), tax);
             }
         }
 
         currentAccount.overrideLoadVaults(vaults);
-
-        if (currentAccount instanceof PlayerAccount)
-            ((PlayerAccount) currentAccount).overrideLoadTaxes(taxes);
     }
+
+    public static void populateAccountTaxes(Account currentAccount, Map<String, String> inputData) {
+        ItemEconomy.log.info("[ItemEconomy: Dataloader] Loading taxes for account: " + currentAccount.getName());
+
+        if (currentAccount instanceof PlayerAccount holder) {
+
+            Map<String, GeneralTax> taxes = new HashMap<>();
+
+            for (String identifier : inputData.keySet()) {
+                if (identifier.contains("Tax")) {
+                    try {
+                        //depositid,taxname,taxrate,lasttaxtime,nexttaxtime
+                        String[] data = inputData.get(identifier).split(",");
+                        GeneralTax tax;
+                        String depositID = data[0];
+                        Account taxDeposit = ItemEconomy.getInstance().getAccounts().get(depositID);
+                        //use main tax deposit if cannot find deposit of id
+                        if(taxDeposit == null)
+                            taxDeposit = Taxation.getInstance().getMainTaxDeposit();
+
+                        String name = data[1];
+                        double rate = Double.parseDouble(data[2]);
+                        Date last = null;
+                        Date next = null;
+                        try {
+                            last = Config.timeFormat.parse(data[3]);
+                            next = Config.timeFormat.parse(data[4]);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        if (last != null && next != null)
+                            tax = new GeneralTax(holder, taxDeposit, name, rate, last, next);
+                        else
+                            tax = new GeneralTax(holder, taxDeposit, name, rate);
+
+                        taxes.put(tax.getTaxName(), tax);
+                    } catch (Exception ignored) {
+                    }
+                }
+
+                ((PlayerAccount) currentAccount).overrideLoadTaxes(taxes);
+            }
+        }
+    }
+
 
     public static void logVaults(Account acc, Map<String, String> outputData) {
         int containerIndex = 0;
@@ -108,14 +134,15 @@ public class DataUtil {
             String lastTax = Config.timeFormat.format(tax.getLastTaxTime());
             String nextTax = Config.timeFormat.format(tax.getNextTaxTime());
             String taxRate = String.valueOf(tax.getTaxRate());
-            data.append(taxName).append(",").append(taxRate).append(",").append(lastTax).append(",").append(nextTax);
-
+            String depositID = tax.getTaxDeposit().getID();
+            data.append(depositID).append(",").append(taxName).append(",").append(taxRate).append(",").append(lastTax).append(",").append(nextTax);
+            //depositid,taxname,taxrate,lasttaxtime,nexttaxtime
             outputData.put("Tax_" + index, data.toString());
             index++;
         }
     }
 
-    public static String serializeLocation(Location location){
+    public static String serializeLocation(Location location) {
         StringBuilder data = new StringBuilder();
         String worldName = location.getWorld().getName();
         data.append(worldName).append(",");
@@ -130,7 +157,7 @@ public class DataUtil {
         return data.toString();
     }
 
-    public static Location deserializeLocation(String[] data){
+    public static Location deserializeLocation(String[] data) {
         return new Location(ItemEconomyPlugin.getInstance().getServer().getWorld(data[0]), Integer.parseInt(data[1]), Integer.parseInt(data[2]), Integer.parseInt(data[3]));
     }
 

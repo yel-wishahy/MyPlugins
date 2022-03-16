@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DataSerializer {
+public class DataManager {
     public static Map<String, Account> loadDataFromJSON(File dataFile) throws IOException, InvalidDataException, NullPointerException {
         Map<String, Account> accounts = new HashMap<>();
 

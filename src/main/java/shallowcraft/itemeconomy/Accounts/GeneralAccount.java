@@ -11,59 +11,55 @@ import shallowcraft.itemeconomy.Util.Util;
 import shallowcraft.itemeconomy.BankVault.Vault;
 import shallowcraft.itemeconomy.BankVault.VaultType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GeneralAccount implements Account {
     private List<Vault> vaults;
     private final Material itemCurrency = Config.currency;
     private final String name;
     public double balanceBuffer;
-    public boolean isTaxDeposit;
+    public boolean isMainTaxDeposit;
 
     public GeneralAccount(Map<String, String> inputData, String ID){
-        double buffer = 0;
+        this.name = ID;
+        try{
+            this.balanceBuffer  = Double.parseDouble(inputData.get("Buffer"));
+        } catch (Exception ignored){
+            balanceBuffer = 0;
+        }
 
-        try{buffer = Double.parseDouble(inputData.get("Buffer")); }
-        catch (Exception ignored){}
+        try{
+            this.isMainTaxDeposit = Boolean.parseBoolean(inputData.get("isMainTaxDeposit"));
+        } catch (Exception ignored){
+            isMainTaxDeposit = name.toLowerCase().contains("tax");
+        }
 
         vaults = new ArrayList<>();
-        this.name = ID;
-        balanceBuffer = 0;
-        setTaxDeposit();
 
-        DataUtil.populateAccount(this, inputData, ItemEconomyPlugin.getInstance().getServer());
+        DataUtil.populateAccountVaults(this, inputData, ItemEconomyPlugin.getInstance().getServer());
     }
 
     public GeneralAccount(String name){
         vaults = new ArrayList<>();
         this.name = name;
         balanceBuffer = 0;
-        setTaxDeposit();
+        isMainTaxDeposit = name.toLowerCase().contains("tax");
     }
 
     public GeneralAccount(double balanceBuffer, String name){
         vaults = new ArrayList<>();
         this.name = name;
         this.balanceBuffer = balanceBuffer;
-        setTaxDeposit();
+        isMainTaxDeposit = name.toLowerCase().contains("tax");
     }
 
-    private void setTaxDeposit(){
-        if(name.toLowerCase().contains("tax"))
-            isTaxDeposit = true;
-        else
-            isTaxDeposit = false;
-    }
-
-    private void convertBalanceBuffer(){
-        if(balanceBuffer > 0){
-            int toConvert = (int) Math.round(balanceBuffer);
-            TransactionResult result = depositCurrency(toConvert);
-
+    private TransactionResult convertBalanceBuffer(){
+        if(balanceBuffer >= 1) {
+            TransactionResult result = Transaction.depositAllVaults((int)balanceBuffer, vaults);
             balanceBuffer -= result.amount;
+            return result;
+        } else {
+            return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "balance buffer too small");
         }
     }
 
@@ -121,13 +117,10 @@ public class GeneralAccount implements Account {
         return Transaction.forceWithdrawAllVaults(amount, getBalance(), vaults);
     }
 
-    private TransactionResult depositCurrency(int amount){
-        return Transaction.depositAllVaults(amount, vaults);
-    }
-
     @Override
     public TransactionResult deposit(int amount) {
         balanceBuffer+=amount;
+        convertBalanceBuffer();
         return new TransactionResult(amount, TransactionResult.ResultType.SUCCESS, "deposit");
     }
 
@@ -163,6 +156,7 @@ public class GeneralAccount implements Account {
         Map<String, String> outputData = new HashMap<>();
 
         outputData.put("Buffer", String.valueOf(balanceBuffer));
+        outputData.put("isMainTaxDeposit", String.valueOf(isMainTaxDeposit));
         DataUtil.logVaults(this, outputData);
 
         return outputData;
