@@ -15,7 +15,7 @@ Item Vault creation sign:
     - for withdraw or deposit only vaults
 
 Demo: https://www.youtube.com/watch?v=MuiKJ1oVDqU
-
+```
 Plugin info:
 
 name: ItemEconomy
@@ -74,4 +74,4 @@ permissions:
     default: true
   itemeconomy.player:
     default: true
-
+```
