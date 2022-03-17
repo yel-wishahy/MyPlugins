@@ -15,10 +15,9 @@ import java.util.*;
 
 public class GeneralAccount implements Account {
     private List<Vault> vaults;
-    private final Material itemCurrency = Config.currency;
     private final String name;
-    public double balanceBuffer;
     public boolean isMainTaxDeposit;
+    private double balanceBuffer;
 
     public GeneralAccount(Map<String, String> inputData, String ID){
         this.name = ID;
@@ -53,7 +52,8 @@ public class GeneralAccount implements Account {
         isMainTaxDeposit = name.toLowerCase().contains("tax");
     }
 
-    private TransactionResult convertBalanceBuffer(){
+    @Override
+    public TransactionResult convertBalanceBuffer(){
         if(balanceBuffer >= 1) {
             TransactionResult result = Transaction.depositAllVaults((int)balanceBuffer, vaults);
             balanceBuffer -= result.amount;
@@ -104,13 +104,25 @@ public class GeneralAccount implements Account {
 
     @Override
     public TransactionResult withdraw(int amount) {
+        convertBalanceBuffer();
+        TransactionResult result;
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("[ItemEconomy] Debug: attempting to withdraw " + amount + " from " + this.name + " " + this.getID());
+
         if(getChequingBalance() < amount)
-            return new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
-        return Transaction.withdrawAllVaults(amount, getChequingBalance(), vaults);
+            result = new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
+        else
+            result = Transaction.withdrawAllVaults(amount, getChequingBalance(), vaults);
+
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("[ItemEconomy] Debug: withdraw result " + amount + " from " + this.name + " " + this.getID() + " : " + result);
+
+        return result;
     }
 
     @Override
     public TransactionResult forcedWithdraw(int amount){
+        convertBalanceBuffer();
         if(getBalance() < amount)
             return new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
 
@@ -119,9 +131,19 @@ public class GeneralAccount implements Account {
 
     @Override
     public TransactionResult deposit(int amount) {
+        convertBalanceBuffer();
+        TransactionResult result;
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("[ItemEconomy] Debug: attempting to deposit " + amount + " into " + this.name + " " + this.getID());
         balanceBuffer+=amount;
         convertBalanceBuffer();
-        return new TransactionResult(amount, TransactionResult.ResultType.SUCCESS, "deposit");
+
+        result = new TransactionResult(amount, TransactionResult.ResultType.SUCCESS, "deposit");
+
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("[ItemEconomy] Debug: deposit " + amount + " into " + this.name + " " + this.getID() + " : " + result);
+
+        return  result;
     }
 
     @Override
@@ -149,6 +171,16 @@ public class GeneralAccount implements Account {
         List<Vault> sources = Util.getVaultsOfType(source, vaults);
         List<Vault> destinations = Util.getVaultsOfType(destination, vaults);
         return Transaction.transferVaults(sources, destinations, amount);
+    }
+
+    @Override
+    public void updateBalanceBuffer(double amount) {
+        balanceBuffer += amount;
+    }
+
+    @Override
+    public double getBalanceBuffer() {
+        return balanceBuffer;
     }
 
     @Override

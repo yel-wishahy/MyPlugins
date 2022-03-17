@@ -15,6 +15,7 @@ import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -180,13 +181,14 @@ public class Commands {
                 int regular = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.REGULAR, vaults));
 
                 String rateOfChange = " ";
+                String buffer = ChatColor.GREEN + "Buffer: " + ChatColor.YELLOW + (new DecimalFormat("#.##")).format(holder.getBalanceBuffer()) + ChatColor.GREEN;
                 if (holder instanceof PlayerAccount) {
                     rateOfChange = Util.getPercentageBalanceChangeMessage((PlayerAccount) holder);
                 }
 
                 sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.YELLOW + holder.getName() + ChatColor.GREEN + "'s chequing balance is " + ChatColor.YELLOW +
                         holder.getChequingBalance() + " " + ChatColor.AQUA + "Diamonds." + ChatColor.GREEN + " \n Total Holdings: " + ChatColor.YELLOW + holder.getBalance() +
-                        rateOfChange + ChatColor.GREEN +
+                        rateOfChange + ChatColor.GREEN + "    " + buffer + ChatColor.GREEN +
                         "\n Vaults ->  Regular: " + ChatColor.YELLOW + regular +
                         ChatColor.GREEN + " , Deposit: " + ChatColor.YELLOW + deposit + ChatColor.GREEN + " , Withdraw: " + ChatColor.YELLOW + withdraw
                         + ChatColor.GREEN + ".");

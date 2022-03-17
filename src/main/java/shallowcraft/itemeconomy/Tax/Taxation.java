@@ -207,12 +207,9 @@ public class Taxation {
     }
 
     public boolean tax(double amount) {
-        for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
-            if (acc instanceof GeneralAccount && ((GeneralAccount) acc).isMainTaxDeposit) {
-                GeneralAccount account = (GeneralAccount) acc;
-                account.balanceBuffer += amount;
-                return true;
-            }
+        if (this.mainTaxDeposit != null) {
+            this.mainTaxDeposit.updateBalanceBuffer(amount);
+            return true;
         }
 
         return false;
@@ -220,7 +217,7 @@ public class Taxation {
 
     public boolean tax(double amount, Account taxDeposit) {
         if (taxDeposit instanceof GeneralAccount account && ((GeneralAccount) taxDeposit).isMainTaxDeposit) {
-            account.balanceBuffer += amount;
+            account.updateBalanceBuffer(amount);
             return true;
         }
 

@@ -112,7 +112,15 @@ public class IECommand implements CommandExecutor {
                     sender.sendMessage(Permissions.invalidPerm);
             case "withdraw":
                 return Commands.withdraw(args,sender);
-
+            case "debug":
+                if(sender.hasPermission(Permissions.adminPerm) || sender.isOp() || !isPlayer){
+                    ItemEconomy.getInstance().setDebugMode(!ItemEconomy.getInstance().isDebugMode());
+                    if(ItemEconomy.getInstance().isDebugMode())
+                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + ChatColor.BOLD + "Debug Mode Enabled.");
+                    else
+                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + ChatColor.BOLD + "Debug Mode Disabled.");
+                }
+                return true;
             default:
                 return false;
         }

@@ -32,11 +32,13 @@ public class ItemEconomy {
 
     @Getter @Setter private Map<String, String> historyStats;
     @Getter @Setter private Map<String, Account> accounts;
+    @Getter @Setter private boolean debugMode;
 
     private ItemEconomy(){
         instance = this;
         loadData();
         isEnabled = true;
+        debugMode = false;
     }
 
     public static ItemEconomy getInstance(){
@@ -52,7 +54,8 @@ public class ItemEconomy {
             DataManager.saveDataToJSON(accounts, dataFile);
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            if(debugMode)
+                e.printStackTrace();
             log.info("[ItemEconomy] Failed to save data.");
             return false;
         }
@@ -69,7 +72,8 @@ public class ItemEconomy {
 
             return true;
         } catch (IOException | InvalidDataException e) {
-            e.printStackTrace();
+            if(debugMode)
+                e.printStackTrace();
             accounts = new HashMap<>();
             log.info("[ItemEconomy] Failed to load data");
             return false;
@@ -78,8 +82,14 @@ public class ItemEconomy {
 
 
     public boolean hasAccount(OfflinePlayer player) {
-
-        return accounts.containsKey(player.getUniqueId().toString()) || accounts.containsKey(player.getName()); //name is for tax account uuid trick, fake player
+        boolean result = accounts.containsKey(player.getUniqueId().toString()) || accounts.containsKey(player.getName());
+        if(debugMode) {
+            if (result)
+                log.info("[ItemEconomy] in hasAccount, found account with player name: " + player.getName() + "and id " + player.getUniqueId());
+            else
+                log.info("[ItemEconomy] in hasAccount, COULD NOT FIND account with player name: " + player.getName() + "and id " + player.getUniqueId());
+        }
+        return result;
     }
 
     public boolean hasAccount(String id) {
@@ -87,11 +97,20 @@ public class ItemEconomy {
     }
 
     public Account getAccount(OfflinePlayer player) {
-        if(accounts.containsKey(player.getUniqueId().toString()))
+        if (accounts.containsKey(player.getUniqueId().toString())) {
+            if (debugMode)
+                log.info("[ItemEconomy] in getAccount, found account with player name: " + player.getName() + "and id " + player.getUniqueId());
             return accounts.get(player.getUniqueId().toString());
+        }
 
-        if(accounts.containsKey(player.getName()))
-            return accounts.get(player.getName());
+        if (accounts.containsKey(player.getName())){
+            if (debugMode)
+                log.info("[ItemEconomy] in getAccount, found account with player name: " + player.getName() + "and id " + player.getUniqueId());
+        return accounts.get(player.getName());
+        }
+
+        if (debugMode)
+            log.info("[ItemEconomy] in getAccount, COULD NOT FIND account with player name: " + player.getName() + "and id " + player.getUniqueId());
 
         return null;
     }
@@ -121,21 +140,13 @@ public class ItemEconomy {
 
 
     public TransactionResult withdrawPlayer(OfflinePlayer player, double amount) {
-        ItemEconomy.log.info("[ItemEconomy] WITHDRAWING FROM PLAYER");
-        Account holder = accounts.get(player.getUniqueId().toString());
+        Account holder = getAccount(player);
 
-        int toWithdraw = (int) Math.round(amount);
-        //why can you tax negative amounts you may ask? well in the event of a round up, the player gains money
-        //i deem that this is fine as long as the tax account loses the same amount of money
-        //essentially, the tax account can be generous
-        double taxable = amount - toWithdraw;
+        int toWithdraw = (int) amount;
+        double buffer = amount - toWithdraw;
 
         if (holder != null) {
-            if (Config.enableTaxes && Taxation.getInstance().tax(taxable))
-                try {
-                    player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have been taxed " + ChatColor.AQUA + (taxable / amount * 100) + " %!");
-                } catch (Exception ignored) {
-                }
+            holder.updateBalanceBuffer(-1*buffer);
             return holder.withdraw(toWithdraw);
         } else {
             return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "playerNotFound");
@@ -143,18 +154,13 @@ public class ItemEconomy {
     }
 
     public TransactionResult depositPlayer(OfflinePlayer player, double amount) {
-        Account holder = accounts.get(player.getUniqueId().toString());
+        Account holder = getAccount(player);
 
-        int toDeposit = (int) Math.round(amount);
-        //this isnt really
-        double taxable = amount - toDeposit;
+        int toDeposit = (int) amount;
+        double buffer = amount - toDeposit;
 
         if (holder != null) {
-            if (Config.enableTaxes && Taxation.getInstance().tax(taxable))
-                try {
-                    player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You have been taxed " + ChatColor.AQUA + (taxable / amount * 100) + " %!");
-                } catch (Exception ignored) {
-                }
+            holder.updateBalanceBuffer(buffer);
             return holder.deposit(toDeposit);
         } else {
             return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "playerNotFound");
@@ -164,12 +170,11 @@ public class ItemEconomy {
     public TransactionResult deposit(String id, double amount) {
         Account holder = accounts.get(id);
 
-        int toDeposit = (int) Math.round(amount);
-        double taxable = amount - toDeposit;
+        int toDeposit = (int) amount;
+        double buffer = amount - toDeposit;
 
         if (holder != null) {
-            if (Config.enableTaxes)
-                Taxation.getInstance().tax(taxable);
+            holder.updateBalanceBuffer(buffer);
             return holder.deposit(toDeposit);
         } else {
             return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "playerNotFound");

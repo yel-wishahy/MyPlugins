@@ -32,7 +32,7 @@ public class Config {
     public static final List<String> IESubCommands = List.of("create_account",
             "balance", "list_accounts", "create_account_all", "remove_account",
             "reload", "save","load", "baltop", "admindeposit", "adminwithdraw","withdraw",
-            "transfer", "admintransfer", "statsupdate");
+            "transfer", "admintransfer", "statsupdate", "debug");
     public static final List<String> IECommandAliases = List.of("ItemEconomy", "itemeconomy",
             "IE", "ie", "eco", "money");
     public static final List<String> TaxCommandAliases = List.of("tax", "ietax", "ieTax", "taxes", "t");

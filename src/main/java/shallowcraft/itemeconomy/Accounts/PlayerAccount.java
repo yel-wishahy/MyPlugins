@@ -26,6 +26,7 @@ public class PlayerAccount implements Account {
     private Map<String, Taxable> taxes;
     private int lastPersonalBalance;
     private int lastBalance;
+    private double balanceBuffer;
     @Getter @Setter private int netWithdraw;
 
     public PlayerAccount(Map<String, String> inputData, String ID){
@@ -34,6 +35,7 @@ public class PlayerAccount implements Account {
         int personalBalance = 0;
         int lastSavings = 0;
         int net = 0;
+        double buffer = 0.0;
 
         try{ personalBalance = Integer.parseInt(inputData.get("Personal Balance"));}
         catch (Exception ignored){}
@@ -41,8 +43,11 @@ public class PlayerAccount implements Account {
         catch (Exception ignored){}
         try { net = Integer.parseInt(inputData.get("Net Withdraw"));}
         catch (Exception ignored){}
+        try { buffer = Double.parseDouble(inputData.get("Balance Buffer"));}
+        catch (Exception ignored){}
 
         this.player = player;
+        balanceBuffer = buffer;
         vaults = new ArrayList<>();
         taxes = new HashMap<>();
         lastPersonalBalance = personalBalance;
@@ -50,7 +55,6 @@ public class PlayerAccount implements Account {
         this.lastBalance = lastSavings;
 
         DataUtil.populateAccountVaults(this, inputData, ItemEconomyPlugin.getInstance().getServer());
-        DataUtil.populateAccountTaxes(this, inputData);
 
         //load taxes later, as this requires other accounts to be loaded as well for tax deposit
         Account thisAccount = this;
@@ -83,6 +87,17 @@ public class PlayerAccount implements Account {
 
     public int getLastBalance(){
         return lastBalance;
+    }
+
+    @Override
+    public TransactionResult convertBalanceBuffer(){
+        if(balanceBuffer >= 1) {
+            TransactionResult result = this.deposit((int)balanceBuffer);
+            balanceBuffer -= result.amount;
+            return result;
+        } else {
+            return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "balance buffer too small");
+        }
     }
 
     @Override
@@ -149,6 +164,7 @@ public class PlayerAccount implements Account {
 
     public TransactionResult taxAll(){
         int count = 0;
+        convertBalanceBuffer();
         for (Taxable tax: taxes.values()) {
             count += tax.tax().amount;
         }
@@ -157,6 +173,7 @@ public class PlayerAccount implements Account {
     }
 
     private boolean updatePersonalBalance(){
+        convertBalanceBuffer();
         Inventory inventory = Util.getInventory(player);
 
         if(inventory != null){
@@ -199,12 +216,19 @@ public class PlayerAccount implements Account {
 
     @Override
     public TransactionResult withdraw(int amount){
-        if(getChequingBalance() < amount)
-            return new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
+        TransactionResult result;
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("[ItemEconomy] Debug: attempting to withdraw " + amount + " from " + this.getName() + " " + this.getID());
+
+        if(getChequingBalance() < amount) {
+            result = new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
+            if(ItemEconomy.getInstance().isDebugMode())
+                ItemEconomy.log.info("[ItemEconomy] Debug: withdraw result " + amount + " from " + this.getName() + " " + this.getID() + " : " + result);
+        }
 
         int removed = 0;
 
-        TransactionResult result = Transaction.withdrawAllVaults(amount, getChequingBalance(), vaults);
+        result = Transaction.withdrawAllVaults(amount, getChequingBalance(), vaults);
         removed += result.amount;
 
 
@@ -222,7 +246,13 @@ public class PlayerAccount implements Account {
             player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Failed to withdraw completely! (Determined cause: Deposit only account).");
 
         netWithdraw+=removed;
-        return new TransactionResult(removed, result.type, "withdraw");
+        result = new TransactionResult(removed, result.type, "withdraw");
+
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("[ItemEconomy] Debug: withdraw result " + amount + " from " + this.getName() + " " + this.getID() + " : " + result);
+
+        return result;
+
     }
 
     @Override
@@ -253,8 +283,14 @@ public class PlayerAccount implements Account {
 
     @Override
     public TransactionResult deposit(int amount){
+        TransactionResult result;
+
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("[ItemEconomy] Debug: attempting to deposit " + amount + " into " + this.getName() + " " + this.getID());
+
+        convertBalanceBuffer();
         int numAdded = 0;
-        TransactionResult result = Transaction.depositAllVaults(amount, vaults);
+        result = Transaction.depositAllVaults(amount, vaults);
         numAdded += result.amount;
 
         if(TransactionResult.ResultType.failureModes.contains(result.type)){
@@ -272,10 +308,17 @@ public class PlayerAccount implements Account {
 
         updatePersonalBalance();
         ItemEconomy.getInstance().saveData();
-        return new TransactionResult(numAdded, result.type, "deposit");
+        result = new TransactionResult(numAdded, result.type, "deposit");
+
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("[ItemEconomy] Debug: deposit " + amount + " into " + this.getName() + " " + this.getID() + " : " + result);
+
+        return  result;
+
     }
 
     public TransactionResult depositInventory(int amount){
+        convertBalanceBuffer();
         TransactionResult result;
         Inventory inventory =  null;
         try{
@@ -320,12 +363,23 @@ public class PlayerAccount implements Account {
     }
 
     @Override
+    public void updateBalanceBuffer(double amount) {
+        balanceBuffer+=amount;
+    }
+
+    @Override
+    public double getBalanceBuffer() {
+        return balanceBuffer;
+    }
+
+    @Override
     public Map<String, String> getSerializableData() {
         Map<String, String> outputData = new HashMap<>();
 
         outputData.put("Personal Balance", String.valueOf(lastPersonalBalance));
         outputData.put("Last Savings", String.valueOf(lastBalance));
         outputData.put("Net Withdraw", String.valueOf(netWithdraw));
+        outputData.put("Balance Buffer", String.valueOf(balanceBuffer));
 
         DataUtil.logVaults(this, outputData);
         DataUtil.logTaxes(this, outputData);

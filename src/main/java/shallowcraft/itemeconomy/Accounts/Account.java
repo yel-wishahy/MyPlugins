@@ -1,6 +1,7 @@
 package shallowcraft.itemeconomy.Accounts;
 
 import shallowcraft.itemeconomy.Data.Serializable;
+import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.BankVault.Vault;
 import shallowcraft.itemeconomy.BankVault.VaultType;
@@ -11,6 +12,7 @@ import java.util.List;
  * interface for accounts, create an account class by implementing this interface
  */
 public interface Account extends Serializable<Account> {
+
     public int getChequingBalance();
     public int getBalance();
     public int getBalance(VaultType vaultType);
@@ -25,5 +27,8 @@ public interface Account extends Serializable<Account> {
     public String getName();
     public int hashCode();
     public String getAccountType();
-    public TransactionResult transfer(VaultType source, VaultType destination, int amount); 
+    public TransactionResult transfer(VaultType source, VaultType destination, int amount);
+    public void updateBalanceBuffer(double amount);
+    public double getBalanceBuffer();
+    public TransactionResult convertBalanceBuffer();
 }

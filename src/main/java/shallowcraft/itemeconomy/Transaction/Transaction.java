@@ -5,6 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.BankVault.Vault;
 import shallowcraft.itemeconomy.BankVault.VaultType;
+import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.util.ArrayList;
@@ -15,8 +16,8 @@ public class Transaction {
     public static TransactionResult withdraw(Inventory inventory, int amount) {
         if(amount == 0)
             return new TransactionResult(0, TransactionResult.ResultType.SUCCESS, "withdraw");
-
-        //ItemEconomy.log.info("Trying to withdraw " + amount + "from " + inventory.getType().name() + " with total of " + Util.countItem(inventory));
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("Trying to withdraw " + amount + "from " + inventory.getType().name() + " with total of " + Util.countItem(inventory));
         int numRemoved = 0;
 
         for (int i = 0; i < inventory.getSize(); i++) {
@@ -71,11 +72,12 @@ public class Transaction {
         }
 
         if(numRemoved == amount){
-            //ItemEconomy.log.info("success NOW HAS:  " + Util.countItem(inventory));
+            if(ItemEconomy.getInstance().isDebugMode())
+                ItemEconomy.log.info("success NOW HAS:  " + Util.countItem(inventory));
             return new TransactionResult(numRemoved, TransactionResult.ResultType.SUCCESS, "withdraw");
         }
-
-        //ItemEconomy.log.info("fail NOW HAS:  " + Util.countItem(inventory));
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("fail NOW HAS:  " + Util.countItem(inventory));
         return new TransactionResult(numRemoved, TransactionResult.ResultType.FAILURE, "withdraw");
     }
 
@@ -83,8 +85,8 @@ public class Transaction {
     public static TransactionResult deposit(Inventory inventory, int amount){
         if(amount == 0)
             return new TransactionResult(0, TransactionResult.ResultType.SUCCESS, "deposit");
-
-        //ItemEconomy.log.info("Trying to deposit " + amount + " into " + inventory.getType().name() + " with total of " + Util.countItem(inventory));
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("Trying to deposit " + amount + " into " + inventory.getType().name() + " with total of " + Util.countItem(inventory));
         int numAdded = 0;
 
 
@@ -123,12 +125,15 @@ public class Transaction {
         }
 
         if(numAdded == amount){
-            //ItemEconomy.log.info("Success: Deposited " + numAdded + " into " + inventory.getType().name());
-            //ItemEconomy.log.info("NOW HAS:  " + Util.countItem(inventory));
+            if(ItemEconomy.getInstance().isDebugMode()) {
+                ItemEconomy.log.info("Success: Deposited " + numAdded + " into " + inventory.getType().name());
+                ItemEconomy.log.info("NOW HAS:  " + Util.countItem(inventory));
+            }
             return new TransactionResult(numAdded, TransactionResult.ResultType.SUCCESS, "deposit");
         }
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("NOW HAS:  " + Util.countItem(inventory));
 
-        //ItemEconomy.log.info("NOW HAS:  " + Util.countItem(inventory));
         return new TransactionResult(numAdded, TransactionResult.ResultType.INSUFFICIENT_SPACE, "deposit");
     }
 

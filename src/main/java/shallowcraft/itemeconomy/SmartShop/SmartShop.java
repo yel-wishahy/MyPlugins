@@ -107,7 +107,8 @@ public class SmartShop {
             DataManager.saveShopOrdersToJSON(shopOrders, dataFile);
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            if(ItemEconomy.getInstance().isDebugMode())
+                e.printStackTrace();
             ItemEconomy.log.info("[ItemEconomy Smart Shop] Failed to save data.");
             return false;
         }
@@ -123,7 +124,8 @@ public class SmartShop {
 
             return true;
         } catch (IOException | InvalidDataException e) {
-            e.printStackTrace();
+            if(ItemEconomy.getInstance().isDebugMode())
+                e.printStackTrace();
             shopOrders = new HashMap<>();
             ItemEconomy.log.info("[ItemEconomy: Smart Shop] Failed to load data");
             return false;

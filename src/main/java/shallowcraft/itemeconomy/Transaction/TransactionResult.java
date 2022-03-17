@@ -31,6 +31,12 @@ public class TransactionResult {
         this.errorMessage = errorMessage;
     }
 
+    @Override
+    public String toString(){
+        return "Type: " + type.toString() + " Amount: " + amount + "Error Msg: " + errorMessage;
+    }
+
+
     /**
      * Enum for types of Responses indicating the status of a method call.
      */

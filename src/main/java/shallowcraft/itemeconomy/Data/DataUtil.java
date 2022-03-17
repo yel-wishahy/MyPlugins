@@ -42,7 +42,8 @@ public class DataUtil {
                     Vault currentVault = new ContainerVault(container, (Sign) sign.getState(), currentAccount, type);
                     vaults.add(currentVault);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    if(ItemEconomy.getInstance().isDebugMode())
+                        e.printStackTrace();
                 }
             }
         }
@@ -51,9 +52,9 @@ public class DataUtil {
     }
 
     public static void populateAccountTaxes(Account currentAccount, Map<String, String> inputData) {
-        ItemEconomy.log.info("[ItemEconomy: Dataloader] Loading taxes for account: " + currentAccount.getName());
 
         if (currentAccount instanceof PlayerAccount holder) {
+            ItemEconomy.log.info("[ItemEconomy: Dataloader] Loading taxes for account: " + currentAccount.getName());
 
             Map<String, GeneralTax> taxes = new HashMap<>();
 
@@ -86,7 +87,9 @@ public class DataUtil {
                             tax = new GeneralTax(holder, taxDeposit, name, rate);
 
                         taxes.put(tax.getTaxName(), tax);
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        if(ItemEconomy.getInstance().isDebugMode())
+                            e.printStackTrace();
                     }
                 }
 
