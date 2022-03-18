@@ -173,7 +173,6 @@ public class PlayerAccount implements Account {
     }
 
     private boolean updatePersonalBalance(){
-        convertBalanceBuffer();
         Inventory inventory = Util.getInventory(player);
 
         if(inventory != null){
@@ -288,7 +287,6 @@ public class PlayerAccount implements Account {
         if(ItemEconomy.getInstance().isDebugMode())
             ItemEconomy.log.info("[ItemEconomy] Debug: attempting to deposit " + amount + " into " + this.getName() + " " + this.getID());
 
-        convertBalanceBuffer();
         int numAdded = 0;
         result = Transaction.depositAllVaults(amount, vaults);
         numAdded += result.amount;
@@ -318,7 +316,6 @@ public class PlayerAccount implements Account {
     }
 
     public TransactionResult depositInventory(int amount){
-        convertBalanceBuffer();
         TransactionResult result;
         Inventory inventory =  null;
         try{

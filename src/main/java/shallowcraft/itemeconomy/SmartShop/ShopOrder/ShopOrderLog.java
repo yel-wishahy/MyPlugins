@@ -78,7 +78,8 @@ public class ShopOrderLog{
                 orderLogs = new HashMap<>();
             return true;
         } catch (Exception e){
-            e.printStackTrace();
+            if(ItemEconomy.getInstance().isDebugMode())
+                e.printStackTrace();
             orderLogs = new HashMap<>();
             ItemEconomy.log.info("[ItemEconomy Smart Shop] Failed to load order logs");
             return false;
@@ -90,8 +91,9 @@ public class ShopOrderLog{
             File dataFile = DataManager.createDataFile(SmartShopConfig.logFileName);
             DataManager.saveShopOrderLogsToJSON(orderLogs, dataFile);
             return true;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            if(ItemEconomy.getInstance().isDebugMode())
+                e.printStackTrace();
             ItemEconomy.log.info("[ItemEconomy Smart Shop] Failed to save order logs.");
             return false;
         }

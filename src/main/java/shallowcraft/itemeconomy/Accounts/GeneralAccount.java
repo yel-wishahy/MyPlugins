@@ -131,12 +131,10 @@ public class GeneralAccount implements Account {
 
     @Override
     public TransactionResult deposit(int amount) {
-        convertBalanceBuffer();
         TransactionResult result;
         if(ItemEconomy.getInstance().isDebugMode())
             ItemEconomy.log.info("[ItemEconomy] Debug: attempting to deposit " + amount + " into " + this.name + " " + this.getID());
         balanceBuffer+=amount;
-        convertBalanceBuffer();
 
         result = new TransactionResult(amount, TransactionResult.ResultType.SUCCESS, "deposit");
 
