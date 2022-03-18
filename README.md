@@ -1,6 +1,6 @@
 # ItemEconomy
 
-A minecraft server ecoomy plugin working on the current 1.18.1 paper api and hooks to Vault to link with other economy plugins.
+A minecraft server ecoomy plugin working on the current 1.18 paper api and hooks to Vault to link with other economy plugins.
 Unlike typical curreency plugins, the currency in this plugin is a physical item or items.
 
 The current Config is set to DIAMOND and DIAMOND_BLOCK.
@@ -16,13 +16,11 @@ Item Vault creation sign:
 
 Demo: https://www.youtube.com/watch?v=MuiKJ1oVDqU
 ```
-Plugin info:
-
 name: ItemEconomy
-version: SNAPSHOT-7.2 (works with 1.18.2)
+version: ${project.version}
 main: shallowcraft.itemeconomy.ItemEconomyPlugin
 api-version: 1.18
-authors: [ BlackShadow2941 (yel-wishahy on GitHub) ]
+authors: [ BlackShadow2941 ]
 description: An item based economy for minecraft with vault support and quickshop addon
 depend: [Vault]
 loadbefore: [QuickShop]
@@ -46,6 +44,7 @@ commands:
       /ItemEconomy withdraw <amount>
       /ItemEconomy transfer <vault tpye> <vault type> <amount>
       /ItemEconomy admintransfer <name> <vault tpye> <vault type> <amount>
+      /ItemEconomy debug
   Tax:
     aliases: [tax, ietax, ieTax, taxes, t]
     usage: |
@@ -74,4 +73,5 @@ permissions:
     default: true
   itemeconomy.player:
     default: true
+
 ```
