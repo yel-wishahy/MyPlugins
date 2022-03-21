@@ -4,14 +4,12 @@ import com.google.gson.Gson;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
+import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.SmartShop.ShopOrder.ShopOrder;
 import shallowcraft.itemeconomy.Util.Util;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +99,7 @@ public class DataManager {
         writer.close();
     }
 
-    public static File createDataFile(String fileName) throws IOException {
+    public static File createDataFileJSON(String fileName) throws IOException {
         File dataFile = new File("plugins/ItemEconomy/" + fileName + ".json");
         File dir = dataFile.getParentFile(); // Get the parent directory
         dir.mkdirs(); // Creates all directories that do not exist
@@ -110,8 +108,21 @@ public class DataManager {
         return dataFile;
     }
 
-    public static File getDataFile(String fileName) throws IOException {
+    public static File createDataFileYML(String fileName) throws IOException {
+        File dataFile = new File("plugins/ItemEconomy/" + fileName + ".yml");
+        File dir = dataFile.getParentFile(); // Get the parent directory
+        dir.mkdirs(); // Creates all directories that do not exist
+        dataFile.createNewFile(); // Creates a new file if it does not already exist; throws IOException
+
+        return dataFile;
+    }
+
+    public static File getDataFile(String fileName) {
         return new File("plugins/ItemEconomy/" + fileName + ".json");
+    }
+
+    public static FileInputStream getDataStreamYML(String filename) throws FileNotFoundException {
+        return new FileInputStream("plugins/ItemEconomy/" + Config.configFileName + ".yml");
     }
 
     public static Map<String, List<ShopOrder>> loadShopOrdersFromJSON(File dataFile) throws IOException, InvalidDataException, NullPointerException {

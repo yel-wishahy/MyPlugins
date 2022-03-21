@@ -3,7 +3,6 @@ package shallowcraft.itemeconomy;
 import lombok.Getter;
 import lombok.Setter;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import shallowcraft.itemeconomy.Commands.IECommand;
@@ -11,13 +10,10 @@ import shallowcraft.itemeconomy.Commands.IETabCompleter;
 import shallowcraft.itemeconomy.Tax.command.TaxCommand;
 import shallowcraft.itemeconomy.Tax.command.TaxTabCompleter;
 import shallowcraft.itemeconomy.Listener.IEEventHandler;
-import shallowcraft.itemeconomy.SmartShop.Commads.SmartShopCommand;
-import shallowcraft.itemeconomy.SmartShop.Commads.SmartShopTabCompleter;
-import shallowcraft.itemeconomy.SmartShop.Listener.SSEventHandler;
 import shallowcraft.itemeconomy.SmartShop.SmartShop;
-import shallowcraft.itemeconomy.SmartShop.SmartShopConfig;
 import shallowcraft.itemeconomy.VaultEconomyHook.Economy_ItemEconomy;
 
+import java.io.FileNotFoundException;
 import java.util.logging.Logger;
 
 //plugin class for item economy that extends JavaPlugin, handles actual startup and communication with other plugins
@@ -37,12 +33,23 @@ public class ItemEconomyPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
+        try{
+            Config.loadConfig();
+            log.info("[ItemEconomy] Successfully loaded config.yml");
+        } catch (FileNotFoundException e) {
+            if(Config.defaultDebug)
+                e.printStackTrace();
+            log.info("[ItemEconomy] Failed to load config, check if file exists. Or create config with /ie createconfig.");
+        }
+
         if (!setupEconomy()) {
             log.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
             return;
         } else
             log.info("[ItemEconomy] Vault hook successful.");
+
+        ItemEconomy.loadData();
 
         registerEventHandler();
         registerCommands();

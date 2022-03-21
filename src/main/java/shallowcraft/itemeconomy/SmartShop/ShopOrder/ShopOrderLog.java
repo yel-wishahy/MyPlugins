@@ -5,13 +5,12 @@ import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Data.DataManager;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.SmartShop.SmartShopConfig;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +70,7 @@ public class ShopOrderLog{
 
     public boolean loadPreviousLogs(){
         try{
-            File dataFile = DataManager.getDataFile(SmartShopConfig.logFileName);
+            File dataFile = DataManager.getDataFile(Config.SSlogFileName);
             if(dataFile.exists())
                 orderLogs = DataManager.loadShopOrderLogsFromJSON(dataFile);
             else
@@ -88,7 +87,7 @@ public class ShopOrderLog{
 
     public boolean saveLogs(){
         try {
-            File dataFile = DataManager.createDataFile(SmartShopConfig.logFileName);
+            File dataFile = DataManager.createDataFileJSON(Config.SSlogFileName);
             DataManager.saveShopOrderLogsToJSON(orderLogs, dataFile);
             return true;
         } catch (Exception e) {

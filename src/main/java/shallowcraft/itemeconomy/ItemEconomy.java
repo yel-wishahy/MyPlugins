@@ -1,9 +1,7 @@
 package shallowcraft.itemeconomy;
 
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -13,8 +11,6 @@ import org.bukkit.entity.Player;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Data.DataManager;
-import shallowcraft.itemeconomy.Data.DataUtil;
-import shallowcraft.itemeconomy.Tax.Taxation;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Data.InvalidDataException;
 import shallowcraft.itemeconomy.Util.Util;
@@ -36,9 +32,8 @@ public class ItemEconomy {
 
     private ItemEconomy(){
         instance = this;
-        loadData();
         isEnabled = true;
-        debugMode = false;
+        debugMode = Config.defaultDebug;
     }
 
     public static ItemEconomy getInstance(){
@@ -50,7 +45,7 @@ public class ItemEconomy {
 
     public boolean saveData() {
         try {
-            File dataFile = DataManager.createDataFile(Config.dataFileName);
+            File dataFile = DataManager.createDataFileJSON(Config.IEdataFileName);
             DataManager.saveDataToJSON(accounts, dataFile);
             return true;
         } catch (IOException e) {
@@ -63,7 +58,7 @@ public class ItemEconomy {
 
     public boolean loadData() {
         try {
-            File dataFile = DataManager.getDataFile(Config.dataFileName);
+            File dataFile = DataManager.getDataFile(Config.IEdataFileName);
             if (dataFile.exists())
                 accounts = DataManager.loadDataFromJSON(dataFile);
             else{

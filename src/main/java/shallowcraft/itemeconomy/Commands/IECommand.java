@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
+import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
 import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.ItemEconomy;
@@ -18,7 +19,9 @@ import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
 import shallowcraft.itemeconomy.BankVault.Vault;
 import shallowcraft.itemeconomy.BankVault.VaultType;
+import shallowcraft.itemeconomy.VaultEconomyHook.Economy_ItemEconomy;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -75,25 +78,16 @@ public class IECommand implements CommandExecutor {
             case "remove_account":
                 return Commands.removeAccount(args,sender,accounts);
             case "load":
-                if (ItemEconomy.getInstance().loadData())
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully loaded data");
-                else
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "FAILED to load data...files corrupt");
-
-                return true;
+                return Commands.load(sender);
             case "reload":
-                if (ItemEconomy.getInstance().saveData() && ItemEconomy.getInstance().loadData())
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully reloaded data");
-                else
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "FAILED to reload data...files corrupt");
-
+                if (Util.isAdmin(sender)){
+                    Commands.save(sender);
+                    Commands.load(sender);
+                } else
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You have no rights to send this command.");
                 return true;
             case "save":
-                if (ItemEconomy.getInstance().saveData())
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully saved data");
-                else
-                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "FAILED to save data...files corrupt");
-                return true;
+                return Commands.save(sender);
             case "baltop":
                 String baltopMessage = Util.getServerStatsMessage();
                 sender.sendMessage(baltopMessage);
@@ -119,6 +113,18 @@ public class IECommand implements CommandExecutor {
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + ChatColor.BOLD + "Debug Mode Enabled.");
                     else
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + ChatColor.BOLD + "Debug Mode Disabled.");
+                }
+                return true;
+            case "createconfig":
+                if(sender.hasPermission(Permissions.adminPerm) || sender.isOp() || !isPlayer) {
+                    try {
+                        Config.createConfig();
+                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + ChatColor.BOLD + "Created " + Config.configFileName + ".yml File");
+                    } catch (Exception e) {
+                        if (ItemEconomy.getInstance().isDebugMode())
+                            e.printStackTrace();
+                        sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + ChatColor.BOLD + "Failed to create config file. Enable debug mode for stack trace.");
+                    }
                 }
                 return true;
             default:

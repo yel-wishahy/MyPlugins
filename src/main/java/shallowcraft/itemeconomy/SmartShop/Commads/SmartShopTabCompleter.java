@@ -1,20 +1,17 @@
 package shallowcraft.itemeconomy.SmartShop.Commads;
 
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import shallowcraft.itemeconomy.SmartShop.SmartShopConfig;
+import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.SmartShop.SmartShopUtil;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SmartShopTabCompleter implements TabCompleter {
@@ -23,7 +20,7 @@ public class SmartShopTabCompleter implements TabCompleter {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1)
-            StringUtil.copyPartialMatches(args[0], SmartShopConfig.subCommands, completions);
+            StringUtil.copyPartialMatches(args[0], Config.SS_subCommands, completions);
         else if(args.length == 2) {
             if(args[0].equals("search"))
                 StringUtil.copyPartialMatches(args[1], SmartShopUtil.getMaterialsListAsString(), completions);

@@ -9,11 +9,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 import shallowcraft.itemeconomy.Accounts.Account;
-import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
+import shallowcraft.itemeconomy.ItemEconomyPlugin;
 import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.Util.Util;
 import shallowcraft.itemeconomy.BankVault.ContainerVault;
@@ -23,6 +24,26 @@ import java.util.Map;
 import java.util.Objects;
 
 public class IEEventHandler implements Listener {
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent playerJoinEvent){
+        BukkitRunnable task = new BukkitRunnable() {
+                /**
+                 * When an object implementing interface {@code Runnable} is used
+                 * to create a thread, starting the thread causes the object's
+                 * {@code run} method to be called in that separately executing
+                 * thread.
+                 * <p>
+                 * The general contract of the method {@code run} is that it may
+                 * take any action whatsoever.
+                 *
+                 * @see Thread#run()
+                 */
+                @Override
+                public void run() {playerJoinEvent.getPlayer().sendMessage(Util.getServerStatsMessage());}
+            };
+        task.runTaskLater(ItemEconomyPlugin.getInstance(), 100);
+    }
 
     @EventHandler
     public void onCreateVaultSign(SignChangeEvent signEvent) {

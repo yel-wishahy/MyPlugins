@@ -2,7 +2,6 @@ package shallowcraft.itemeconomy.Util;
 
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.EconomyResponse;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -22,7 +21,6 @@ import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
-import shallowcraft.itemeconomy.SmartShop.SmartShopConfig;
 import shallowcraft.itemeconomy.Tax.taxable.Taxable;
 import shallowcraft.itemeconomy.Tax.Taxation;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
@@ -79,7 +77,7 @@ public class Util {
      * @return whether the given material is a valid container type for item vaults
      */
     public static boolean isValidContainer(Material material) {
-        return Config.VaultContainerTypes.contains(material);
+        return shallowcraft.itemeconomy.Config.VaultContainerTypes.contains(material);
     }
 
 
@@ -124,17 +122,17 @@ public class Util {
 
 
     public static boolean isValidVaultSignText(SignChangeEvent sign) {
-        return sign.lines().contains(Component.text(Config.vaultHeader));
+        return sign.lines().contains(Component.text(shallowcraft.itemeconomy.Config.vaultHeader));
     }
 
     public static int countItem(Inventory inventory) {
         int itemCount = 0;
         for (ItemStack stack : inventory.getContents()) {
             if (stack != null) {
-                if (stack.getType().equals(Config.currency))
+                if (stack.getType().equals(shallowcraft.itemeconomy.Config.currency))
                     itemCount += stack.getAmount();
 
-                if (stack.getType().equals(Config.currency_block)) {
+                if (stack.getType().equals(shallowcraft.itemeconomy.Config.currency_block)) {
                     itemCount += stack.getAmount() * 9;
                 }
             }
@@ -193,7 +191,7 @@ public class Util {
 
         if (slot != -1) {
             blockStack.setAmount(blockStack.getAmount() - amount);
-            inventory.setItem(slot, new ItemStack(Config.currency, amount * 9));
+            inventory.setItem(slot, new ItemStack(shallowcraft.itemeconomy.Config.currency, amount * 9));
             //ItemEconomy.log.info("conversion of 1 " + amount + "blocks to items result: " + (inventory.getItem(slot) != null));
             return inventory.getItem(slot);
         }
@@ -220,7 +218,7 @@ public class Util {
 
         if (slot != -1) {
             itemStack.setAmount(itemStack.getAmount() - amount);
-            inventory.setItem(slot, new ItemStack(Config.currency_block, amount / 9));
+            inventory.setItem(slot, new ItemStack(shallowcraft.itemeconomy.Config.currency_block, amount / 9));
             return inventory.getItem(slot);
         }
 
@@ -333,7 +331,7 @@ public class Util {
         Map<String, Account> accounts = ItemEconomy.getInstance().getAccounts();
 
         for (Account acc : accounts.values()) {
-            if (acc != null && !acc.getID().equals(SmartShopConfig.smartShopHolderName))
+            if (acc != null && !acc.getID().equals(Config.smartShopHolderName))
                 totalCirculation += acc.getBalance();
         }
 
@@ -490,7 +488,7 @@ public class Util {
             if (tax != null) {
                 msg.append(ChatColor.GREEN + "* Tax Name: " + ChatColor.AQUA).append(tax.getTaxName()).append(ChatColor.GREEN).append(" Tax %: ").
                         append(ChatColor.YELLOW).append(tax.getTaxRate()).append(ChatColor.GREEN).append(" Next Tax Time: ").append(ChatColor.YELLOW).
-                        append(Config.timeFormat.format(tax.getNextTaxTime())).append("\n");
+                        append(shallowcraft.itemeconomy.Config.timeFormat.format(tax.getNextTaxTime())).append("\n");
             }
 
         }
@@ -642,7 +640,7 @@ public class Util {
         Map<String, Integer> bals = new HashMap<>();
 
         for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
-            if (acc != null && !acc.getID().equals(SmartShopConfig.smartShopHolderName))
+            if (acc != null && !acc.getID().equals(Config.smartShopHolderName))
                 bals.put(acc.getName(), acc.getBalance());
         }
 
@@ -661,7 +659,7 @@ public class Util {
                 }
 
                 baltopMessage.append("    ").append(j).append(". ").append(ChatColor.GOLD).append(name).append(" ".repeat(24 - name.length()));
-                baltopMessage.append(ChatColor.YELLOW).append(bals.get(name)).append(ChatColor.AQUA).append(" ").append(Config.currency.name().toLowerCase()).
+                baltopMessage.append(ChatColor.YELLOW).append(bals.get(name)).append(ChatColor.AQUA).append(" ").append(shallowcraft.itemeconomy.Config.currency.name().toLowerCase()).
                         append(rateofchange).append("\n");
                 j++;
             }

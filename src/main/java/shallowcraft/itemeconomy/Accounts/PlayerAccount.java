@@ -9,8 +9,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import shallowcraft.itemeconomy.Data.DataUtil;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
-import shallowcraft.itemeconomy.SmartShop.SmartShop;
-import shallowcraft.itemeconomy.SmartShop.SmartShopConfig;
 import shallowcraft.itemeconomy.Tax.taxable.GeneralTax;
 import shallowcraft.itemeconomy.Tax.taxable.Taxable;
 import shallowcraft.itemeconomy.BankVault.Vault;

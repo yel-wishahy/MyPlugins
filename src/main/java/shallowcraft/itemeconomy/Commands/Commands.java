@@ -9,6 +9,7 @@ import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.BankVault.Vault;
 import shallowcraft.itemeconomy.BankVault.VaultType;
+import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
 import shallowcraft.itemeconomy.Permissions;
@@ -362,6 +363,44 @@ public class Commands {
             }
         } else
             sender.sendMessage(Permissions.invalidPerm);
+
+        return true;
+    }
+
+    public static boolean save(CommandSender sender){
+        if(Util.isAdmin(sender)) {
+            try {
+                ItemEconomy.getInstance().saveData();
+                Config.createConfig();
+                sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully saved data");
+            } catch (Exception e) {
+                if (ItemEconomy.getInstance().isDebugMode())
+                    e.printStackTrace();
+
+                sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "FAILED to save data...files corrupt");
+            }
+        } else{
+            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You have no rights to send this command.");
+        }
+
+        return true;
+    }
+
+    public static boolean load(CommandSender sender){
+        if(Util.isAdmin(sender)) {
+            try {
+                ItemEconomy.getInstance().loadData();
+                Config.loadConfig();
+                sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully loaded data");
+            } catch (Exception e) {
+                if (ItemEconomy.getInstance().isDebugMode())
+                    e.printStackTrace();
+
+                sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "FAILED to load data...files corrupt");
+            }
+        } else{
+            sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You have no rights to send this command.");
+        }
 
         return true;
     }

@@ -10,14 +10,12 @@ import org.bukkit.block.Container;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.maxgamer.quickshop.QuickShop;
-import org.maxgamer.quickshop.api.QuickShopAPI;
 import org.maxgamer.quickshop.api.shop.Shop;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Data.DataUtil;
 import shallowcraft.itemeconomy.Data.Serializable;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.SmartShop.SmartShopConfig;
 import shallowcraft.itemeconomy.SmartShop.SmartShopUtil;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 
@@ -74,7 +72,7 @@ public class ShopOrder implements Serializable<ShopOrder> {
             costPerQuantity = Double.parseDouble(inputData.get("Price"));
             //ItemEconomy.log.info("load price success");
 
-            orderTime = Config.shortTimeFormat.parse(inputData.get("Time"));
+            orderTime = shallowcraft.itemeconomy.Config.shortTimeFormat.parse(inputData.get("Time"));
             //ItemEconomy.log.info("load time success");
 
             orderType = ShopOrderType.getType(Integer.parseInt(inputData.get("Order Type")));
@@ -158,7 +156,7 @@ public class ShopOrder implements Serializable<ShopOrder> {
         outputData.put("Quantity", String.valueOf(orderQuantity));
         outputData.put("Price", String.valueOf(costPerQuantity));
 
-        outputData.put("Time", Config.shortTimeFormat.format(orderTime));
+        outputData.put("Time", shallowcraft.itemeconomy.Config.shortTimeFormat.format(orderTime));
 
         outputData.put("Order Type", String.valueOf(orderType.getId()));
 
@@ -201,7 +199,7 @@ public class ShopOrder implements Serializable<ShopOrder> {
             this.resultType = resultType;
             this.amount = amount;
             this.itemStack = itemStack;
-            this.timeOfResult = Config.shortTimeFormat.format(new Date());
+            this.timeOfResult = shallowcraft.itemeconomy.Config.shortTimeFormat.format(new Date());
         }
 
         public enum ShopOrderResultType {
@@ -245,7 +243,7 @@ public class ShopOrder implements Serializable<ShopOrder> {
     @Override
     public String toString() {
         int quantity = orderItem.getAmount() * orderQuantity;
-        String time = Config.shortTimeFormat.format(orderTime);
+        String time = shallowcraft.itemeconomy.Config.shortTimeFormat.format(orderTime);
 
         return ChatColor.GOLD + "* " + time + " " + ChatColor.GREEN + orderType.toString() + " Order for " + ChatColor.GOLD + seller.getName() + ChatColor.GREEN +
                 " :\n " + ChatColor.YELLOW + quantity + " x " +
@@ -258,7 +256,7 @@ public class ShopOrder implements Serializable<ShopOrder> {
     }
 
     public boolean timerSurpassed(){
-       Date next = DateUtils.addHours(orderTime, SmartShopConfig.nextOrderHours);
+       Date next = DateUtils.addHours(orderTime, Config.nextOrderHours);
        Date now = new Date();
 
        return now.compareTo(next) > 0;

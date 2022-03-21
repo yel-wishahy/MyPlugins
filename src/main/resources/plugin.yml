@@ -27,6 +27,8 @@ commands:
       /ItemEconomy transfer <vault tpye> <vault type> <amount>
       /ItemEconomy admintransfer <name> <vault tpye> <vault type> <amount>
       /ItemEconomy debug
+      /ItemEconomy createconfig
+
   Tax:
     aliases: [tax, ietax, ieTax, taxes, t]
     usage: |

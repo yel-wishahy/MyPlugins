@@ -231,7 +231,7 @@ public class Taxation {
             }
         }
 
-        Account deposit = new GeneralAccount(Config.taxID);
+        Account deposit = new GeneralAccount(Config.mainTaxDepositID);
         ItemEconomy.getInstance().getAccounts().put(deposit.getID(),deposit);
         return deposit;
     }
