@@ -145,6 +145,7 @@ public class Commands {
         if (args.length == 1 && isPlayer) {
             if (accounts.containsKey(player.getUniqueId().toString())) {
                 PlayerAccount holder = (PlayerAccount) accounts.get(player.getUniqueId().toString());
+                holder.convertBalanceBuffer();
                 List<Vault> vaults = holder.getVaults();
                 int deposit = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
                 int withdraw = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.WITHDRAW_ONLY, vaults));
@@ -176,6 +177,7 @@ public class Commands {
             }
 
             if (holder != null) {
+                holder.convertBalanceBuffer();
                 List<Vault> vaults = holder.getVaults();
                 int deposit = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
                 int withdraw = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.WITHDRAW_ONLY, vaults));
@@ -204,36 +206,72 @@ public class Commands {
     }
 
     public static boolean withdraw(String[] args, CommandSender sender) {
-        if (args.length == 2) {
-            PlayerAccount holder = null;
-            try{
-                holder = (PlayerAccount) ItemEconomy.getInstance().getAccount(sender.getName());
-            } catch (Exception e){
-                e.printStackTrace();
+        if(Util.isAdmin(sender) ||  sender.hasPermission(Permissions.remoteWithdraw)) {
+            if (args.length == 2) {
+                PlayerAccount holder = null;
+                try {
+                    holder = (PlayerAccount) ItemEconomy.getInstance().getAccount(sender.getName());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                int amount = 0;
+                try {
+                    amount = Integer.parseInt(args[1]);
+                } catch (Exception ignore) {
+                }
+
+                TransactionResult resultWithdraw = null;
+                TransactionResult resultDeposit = null;
+
+                if (holder != null && amount > 0) {
+                    resultWithdraw = holder.withdraw(amount);
+                    resultDeposit = holder.depositInventory(resultWithdraw.amount);
+                    if (resultDeposit.amount < resultWithdraw.amount) {
+                        holder.deposit(resultWithdraw.amount - resultDeposit.amount);
+                    }
+                }
+
+                if (resultWithdraw != null && resultWithdraw.type.equals(TransactionResult.ResultType.SUCCESS)) {
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully withdrew " + ChatColor.AQUA + resultDeposit.amount + " diamonds" +
+                            ChatColor.GREEN + " from your vault");
+                } else {
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Withdraw Failed");
+                }
             }
+        }
 
-            int amount = 0;
-            try {
-                amount = Integer.parseInt(args[1]);
-            } catch (Exception ignore) {
-            }
+        return true;
+    }
 
-            TransactionResult resultWithdraw = null;
-            TransactionResult resultDeposit = null;
+    public static boolean deposit(String[] args, CommandSender sender) {
+        if(Util.isAdmin(sender) ||  sender.hasPermission(Permissions.remoteDeposit)) {
+            if (args.length == 2) {
+                PlayerAccount holder = null;
+                try {
+                    holder = (PlayerAccount) ItemEconomy.getInstance().getAccount(sender.getName());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-            if (holder != null && amount > 0) {
-                 resultWithdraw = holder.withdraw(amount);
-                 resultDeposit = holder.depositInventory(resultWithdraw.amount);
-                 if(resultDeposit.amount < resultWithdraw.amount){
-                     holder.deposit(resultWithdraw.amount - resultDeposit.amount);
-                 }
-            }
+                int amount = 0;
+                try {
+                    amount = Integer.parseInt(args[1]);
+                } catch (Exception ignore) {
+                }
 
-            if (resultWithdraw != null && resultWithdraw.type.equals(TransactionResult.ResultType.SUCCESS)) {
-                sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully withdrew " + ChatColor.AQUA + resultDeposit.amount + " diamonds" +
-                        ChatColor.GREEN + " from your vault");
-            } else {
-                sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Withdraw Failed");
+                TransactionResult result = null;
+
+                if (holder != null && amount > 0) {
+                    result = holder.deposit(amount);
+                }
+
+                if (result != null && result.type.equals(TransactionResult.ResultType.SUCCESS)) {
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully deposited " + ChatColor.AQUA + result.amount + " diamonds" +
+                            ChatColor.GREEN + " into your vault");
+                } else {
+                    sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Deposit Failed");
+                }
             }
         }
 
@@ -404,5 +442,6 @@ public class Commands {
 
         return true;
     }
+
 
 }

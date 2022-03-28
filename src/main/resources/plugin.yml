@@ -24,11 +24,11 @@ commands:
       /ItemEconomy admindeposit <name> <amount>
       /ItemEconomy adminwithdraw <name> <amount>
       /ItemEconomy withdraw <amount>
+      /ItemEconomy deposit <amount>
       /ItemEconomy transfer <vault tpye> <vault type> <amount>
       /ItemEconomy admintransfer <name> <vault tpye> <vault type> <amount>
       /ItemEconomy debug
       /ItemEconomy createconfig
-
   Tax:
     aliases: [tax, ietax, ieTax, taxes, t]
     usage: |
@@ -57,4 +57,8 @@ permissions:
     default: true
   itemeconomy.player:
     default: true
+  itemeconomy.remotewithdraw:
+    default: op
+  itemeconomy.remotedeposit:
+    default: op
 

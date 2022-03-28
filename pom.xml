@@ -6,7 +6,7 @@
 
     <groupId>shallowcraft</groupId>
     <artifactId>ItemEconomy</artifactId>
-    <version>7.4-SNAPSHOT</version>
+    <version>7.5-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>ItemEconomy</name>

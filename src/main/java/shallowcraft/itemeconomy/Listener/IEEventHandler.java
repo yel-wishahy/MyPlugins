@@ -2,6 +2,7 @@ package shallowcraft.itemeconomy.Listener;
 
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -85,14 +86,13 @@ public class IEEventHandler implements Listener {
     @EventHandler
     public void onBreakVault(BlockBreakEvent blockBreakEvent) {
         Block block = blockBreakEvent.getBlock();
-
         Player player = blockBreakEvent.getPlayer();
         Vault toDestroy = null;
 
 
         if (block.getState() instanceof Sign && Util.isValidVaultSign((Sign) block.getState())) {
             toDestroy = Util.getVaultFromSign((Sign) block.getState());
-        } else if (Config.VaultContainerTypes.contains(block.getState().getType()) && Util.isVault(block)) {
+        } else if (Config.VaultContainerTypes.contains(block.getType()) && Util.isVault(block)) {
             toDestroy = Util.getVaultFromContainer(block);
         }
 
@@ -111,21 +111,5 @@ public class IEEventHandler implements Listener {
                     + "DESTROYED" + ChatColor.RESET + " " + ChatColor.RED + "a vault!");
         }
     }
-
-//    @EventHandler
-//    public void onOpenVault(InventoryOpenEvent inventoryOpenEvent) {
-//        if(Util.isVault(Objects.requireNonNull(inventoryOpenEvent.getInventory().getLocation()).getBlock())){
-//            boolean hasAccount = false;
-//            Player player = (Player) inventoryOpenEvent.getPlayer();
-//            PlayerAccount account = null;
-//            try {
-//                account = (PlayerAccount)
-//                        ItemEconomy.getInstance().getAccount(player.getUniqueId().toString());
-//                if(account != null)
-//                    hasAccount = true;
-//            } catch (Exception e){e.printStackTrace();}
-//
-//        }
-//    }
 
 }

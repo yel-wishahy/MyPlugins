@@ -5,6 +5,7 @@ import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.BankVault.Vault;
 import shallowcraft.itemeconomy.BankVault.VaultType;
+import shallowcraft.itemeconomy.Util.Util;
 
 import java.util.List;
 
@@ -30,5 +31,7 @@ public interface Account extends Serializable<Account> {
     public TransactionResult transfer(VaultType source, VaultType destination, int amount);
     public void updateBalanceBuffer(double amount);
     public double getBalanceBuffer();
-    public TransactionResult convertBalanceBuffer();
+    public default TransactionResult convertBalanceBuffer(){
+        return Util.convertBalanceBuffer(this);
+    }
 }

@@ -23,6 +23,7 @@ import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
 import shallowcraft.itemeconomy.Tax.taxable.Taxable;
 import shallowcraft.itemeconomy.Tax.Taxation;
+import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.BankVault.Vault;
 import shallowcraft.itemeconomy.BankVault.VaultType;
@@ -608,6 +609,7 @@ public class Util {
     }
 
     public static String getServerStatsMessage() {
+        convertAllBalanceBuffers();
         if (!Util.validateHistoryStats(ItemEconomy.getInstance().getHistoryStats()))
             ItemEconomy.getInstance().resetHistoryStats();
 
@@ -688,6 +690,31 @@ public class Util {
         }
 
         return true;
+    }
+
+    public static TransactionResult convertBalanceBuffer(Account account){
+        TransactionResult result;
+        if(account.getBalanceBuffer() >= 1.0) {
+            result = Transaction.depositAllVaults((int)account.getBalanceBuffer(), account.getVaults());
+            account.updateBalanceBuffer(-1*result.amount);
+        } else if(account.getBalanceBuffer() <= -1.0) {
+            result = Transaction.withdrawAllVaults((int)(-1*account.getBalanceBuffer()),Util.getAllVaultsBalance(account.getVaults()),account.getVaults());
+            account.updateBalanceBuffer(result.amount);
+        }
+        else {
+            result = new TransactionResult(0, TransactionResult.ResultType.FAILURE, "balance buffer too small");
+        }
+
+        if(ItemEconomy.getInstance().isDebugMode())
+            ItemEconomy.log.info("[ItemEconomy] Convert Balance Buffer for account with ID: " + account.getID() + "\n Result is: + " + result);
+
+        return result;
+    }
+
+    public static void convertAllBalanceBuffers(){
+        for (Account acc:ItemEconomy.getInstance().getAccounts().values()) {
+            acc.convertBalanceBuffer();
+        }
     }
 
 

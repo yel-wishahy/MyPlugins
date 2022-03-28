@@ -88,17 +88,6 @@ public class PlayerAccount implements Account {
     }
 
     @Override
-    public TransactionResult convertBalanceBuffer(){
-        if(balanceBuffer >= 1) {
-            TransactionResult result = this.deposit((int)balanceBuffer);
-            balanceBuffer -= result.amount;
-            return result;
-        } else {
-            return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "balance buffer too small");
-        }
-    }
-
-    @Override
     public int getChequingBalance() {
         int count = 0;
 
@@ -369,6 +358,7 @@ public class PlayerAccount implements Account {
 
     @Override
     public Map<String, String> getSerializableData() {
+        convertBalanceBuffer();
         Map<String, String> outputData = new HashMap<>();
 
         outputData.put("Personal Balance", String.valueOf(lastPersonalBalance));

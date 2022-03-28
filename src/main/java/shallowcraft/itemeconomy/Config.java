@@ -33,10 +33,12 @@ public class Config {
     //commands
     public static final List<String> IESubCommands = List.of("create_account",
             "balance", "list_accounts", "create_account_all", "remove_account",
-            "reload", "save", "load", "baltop", "admindeposit", "adminwithdraw", "withdraw",
+            "reload", "save", "load", "baltop", "admindeposit", "adminwithdraw", "withdraw","deposit",
             "transfer", "admintransfer", "statsupdate", "debug","createconfig");
+
     public static final List<String> IECommandAliases = List.of("ItemEconomy", "itemeconomy",
             "IE", "ie", "eco", "money");
+
     public static final List<String> TaxCommandAliases = List.of("tax", "ietax", "ieTax", "taxes", "t");
     public static final List<String> TaxSubCommands = List.of("add", "addcustom", "remove", "tax", "taxall", "info", "clear", "edit", "redistribute", "taxprofits", "resetprofits");
     public static final List<String> TaxEditSubCommands = List.of("timeset_now", "set_rate");
@@ -81,6 +83,7 @@ public class Config {
     public static double earningFactor = 0.20;
     public static int nextOrderHours = 32;
     public static String smartShopHolderName = "CHINA";
+    public static int shopDepositCost = 10;
 
 
 
@@ -139,6 +142,8 @@ public class Config {
                         nextOrderHours = (int)smartShopSettings.get("nextOrderHours");
                     if(smartShopSettings.containsKey("smartShopHolderName"))
                         smartShopHolderName = (String)smartShopSettings.get("smartShopHolderName");
+                    if(smartShopSettings.containsKey("shopDepositCost"))
+                        shopDepositCost = (int)smartShopSettings.get("shopDepositCost");
                 }
             }
         }
@@ -172,6 +177,7 @@ public class Config {
         smartShopDataMap.put("earningFactor",earningFactor);
         smartShopDataMap.put("nextOrderHours",nextOrderHours);
         smartShopDataMap.put("smartShopHolderName",smartShopHolderName);
+        smartShopDataMap.put("shopDepositCost",shopDepositCost);
 
         dataMap.put("Tax Settings",taxDataMap);
         dataMap.put("SmartShop Settings",smartShopDataMap);

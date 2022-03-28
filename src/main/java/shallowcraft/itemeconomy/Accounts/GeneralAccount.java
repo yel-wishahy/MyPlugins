@@ -53,31 +53,17 @@ public class GeneralAccount implements Account {
     }
 
     @Override
-    public TransactionResult convertBalanceBuffer(){
-        if(balanceBuffer >= 1) {
-            TransactionResult result = Transaction.depositAllVaults((int)balanceBuffer, vaults);
-            balanceBuffer -= result.amount;
-            return result;
-        } else {
-            return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "balance buffer too small");
-        }
-    }
-
-    @Override
     public int getChequingBalance() {
-        convertBalanceBuffer();
         return Util.getAllVaultsBalance(Util.getVaultsOfNotType(VaultType.DEPOSIT_ONLY, vaults));
     }
 
     @Override
     public int getBalance() {
-        convertBalanceBuffer();
         return Util.getAllVaultsBalance(vaults);
     }
 
     @Override
     public int getBalance(VaultType vaultType) {
-        convertBalanceBuffer();
         return Util.getAllVaultsBalance(Util.getVaultsOfType(vaultType, vaults));
     }
 
