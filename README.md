@@ -14,7 +14,9 @@ Item Vault creation sign:
   - Line 3 (optional, defaults to regular): Vault type: "[Withdraw]" or "[Deposit]" 
     - for withdraw or deposit only vaults
 
-Demo: https://www.youtube.com/watch?v=MuiKJ1oVDqU
+[Video Demo](https://www.youtube.com/watch?v=MuiKJ1oVDqU)
+[Portfolio Project Description](https://yel-wishahy.github.io/#modalMCPlugin)
+
 ```
 name: ItemEconomy
 version: ${project.version}
@@ -42,9 +44,11 @@ commands:
       /ItemEconomy admindeposit <name> <amount>
       /ItemEconomy adminwithdraw <name> <amount>
       /ItemEconomy withdraw <amount>
+      /ItemEconomy deposit <amount>
       /ItemEconomy transfer <vault tpye> <vault type> <amount>
       /ItemEconomy admintransfer <name> <vault tpye> <vault type> <amount>
       /ItemEconomy debug
+      /ItemEconomy createconfig
   Tax:
     aliases: [tax, ietax, ieTax, taxes, t]
     usage: |
@@ -73,5 +77,9 @@ permissions:
     default: true
   itemeconomy.player:
     default: true
+  itemeconomy.remotewithdraw:
+    default: op
+  itemeconomy.remotedeposit:
+    default: op
 
 ```
