@@ -10,7 +10,7 @@ import shallowcraft.itemeconomy.Commands.IETabCompleter;
 import shallowcraft.itemeconomy.Tax.command.TaxCommand;
 import shallowcraft.itemeconomy.Tax.command.TaxTabCompleter;
 import shallowcraft.itemeconomy.Listener.IEEventHandler;
-import shallowcraft.itemeconomy.SmartShop.SmartShop;
+import shallowcraft.smartshop.SmartShop;
 import shallowcraft.itemeconomy.VaultEconomyHook.Economy_ItemEconomy;
 
 import java.io.FileNotFoundException;
@@ -91,7 +91,7 @@ public class ItemEconomyPlugin extends JavaPlugin {
     }
 
     private void setupSmartShop(){
-        SmartShop = shallowcraft.itemeconomy.SmartShop.SmartShop.getInstance();
+        SmartShop = shallowcraft.smartshop.SmartShop.getInstance();
         SmartShop.initializeSmartShop();
     }
 

@@ -84,6 +84,8 @@ public class Config {
     public static int nextOrderHours = 32;
     public static String smartShopHolderName = "CHINA";
     public static int shopDepositCost = 10;
+    public static boolean taxAccountAsBuyer = true;
+    public static double maxTakeFromTaxAccountPercentage = 0.10;
 
 
 
@@ -144,6 +146,10 @@ public class Config {
                         smartShopHolderName = (String)smartShopSettings.get("smartShopHolderName");
                     if(smartShopSettings.containsKey("shopDepositCost"))
                         shopDepositCost = (int)smartShopSettings.get("shopDepositCost");
+                    if(smartShopSettings.containsKey("taxAccountAsBuyer"))
+                        taxAccountAsBuyer = (boolean)smartShopSettings.get("taxAccountAsBuyer");
+                    if(smartShopSettings.containsKey("maxTakeFromTaxAccountPercentage"))
+                        maxTakeFromTaxAccountPercentage = (double)smartShopSettings.get("maxTakeFromTaxAccountPercentage");
                 }
             }
         }
@@ -178,6 +184,8 @@ public class Config {
         smartShopDataMap.put("nextOrderHours",nextOrderHours);
         smartShopDataMap.put("smartShopHolderName",smartShopHolderName);
         smartShopDataMap.put("shopDepositCost",shopDepositCost);
+        smartShopDataMap.put("taxAccountAsBuyer",taxAccountAsBuyer);
+        smartShopDataMap.put("maxTakeFromTaxAccountPercentage",maxTakeFromTaxAccountPercentage);
 
         dataMap.put("Tax Settings",taxDataMap);
         dataMap.put("SmartShop Settings",smartShopDataMap);

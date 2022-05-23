@@ -1,4 +1,4 @@
-package shallowcraft.itemeconomy.SmartShop;
+package shallowcraft.smartshop;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,11 +12,11 @@ import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Data.DataManager;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
-import shallowcraft.itemeconomy.SmartShop.Commads.SmartShopCommand;
-import shallowcraft.itemeconomy.SmartShop.Commads.SmartShopTabCompleter;
-import shallowcraft.itemeconomy.SmartShop.Listener.SSEventHandler;
-import shallowcraft.itemeconomy.SmartShop.ShopOrder.ShopOrder;
-import shallowcraft.itemeconomy.SmartShop.ShopOrder.ShopOrderLog;
+import shallowcraft.smartshop.Commads.SmartShopCommand;
+import shallowcraft.smartshop.Commads.SmartShopTabCompleter;
+import shallowcraft.smartshop.Listener.SSEventHandler;
+import shallowcraft.smartshop.ShopOrder.ShopOrder;
+import shallowcraft.smartshop.ShopOrder.ShopOrderLog;
 
 import java.io.File;
 import java.util.ArrayList;

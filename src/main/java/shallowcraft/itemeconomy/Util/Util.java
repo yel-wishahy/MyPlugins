@@ -333,7 +333,7 @@ public class Util {
 
         for (Account acc : accounts.values()) {
             if (acc != null && !acc.getID().equals(Config.smartShopHolderName))
-                totalCirculation += acc.getBalance();
+                totalCirculation += acc.getBalance(VaultType.ALL);
         }
 
         return totalCirculation;
@@ -407,9 +407,7 @@ public class Util {
             if (acc != null) {
                 acc.updateSavings();
             }
-
         }
-
     }
 
     public static List<Vault> getVaultsOfType(VaultType vaultType, List<Vault> vaults) {
@@ -447,8 +445,8 @@ public class Util {
 
     public static String getPercentageBalanceChangeMessage(PlayerAccount holder) {
         double upBy = 0.0;
-        if (holder.getLastBalance() != 0)
-            upBy = holder.getProfit() / ((double) holder.getLastBalance()) * 100;
+        if (holder.getLastStatsBalance() != 0)
+            upBy = holder.getProfit() / ((double) holder.getLastStatsBalance()) * 100;
         String percentage = (new DecimalFormat("#.##")).format(upBy);
         StringBuilder s = new StringBuilder();
         s.append(ChatColor.GOLD).append(" ( ");
@@ -528,7 +526,7 @@ public class Util {
         int total = 0;
         for (Account acc : ItemEconomy.getInstance().getAccounts().values())
             if (acc instanceof PlayerAccount) {
-                total += acc.getBalance();
+                total += acc.getBalance(VaultType.ALL);
                 count++;
             }
 
@@ -542,7 +540,7 @@ public class Util {
         Map<String, Integer> bals = new HashMap<>();
         for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
             if (acc instanceof PlayerAccount)
-                bals.put(acc.getName(), acc.getBalance());
+                bals.put(acc.getName(), acc.getBalance(VaultType.ALL));
         }
         bals = Util.sortByValue(bals);
         int mid = bals.size() / 2;
@@ -577,7 +575,7 @@ public class Util {
         newStats.put("Circulation", String.valueOf(getTotalCirculation()));
         newStats.put("Average Balance", String.valueOf(getAveragePlayerBalance()));
         newStats.put("Median Balance", String.valueOf(getMedianPlayerBalance()));
-        newStats.put("Last Tax Balance", String.valueOf(Objects.requireNonNull(Taxation.getInstance().getMainTaxDeposit()).getBalance()));
+        newStats.put("Last Tax Balance", String.valueOf(Objects.requireNonNull(Taxation.getInstance().getMainTaxDeposit()).getBalance(VaultType.ALL)));
 
         ItemEconomy.getInstance().setHistoryStats(newStats);
 
@@ -643,7 +641,7 @@ public class Util {
 
         for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
             if (acc != null && !acc.getID().equals(Config.smartShopHolderName))
-                bals.put(acc.getName(), acc.getBalance());
+                bals.put(acc.getName(), acc.getBalance(VaultType.ALL));
         }
 
         bals = Util.sortByValue(bals);
@@ -715,6 +713,33 @@ public class Util {
         for (Account acc:ItemEconomy.getInstance().getAccounts().values()) {
             acc.convertBalanceBuffer();
         }
+    }
+
+    public static String getBalanceMessage(Account holder){
+        holder.convertBalanceBuffer();
+
+        List<Vault> vaults = holder.getVaults();
+        int deposit = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
+        int withdraw = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.WITHDRAW_ONLY, vaults));
+        int regular = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.REGULAR, vaults));
+
+        String rateOfChange = "";
+        String inventoryBal = "";
+        String buffer = ChatColor.GREEN + "Buffer: " + ChatColor.YELLOW + (new DecimalFormat("#.##")).format(holder.getBalanceBuffer()) + ChatColor.GREEN;
+        if (holder instanceof PlayerAccount) {
+            rateOfChange = Util.getPercentageBalanceChangeMessage((PlayerAccount) holder);
+            inventoryBal = ChatColor.GREEN +
+                    "Inventory -> " + ChatColor.YELLOW + ((PlayerAccount) holder).getLastInventoryBalance() +
+                    ChatColor.GREEN;
+        }
+
+        return ChatColor.GOLD + "[ItemEconomy] " + ChatColor.YELLOW + holder.getName() + ChatColor.GREEN + "'s chequing balance is " + ChatColor.YELLOW +
+                holder.getBalance(VaultType.REGULAR) + " " + ChatColor.AQUA + "Diamonds." + ChatColor.GREEN + " \n Total Holdings: " + ChatColor.YELLOW + holder.getBalance(VaultType.ALL) +
+                rateOfChange + ChatColor.GREEN + "    " + buffer + ChatColor.GREEN
+                + "\n" + inventoryBal +
+                "\n Vaults ->  Regular: " + ChatColor.YELLOW + regular +
+                ChatColor.GREEN + " , Deposit: " + ChatColor.YELLOW + deposit + ChatColor.GREEN + " , Withdraw: " + ChatColor.YELLOW + withdraw
+                + ChatColor.GREEN + ".";
     }
 
 

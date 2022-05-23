@@ -5,6 +5,7 @@ import net.kyori.adventure.text.TextComponent;
 import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.ChatColor;
 import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.BankVault.VaultType;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.*;
@@ -66,7 +67,7 @@ public class GeneralTax implements Taxable {
         if(now.compareTo(nextTaxTime) > 0){
             if(taxDeposit!=null){
                 int taxable = amountToTax();
-                TransactionResult withdrawResult = holder.forcedWithdraw(taxable);
+                TransactionResult withdrawResult = holder.withdraw(taxable, VaultType.ALL);
                 taxDeposit.deposit(withdrawResult.amount);
 
                 setTaxTimes();
@@ -103,7 +104,7 @@ public class GeneralTax implements Taxable {
     }
 
     private int amountToTax(){
-        int bal = holder.getChequingBalance();
+        int bal = holder.getBalance(VaultType.REGULAR);
         return (int) (bal * taxRate/100.0);
     }
 

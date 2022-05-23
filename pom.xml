@@ -6,7 +6,7 @@
 
     <groupId>shallowcraft</groupId>
     <artifactId>ItemEconomy</artifactId>
-    <version>7.5-SNAPSHOT</version>
+    <version>7.7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>ItemEconomy</name>
@@ -124,6 +124,12 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.10.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Zrips</groupId>
+            <artifactId>Jobs</artifactId>
+            <version>LATEST</version> <!-- Change the LATEST to the current version of jobs -->
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

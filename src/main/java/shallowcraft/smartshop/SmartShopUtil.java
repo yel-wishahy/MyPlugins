@@ -1,4 +1,4 @@
-package shallowcraft.itemeconomy.SmartShop;
+package shallowcraft.smartshop;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -9,9 +9,10 @@ import org.bukkit.util.StringUtil;
 import org.maxgamer.quickshop.api.shop.Shop;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
+import shallowcraft.itemeconomy.BankVault.VaultType;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.SmartShop.ShopOrder.ShopOrder;
+import shallowcraft.smartshop.ShopOrder.ShopOrder;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.text.DecimalFormat;
@@ -174,7 +175,7 @@ public class SmartShopUtil {
     }
 
     public static void balanceShopOrder(ShopOrder order){
-        int buyerBalance = order.getBuyer().getBalance();
+        int buyerBalance = order.getBuyer().getBalance(VaultType.ALL);
         int potential = getPotentialOrderEarnings(order.getSeller().getID());
         int maxEarnable = (int) (Util.getMedianPlayerBalance() * Config.earningFactor);
 

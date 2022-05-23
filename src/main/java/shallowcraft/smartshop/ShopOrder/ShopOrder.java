@@ -1,4 +1,4 @@
-package shallowcraft.itemeconomy.SmartShop.ShopOrder;
+package shallowcraft.smartshop.ShopOrder;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,11 +12,12 @@ import org.bukkit.inventory.ItemStack;
 import org.maxgamer.quickshop.QuickShop;
 import org.maxgamer.quickshop.api.shop.Shop;
 import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.BankVault.VaultType;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Data.DataUtil;
 import shallowcraft.itemeconomy.Data.Serializable;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.SmartShop.SmartShopUtil;
+import shallowcraft.smartshop.SmartShopUtil;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 
 import java.util.Date;
@@ -107,8 +108,8 @@ public class ShopOrder implements Serializable<ShopOrder> {
     public ShopOrderResult executeShopOrder() {
         double subtotal = orderQuantity * costPerQuantity;
 
-        if (quickShop.getRemainingStock() >= orderQuantity && buyer.getBalance() >= subtotal) {
-            buyer.withdraw((int) Math.round(subtotal));
+        if (quickShop.getRemainingStock() >= orderQuantity && buyer.getBalance(VaultType.ALL) >= subtotal) {
+            buyer.withdraw((int) Math.round(subtotal),VaultType.ALL);
             TransactionResult r = ItemEconomy.getInstance().deposit(seller.getID(), subtotal);
 
             Inventory inv = ((Container) quickShop.getLocation().getBlock().getState()).getInventory();
@@ -129,7 +130,7 @@ public class ShopOrder implements Serializable<ShopOrder> {
         ShopOrderResult.ShopOrderResultType type = ShopOrderResult.ShopOrderResultType.FAILURE;
         if(quickShop.getRemainingStock() < orderQuantity)
             type = ShopOrderResult.ShopOrderResultType.INSUFFICIENT_STOCK;
-        if(buyer.getBalance() < orderQuantity * costPerQuantity)
+        if(buyer.getBalance(VaultType.ALL) < orderQuantity * costPerQuantity)
             type = ShopOrderResult.ShopOrderResultType.BUYER_IS_BROKE;
 
 

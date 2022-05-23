@@ -1,4 +1,4 @@
-package shallowcraft.itemeconomy.SmartShop.Commads;
+package shallowcraft.smartshop.Commads;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -11,10 +11,10 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
-import shallowcraft.itemeconomy.SmartShop.ShopOrder.ShopOrder;
-import shallowcraft.itemeconomy.SmartShop.ShopOrder.ShopOrderLog;
-import shallowcraft.itemeconomy.SmartShop.SmartShop;
-import shallowcraft.itemeconomy.SmartShop.SmartShopUtil;
+import shallowcraft.smartshop.ShopOrder.ShopOrder;
+import shallowcraft.smartshop.ShopOrder.ShopOrderLog;
+import shallowcraft.smartshop.SmartShop;
+import shallowcraft.smartshop.SmartShopUtil;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package shallowcraft.itemeconomy.SmartShop.ShopOrder;
+package shallowcraft.smartshop.ShopOrder;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
+import shallowcraft.itemeconomy.BankVault.VaultType;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.ItemEconomy;
@@ -52,9 +53,9 @@ public class Taxation {
 
         for (Account acc:accounts.values()) {
             if(acc instanceof PlayerAccount){
-                if (isHoarding(acc.getBalance(), totalCirculation)){
+                if (isHoarding(acc.getBalance(VaultType.ALL), totalCirculation)){
                     hoarders.add((PlayerAccount) acc);
-                    double percent = ((double) acc.getBalance())/((double)totalCirculation);
+                    double percent = ((double) acc.getBalance(VaultType.ALL))/((double)totalCirculation);
                     TextComponent info = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Player " + ChatColor.YELLOW + acc.getName() + ChatColor.GREEN
                             + " has " + ChatColor.YELLOW + (percent * 100) + " %" + ChatColor.GREEN + " of the total currency..." + ChatColor.BOLD + " " + ChatColor.RED + "IMMEDIATE REDUCTION IS REQUIRED.");
                     ItemEconomyPlugin.getInstance().getServer().broadcast(info, Permissions.playerPerm);
@@ -67,13 +68,13 @@ public class Taxation {
 
 
         for (PlayerAccount hoarder:hoarders) {
-            if(isHoarding(hoarder.getChequingBalance(), totalCirculation)){
-                double percent = ((double) hoarder.getBalance())/((double)totalCirculation);
+            if(isHoarding(hoarder.getBalance(VaultType.REGULAR), totalCirculation)){
+                double percent = ((double) hoarder.getBalance(VaultType.ALL))/((double)totalCirculation);
                 percent-=Config.wealthCap/100.0;
                 if(percent > 0 && percent <= 1){
 
-                    int toTake = (int) ((percent) * ((double) hoarder.getBalance()));
-                    TransactionResult result = hoarder.forcedWithdraw(toTake);
+                    int toTake = (int) ((percent) * ((double) hoarder.getBalance(VaultType.ALL)));
+                    TransactionResult result = hoarder.withdraw(toTake,VaultType.ALL);
                     toDistribute += result.amount;
 
                     TextComponent hoarderInfo = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Embezzled " + ChatColor.YELLOW + result.amount + ChatColor.AQUA
@@ -135,7 +136,7 @@ public class Taxation {
                     r = 0.0;
                 String rate = (new DecimalFormat("#.##")).format(r);
 
-                TransactionResult result = holder.forcedWithdraw(taxable);
+                TransactionResult result = holder.withdraw(taxable,VaultType.ALL);
                 tax(result.amount);
                 totalTaxed += result.amount;
 

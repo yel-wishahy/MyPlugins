@@ -35,7 +35,7 @@ public class Commands {
                 if (holder != null && amount > 0 && source != destination && holder.getBalance(source) >= amount) {
                     r = holder.transfer(source, destination, amount);
 
-                    if (holder.getChequingBalance() <= amount && TransactionResult.ResultType.failureModes.contains(r.type))
+                    if (holder.getBalance(VaultType.REGULAR) <= amount && TransactionResult.ResultType.failureModes.contains(r.type))
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Encountered insufficient funds in specified vault type");
                 }
             }
@@ -75,7 +75,7 @@ public class Commands {
                 //ItemEconomy.log.info("in here");
                 result1 = holder.transfer(source, destination, amount);
 
-                if (holder.getChequingBalance() <= amount && TransactionResult.ResultType.failureModes.contains(result1.type))
+                if (holder.getBalance(VaultType.REGULAR) <= amount && TransactionResult.ResultType.failureModes.contains(result1.type))
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Encountered insufficient funds in specified vault type");
             }
         }
@@ -145,23 +145,7 @@ public class Commands {
         if (args.length == 1 && isPlayer) {
             if (accounts.containsKey(player.getUniqueId().toString())) {
                 PlayerAccount holder = (PlayerAccount) accounts.get(player.getUniqueId().toString());
-                holder.convertBalanceBuffer();
-                List<Vault> vaults = holder.getVaults();
-                int deposit = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
-                int withdraw = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.WITHDRAW_ONLY, vaults));
-                int regular = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.REGULAR, vaults));
-
-                String rateOfChange = " ";
-                rateOfChange = Util.getPercentageBalanceChangeMessage(holder);
-
-                sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Your chequing balance is " + ChatColor.YELLOW +
-                        holder.getChequingBalance() + " " + ChatColor.AQUA + "Diamonds." + ChatColor.GREEN + " \n Total Holdings: " + ChatColor.YELLOW + holder.getBalance() +
-                        rateOfChange + ChatColor.GREEN +
-                        "\n Inventory -> " + ChatColor.YELLOW + holder.getLastPersonalBalance() +
-                        ChatColor.GREEN +
-                        "\n Vaults ->  Regular: " + ChatColor.YELLOW + regular +
-                        ChatColor.GREEN + " , Deposit: " + ChatColor.YELLOW + deposit + ChatColor.GREEN + " , Withdraw: " + ChatColor.YELLOW + withdraw
-                        + ChatColor.GREEN + ".");
+                sender.sendMessage(Util.getBalanceMessage(holder));
             } else {
                 sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You do not have a bank account");
             }
@@ -177,24 +161,7 @@ public class Commands {
             }
 
             if (holder != null) {
-                holder.convertBalanceBuffer();
-                List<Vault> vaults = holder.getVaults();
-                int deposit = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
-                int withdraw = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.WITHDRAW_ONLY, vaults));
-                int regular = Util.getAllVaultsBalance(Util.getVaultsOfType(VaultType.REGULAR, vaults));
-
-                String rateOfChange = " ";
-                String buffer = ChatColor.GREEN + "Buffer: " + ChatColor.YELLOW + (new DecimalFormat("#.##")).format(holder.getBalanceBuffer()) + ChatColor.GREEN;
-                if (holder instanceof PlayerAccount) {
-                    rateOfChange = Util.getPercentageBalanceChangeMessage((PlayerAccount) holder);
-                }
-
-                sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.YELLOW + holder.getName() + ChatColor.GREEN + "'s chequing balance is " + ChatColor.YELLOW +
-                        holder.getChequingBalance() + " " + ChatColor.AQUA + "Diamonds." + ChatColor.GREEN + " \n Total Holdings: " + ChatColor.YELLOW + holder.getBalance() +
-                        rateOfChange + ChatColor.GREEN + "    " + buffer + ChatColor.GREEN +
-                        "\n Vaults ->  Regular: " + ChatColor.YELLOW + regular +
-                        ChatColor.GREEN + " , Deposit: " + ChatColor.YELLOW + deposit + ChatColor.GREEN + " , Withdraw: " + ChatColor.YELLOW + withdraw
-                        + ChatColor.GREEN + ".");
+                sender.sendMessage(Util.getBalanceMessage(holder));
             } else {
                 sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You do not have a bank account");
             }
@@ -225,7 +192,7 @@ public class Commands {
                 TransactionResult resultDeposit = null;
 
                 if (holder != null && amount > 0) {
-                    resultWithdraw = holder.withdraw(amount);
+                    resultWithdraw = holder.withdraw(amount,VaultType.ALL);
                     resultDeposit = holder.depositInventory(resultWithdraw.amount);
                     if (resultDeposit.amount < resultWithdraw.amount) {
                         holder.deposit(resultWithdraw.amount - resultDeposit.amount);
@@ -389,7 +356,7 @@ public class Commands {
                 TransactionResult result = null;
 
                 if (holder != null && amount > 0) {
-                    result = holder.forcedWithdraw(amount);
+                    result = holder.withdraw(amount,VaultType.ALL);
                 }
 
                 if (result != null && result.type.equals(TransactionResult.ResultType.SUCCESS)) {
@@ -409,7 +376,6 @@ public class Commands {
         if(Util.isAdmin(sender)) {
             try {
                 ItemEconomy.getInstance().saveData();
-                Config.createConfig();
                 sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully saved data");
             } catch (Exception e) {
                 if (ItemEconomy.getInstance().isDebugMode())

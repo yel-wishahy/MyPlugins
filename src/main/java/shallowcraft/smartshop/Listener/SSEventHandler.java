@@ -1,4 +1,4 @@
-package shallowcraft.itemeconomy.SmartShop.Listener;
+package shallowcraft.smartshop.Listener;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -7,7 +7,7 @@ import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
-import shallowcraft.itemeconomy.SmartShop.SmartShopUtil;
+import shallowcraft.smartshop.SmartShopUtil;
 
 import org.maxgamer.quickshop.api.event.ShopDeleteEvent;
 import org.maxgamer.quickshop.api.event.ShopTaxEvent;

@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.bukkit.entity.Player;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
+import shallowcraft.itemeconomy.BankVault.VaultType;
 import shallowcraft.itemeconomy.Data.DataManager;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Data.InvalidDataException;
@@ -116,15 +117,9 @@ public class ItemEconomy {
         return null;
     }
 
-    public Account getAccount(UUID uuid) {
-        if (accounts.containsKey(uuid.toString()))
-            return accounts.get(uuid.toString());
-        return null;
-    }
-
     public double getBalance(OfflinePlayer player) {
         if (hasAccount(player))
-            return Objects.requireNonNull(getAccount(player)).getChequingBalance();
+            return Objects.requireNonNull(getAccount(player)).getBalance(VaultType.REGULAR);
         else
             return 0;
     }
@@ -142,7 +137,7 @@ public class ItemEconomy {
 
         if (holder != null) {
             holder.updateBalanceBuffer(-1*buffer);
-            return holder.withdraw(toWithdraw);
+            return holder.withdraw(toWithdraw, VaultType.REGULAR);
         } else {
             return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "playerNotFound");
         }

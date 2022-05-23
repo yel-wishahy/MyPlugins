@@ -1,5 +1,6 @@
 package shallowcraft.itemeconomy.Accounts;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Data.DataUtil;
@@ -18,6 +19,7 @@ public class GeneralAccount implements Account {
     private final String name;
     public boolean isMainTaxDeposit;
     private double balanceBuffer;
+    private int lastBalance;
 
     public GeneralAccount(Map<String, String> inputData, String ID){
         this.name = ID;
@@ -36,6 +38,7 @@ public class GeneralAccount implements Account {
         vaults = new ArrayList<>();
 
         DataUtil.populateAccountVaults(this, inputData, ItemEconomyPlugin.getInstance().getServer());
+        lastBalance = 0;
     }
 
     public GeneralAccount(String name){
@@ -43,6 +46,7 @@ public class GeneralAccount implements Account {
         this.name = name;
         balanceBuffer = 0;
         isMainTaxDeposit = name.toLowerCase().contains("tax");
+        lastBalance = 0;
     }
 
     public GeneralAccount(double balanceBuffer, String name){
@@ -50,21 +54,22 @@ public class GeneralAccount implements Account {
         this.name = name;
         this.balanceBuffer = balanceBuffer;
         isMainTaxDeposit = name.toLowerCase().contains("tax");
-    }
-
-    @Override
-    public int getChequingBalance() {
-        return Util.getAllVaultsBalance(Util.getVaultsOfNotType(VaultType.DEPOSIT_ONLY, vaults));
-    }
-
-    @Override
-    public int getBalance() {
-        return Util.getAllVaultsBalance(vaults);
+        lastBalance = 0;
     }
 
     @Override
     public int getBalance(VaultType vaultType) {
-        return Util.getAllVaultsBalance(Util.getVaultsOfType(vaultType, vaults));
+        if(Bukkit.isPrimaryThread()) {
+
+            if (vaultType == VaultType.DEPOSIT_ONLY)
+                lastBalance= Util.getAllVaultsBalance(Util.getVaultsOfType(vaultType, vaults));
+            if (vaultType == VaultType.REGULAR || vaultType == VaultType.WITHDRAW_ONLY)
+                lastBalance= Util.getAllVaultsBalance(Util.getVaultsOfNotType(VaultType.DEPOSIT_ONLY, vaults));
+            else
+                lastBalance= Util.getAllVaultsBalance(vaults);
+        }
+
+        return lastBalance;
     }
 
     @Override
@@ -89,30 +94,30 @@ public class GeneralAccount implements Account {
     }
 
     @Override
-    public TransactionResult withdraw(int amount) {
+    public TransactionResult withdraw(int amount, VaultType vaultType) {
         convertBalanceBuffer();
         TransactionResult result;
+        int bal = getBalance(vaultType);
+
         if(ItemEconomy.getInstance().isDebugMode())
             ItemEconomy.log.info("[ItemEconomy] Debug: attempting to withdraw " + amount + " from " + this.name + " " + this.getID());
 
-        if(getChequingBalance() < amount)
-            result = new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
+        if(bal < amount)
+            return new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
+
+        if (vaultType == VaultType.DEPOSIT_ONLY)
+            result = Transaction.withdrawAllVaults(amount, bal, Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
+        else if (vaultType == VaultType.REGULAR || vaultType == VaultType.WITHDRAW_ONLY)
+            result = Transaction.withdrawAllVaults(amount, bal, Util.getVaultsOfNotType(VaultType.DEPOSIT_ONLY, vaults));
         else
-            result = Transaction.withdrawAllVaults(amount, getChequingBalance(), vaults);
+            result = Transaction.withdrawAllVaults(amount, bal, vaults);
+
+        ItemEconomy.getInstance().saveData();
 
         if(ItemEconomy.getInstance().isDebugMode())
             ItemEconomy.log.info("[ItemEconomy] Debug: withdraw result " + amount + " from " + this.name + " " + this.getID() + " : " + result);
 
         return result;
-    }
-
-    @Override
-    public TransactionResult forcedWithdraw(int amount){
-        convertBalanceBuffer();
-        if(getBalance() < amount)
-            return new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
-
-        return Transaction.forceWithdrawAllVaults(amount, getBalance(), vaults);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package shallowcraft.itemeconomy.SmartShop.Commads;
+package shallowcraft.smartshop.Commads;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -8,7 +8,7 @@ import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import shallowcraft.itemeconomy.Config;
-import shallowcraft.itemeconomy.SmartShop.SmartShopUtil;
+import shallowcraft.smartshop.SmartShopUtil;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.util.ArrayList;

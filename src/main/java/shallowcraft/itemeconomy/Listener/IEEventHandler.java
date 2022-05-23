@@ -1,5 +1,7 @@
 package shallowcraft.itemeconomy.Listener;
 
+import com.gamingmesh.jobs.api.JobsPaymentEvent;
+import com.gamingmesh.jobs.container.CurrencyType;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -110,6 +112,24 @@ public class IEEventHandler implements Listener {
             player.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You have " + ChatColor.BOLD
                     + "DESTROYED" + ChatColor.RESET + " " + ChatColor.RED + "a vault!");
         }
+    }
+
+    @EventHandler
+    public void onJobsPayment(JobsPaymentEvent event) {
+        try {
+            double amount = event.get(CurrencyType.MONEY);
+            Account taxAccount = ItemEconomy.getInstance().getAccounts().get(Config.mainTaxDepositID);
+            taxAccount.updateBalanceBuffer(-1 * amount);
+            taxAccount.convertBalanceBuffer();
+            if (ItemEconomy.getInstance().isDebugMode()) {
+                ItemEconomy.log.info("[ItemEconomy] JobsReborn API Listener detected job payment event");
+                ItemEconomy.log.info("[ItemEconomy] withdrew " + amount + " from " + taxAccount.getID() + " due to jobs payment.");
+            }
+        } catch (Exception e){
+            if(ItemEconomy.getInstance().isDebugMode())
+                e.printStackTrace();
+        }
+
     }
 
 }
