@@ -144,7 +144,7 @@ public class Commands {
     public static boolean balance(String[] args, CommandSender sender, Map<String, Account> accounts, boolean isPlayer, Player player) {
         if (args.length == 1 && isPlayer) {
             if (accounts.containsKey(player.getUniqueId().toString())) {
-                PlayerAccount holder = (PlayerAccount) accounts.get(player.getUniqueId().toString());
+                Account holder = accounts.get(player.getUniqueId().toString());
                 sender.sendMessage(Util.getBalanceMessage(holder));
             } else {
                 sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "You do not have a bank account");
