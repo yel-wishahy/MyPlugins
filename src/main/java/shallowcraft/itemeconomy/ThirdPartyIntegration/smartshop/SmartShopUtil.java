@@ -1,4 +1,4 @@
-package shallowcraft.smartshop;
+package shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -12,7 +12,7 @@ import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.BankVault.VaultType;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.smartshop.ShopOrder.ShopOrder;
+import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.ShopOrder.ShopOrder;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.text.DecimalFormat;
@@ -45,12 +45,12 @@ public class SmartShopUtil {
     }
 
     public static int getRandomBuyQuantity(int currentQuantity){
-        int randomNum = rand.nextInt((Config.maxQ - Config.minQ) + 1) + Config.minQ;
+        int randomNum = rand.nextInt(((int)Config.SmartShopConfig.get("maxQ") - (int)Config.SmartShopConfig.get("minQ")) + 1) + (int)Config.SmartShopConfig.get("minQ");
         return (int) (((double) randomNum)/100.0 * currentQuantity);
     }
 
     public static double getRandomBuyPrice(double currentPrice){
-        int randomNum = rand.nextInt((Config.maxP - Config.minP) + 1) + Config.minP;
+        int randomNum = rand.nextInt(((int)Config.SmartShopConfig.get("maxP") - (int)Config.SmartShopConfig.get("minP")) + 1) + (int)Config.SmartShopConfig.get("minP");
         return ((double) randomNum)/100.0 * currentPrice;
     }
 
@@ -107,10 +107,10 @@ public class SmartShopUtil {
 
 
     public static Account getSmartShopDeposit(){
-        if(!ItemEconomy.getInstance().getAccounts().containsKey(Config.smartShopHolderName))
+        if(!ItemEconomy.getInstance().getAccounts().containsKey((String)Config.SmartShopConfig.get("smartShopHolderName")))
             createSmartShopDeposit();
 
-        return ItemEconomy.getInstance().getAccounts().get(Config.smartShopHolderName);
+        return ItemEconomy.getInstance().getAccounts().get((String)Config.SmartShopConfig.get("smartShopHolderName"));
     }
 
     public static List<String> getOrderSummaries(String id){
@@ -158,7 +158,7 @@ public class SmartShopUtil {
     }
 
     public static void createSmartShopDeposit(){
-        Account holder = new GeneralAccount(Config.smartShopHolderName);
+        Account holder = new GeneralAccount((String)Config.SmartShopConfig.get("smartShopHolderName"));
         ItemEconomy.getInstance().getAccounts().put(holder.getID(), holder);
     }
 
@@ -177,7 +177,7 @@ public class SmartShopUtil {
     public static void balanceShopOrder(ShopOrder order){
         int buyerBalance = order.getBuyer().getBalance(VaultType.ALL);
         int potential = getPotentialOrderEarnings(order.getSeller().getID());
-        int maxEarnable = (int) (Util.getMedianPlayerBalance() * Config.earningFactor);
+        int maxEarnable = (int) (Util.getMedianPlayerBalance() * (double)Config.SmartShopConfig.get("earningFactor"));
 
         if(order.getTotal() + potential > maxEarnable){
             int correction = maxEarnable - potential;
@@ -218,32 +218,32 @@ public class SmartShopUtil {
         return potential;
     }
 
-    private static void antiMichael(ShopOrder order){
-        String name = Config.michaelName;
-        String id = Util.getPlayerID(name);
-
-        int subtotal = (int) (order.getOrderQuantity() * order.getCostPerQuantity());
-        int total = subtotal + getPotentialOrderEarnings(id);
-
-        int playersNum = 0;
-
-        order.setOrderQuantity((int) (order.getOrderQuantity() * Config.michaelFactor));
-
-        int totalEarning = 0;
-        for (String uuid:SmartShop.getInstance().getShopOrders().keySet()) {
-            if(!uuid.equals(id) && getPotentialOrderEarnings(uuid) >= 5){
-                totalEarning += getPotentialOrderEarnings(uuid);
-                playersNum++;
-            }
-        }
-
-        int avgEarning = 0;
-        if(playersNum > 0)
-            avgEarning = totalEarning/(playersNum);
-
-        if(total > avgEarning && avgEarning > 5)
-            reduceOrderTotal(order, avgEarning);
-    }
+//    private static void antiMichael(ShopOrder order){
+//        String name = Config.michaelName;
+//        String id = Util.getPlayerID(name);
+//
+//        int subtotal = (int) (order.getOrderQuantity() * order.getCostPerQuantity());
+//        int total = subtotal + getPotentialOrderEarnings(id);
+//
+//        int playersNum = 0;
+//
+//        order.setOrderQuantity((int) (order.getOrderQuantity() * Config.michaelFactor));
+//
+//        int totalEarning = 0;
+//        for (String uuid:SmartShop.getInstance().getShopOrders().keySet()) {
+//            if(!uuid.equals(id) && getPotentialOrderEarnings(uuid) >= 5){
+//                totalEarning += getPotentialOrderEarnings(uuid);
+//                playersNum++;
+//            }
+//        }
+//
+//        int avgEarning = 0;
+//        if(playersNum > 0)
+//            avgEarning = totalEarning/(playersNum);
+//
+//        if(total > avgEarning && avgEarning > 5)
+//            reduceOrderTotal(order, avgEarning);
+//    }
 
     public static void removeItemStacks(ItemStack item, int quantity, Inventory inv){
         int removed = 0;

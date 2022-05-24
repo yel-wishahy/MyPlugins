@@ -1,4 +1,4 @@
-package shallowcraft.smartshop.Listener;
+package shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.Listener;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -7,7 +7,7 @@ import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
-import shallowcraft.smartshop.SmartShopUtil;
+import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.SmartShopUtil;
 
 import org.maxgamer.quickshop.api.event.ShopDeleteEvent;
 import org.maxgamer.quickshop.api.event.ShopTaxEvent;
@@ -30,8 +30,8 @@ public class SSEventHandler implements Listener {
             if(ItemEconomy.getInstance().isDebugMode())
                 ItemEconomy.log.info("[ItemEconomy: SmartShop] Attempting to withdraw money from tax account due to quickshop shop delete event.");
 
-            Account taxAccount = ItemEconomy.getInstance().getAccounts().get(Config.mainTaxDepositID);
-            taxAccount.updateBalanceBuffer(-1*Config.shopDepositCost);
+            Account taxAccount = ItemEconomy.getInstance().getAccounts().get((String)Config.TaxesConfig.get("mainTaxDepositID"));
+            taxAccount.updateBalanceBuffer(-1*(int)Config.SmartShopConfig.get("shopDepositCost"));
             taxAccount.convertBalanceBuffer();
         } catch (Exception e){
             if(ItemEconomy.getInstance().isDebugMode())
@@ -44,7 +44,7 @@ public class SSEventHandler implements Listener {
         try {
             if(ItemEconomy.getInstance().isDebugMode())
                 ItemEconomy.log.info("[ItemEconomy: SmartShop] Attempting to deposit into tax account due to quickshop tax event.");
-            Account taxAccount = ItemEconomy.getInstance().getAccounts().get(Config.mainTaxDepositID);
+            Account taxAccount = ItemEconomy.getInstance().getAccounts().get((String)Config.TaxesConfig.get("mainTaxDepositID"));
             taxAccount.updateBalanceBuffer(shopTaxEvent.getTax());
             taxAccount.convertBalanceBuffer();
         } catch (Exception e){

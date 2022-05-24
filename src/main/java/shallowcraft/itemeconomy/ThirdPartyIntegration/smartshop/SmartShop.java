@@ -1,4 +1,4 @@
-package shallowcraft.smartshop;
+package shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,11 +12,11 @@ import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Data.DataManager;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
-import shallowcraft.smartshop.Commads.SmartShopCommand;
-import shallowcraft.smartshop.Commads.SmartShopTabCompleter;
-import shallowcraft.smartshop.Listener.SSEventHandler;
-import shallowcraft.smartshop.ShopOrder.ShopOrder;
-import shallowcraft.smartshop.ShopOrder.ShopOrderLog;
+import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.Commads.SmartShopCommand;
+import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.Commads.SmartShopTabCompleter;
+import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.Listener.SSEventHandler;
+import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.ShopOrder.ShopOrder;
+import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.ShopOrder.ShopOrderLog;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -68,7 +68,7 @@ public class SmartShop {
             }
         }
 
-        if(!isEnabled && initializeAttempt < Config.maxAllowedInitializeAttempts){
+        if(!isEnabled && initializeAttempt < (int) Config.ItemEconomyConfig.get("maxAllowedInitializeAttempts")){
             BukkitRunnable task = new BukkitRunnable() {
                 /**
                  * When an object implementing interface {@code Runnable} is used
@@ -86,7 +86,7 @@ public class SmartShop {
                     SmartShop.getInstance().initializeSmartShop();
                 }
             };
-            task.runTaskLater(ItemEconomyPlugin.getInstance(), Config.initializeTaskDelay);
+            task.runTaskLater(ItemEconomyPlugin.getInstance(), (long) Config.ItemEconomyConfig.get("initializeTaskDelay"));
             ItemEconomy.log.info("[ItemEconomy: SmartShop] Failed to load SmartShop, will attempt again in 200 ticks");
         }
     }

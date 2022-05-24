@@ -1,4 +1,4 @@
-package shallowcraft.smartshop.ShopOrder;
+package shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.ShopOrder;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +17,7 @@ import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Data.DataUtil;
 import shallowcraft.itemeconomy.Data.Serializable;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.smartshop.SmartShopUtil;
+import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.SmartShopUtil;
 import shallowcraft.itemeconomy.Transaction.TransactionResult;
 
 import java.util.Date;

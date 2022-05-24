@@ -1,4 +1,4 @@
-package shallowcraft.smartshop;
+package shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop;
 
 import java.util.List;
 

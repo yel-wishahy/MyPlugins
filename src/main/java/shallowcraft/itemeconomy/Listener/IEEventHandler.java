@@ -118,7 +118,7 @@ public class IEEventHandler implements Listener {
     public void onJobsPayment(JobsPaymentEvent event) {
         try {
             double amount = event.get(CurrencyType.MONEY);
-            Account taxAccount = ItemEconomy.getInstance().getAccounts().get(Config.mainTaxDepositID);
+            Account taxAccount = ItemEconomy.getInstance().getAccounts().get((String)Config.TaxesConfig.get("mainTaxDepositID"));
             taxAccount.updateBalanceBuffer(-1 * amount);
             taxAccount.convertBalanceBuffer();
             if (ItemEconomy.getInstance().isDebugMode()) {

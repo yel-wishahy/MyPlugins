@@ -63,7 +63,7 @@ public class TaxCommand implements CommandExecutor {
                     if (accounts.containsKey(Util.getPlayerID(playerName)) && taxRate > 0) {
                         PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
 
-                        if(Util.totalTaxRate(holder) + taxRate <= Config.taxCap){
+                        if(Util.totalTaxRate(holder) + taxRate <= (double)Config.TaxesConfig.get("taxCap")){
                             holder.addTax(new GeneralTax(holder, taxName, taxRate));
 
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully added new tax: " + ChatColor.YELLOW + taxName + ChatColor.GREEN +
@@ -71,7 +71,7 @@ public class TaxCommand implements CommandExecutor {
                             success = true;
                         } else {
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED
-                                    + "Total player tax rate cannot exceed + " + ChatColor.YELLOW + Config.taxCap + " %!!");
+                                    + "Total player tax rate cannot exceed + " + ChatColor.YELLOW + (double)Config.TaxesConfig.get("taxCap") + " %!!");
                         }
 
                     }
@@ -95,7 +95,7 @@ public class TaxCommand implements CommandExecutor {
                         PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
                         GeneralAccount taxDeposit = (GeneralAccount) accounts.get(depositID);
 
-                        if(Util.totalTaxRate(holder) + taxRate <= Config.taxCap){
+                        if(Util.totalTaxRate(holder) + taxRate <= (double)Config.TaxesConfig.get("taxCap")){
                             holder.addTax(new GeneralTax(holder,taxDeposit, taxName, taxRate));
 
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully added new tax: " + ChatColor.YELLOW + taxName + ChatColor.GREEN +
@@ -103,7 +103,7 @@ public class TaxCommand implements CommandExecutor {
                             successAddCustom = true;
                         } else {
                             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED
-                                    + "Total player tax rate cannot exceed + " + ChatColor.YELLOW + Config.taxCap + " %!!");
+                                    + "Total player tax rate cannot exceed + " + ChatColor.YELLOW + (double)Config.TaxesConfig.get("taxCap") + " %!!");
                         }
 
                     }
@@ -287,12 +287,12 @@ public class TaxCommand implements CommandExecutor {
                             if(holder.getTaxes().containsKey(taxName)){
                                 tax = holder.getTaxes().get(taxName);
 
-                                if(Util.totalTaxRate(holder) + taxRate - tax.getTaxRate() <= Config.taxCap){
+                                if(Util.totalTaxRate(holder) + taxRate - tax.getTaxRate() <= (double)Config.TaxesConfig.get("taxCap")){
                                     tax.updateRate(taxRate);
                                     pass4 = true;
                                 } else
                                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED
-                                            + "Total player tax rate cannot exceed + " + ChatColor.YELLOW + Config.taxCap + " %!!");
+                                            + "Total player tax rate cannot exceed + " + ChatColor.YELLOW + (double)Config.TaxesConfig.get("taxCap") + " %!!");
                             }
                         }
                     }

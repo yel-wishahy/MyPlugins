@@ -70,7 +70,7 @@ public class Taxation {
         for (PlayerAccount hoarder:hoarders) {
             if(isHoarding(hoarder.getBalance(VaultType.REGULAR), totalCirculation)){
                 double percent = ((double) hoarder.getBalance(VaultType.ALL))/((double)totalCirculation);
-                percent-=Config.wealthCap/100.0;
+                percent-=(double)Config.TaxesConfig.get("wealthCap")/100.0;
                 if(percent > 0 && percent <= 1){
 
                     int toTake = (int) ((percent) * ((double) hoarder.getBalance(VaultType.ALL)));
@@ -112,7 +112,7 @@ public class Taxation {
 
 
     private boolean isHoarding(int balance, int circulation){
-        return ((double) balance)/((double) circulation) > Config.wealthCap/100.0;
+        return ((double) balance)/((double) circulation) > (double)Config.TaxesConfig.get("wealthCap")/100.0;
     }
 
     public TransactionResult taxAllProfits(Map<String, Account> accounts){
@@ -163,9 +163,9 @@ public class Taxation {
         double rate = 0;
 
         if(ratio >= 1)
-            rate = Config.maxProfitTax/100;
+            rate = (double)Config.TaxesConfig.get("maxProfitTax")/100;
         else
-            rate = ratio * Config.maxProfitTax/100;
+            rate = ratio * (double)Config.TaxesConfig.get("maxProfitTax")/100;
 
         return rate;
     }
@@ -193,7 +193,7 @@ public class Taxation {
             int profit = profits.get(id);
             PlayerAccount holder = (PlayerAccount) accounts.get(id);
 
-            if (profit >= Config.minimumProfit) {
+            if (profit >= (int)Config.TaxesConfig.get("minimumProfit")) {
 
                 double rate = getProportionalRate(profit, maxProfit);
                 int taxable = amountToTax(profit, rate);
@@ -232,7 +232,7 @@ public class Taxation {
             }
         }
 
-        Account deposit = new GeneralAccount(Config.mainTaxDepositID);
+        Account deposit = new GeneralAccount((String)Config.TaxesConfig.get("mainTaxDepositID"));
         ItemEconomy.getInstance().getAccounts().put(deposit.getID(),deposit);
         return deposit;
     }

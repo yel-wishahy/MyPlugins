@@ -34,7 +34,7 @@ public class ItemEconomy {
     private ItemEconomy(){
         instance = this;
         isEnabled = true;
-        debugMode = Config.defaultDebug;
+        debugMode = (boolean) Config.ItemEconomyConfig.get("defaultDebug");
     }
 
     public static ItemEconomy getInstance(){

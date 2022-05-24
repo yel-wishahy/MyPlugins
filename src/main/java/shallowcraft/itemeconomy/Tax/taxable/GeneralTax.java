@@ -110,7 +110,7 @@ public class GeneralTax implements Taxable {
 
     private void setTaxTimes(){
         this.lastTaxTime = new Date();
-        this.nextTaxTime = DateUtils.addHours(lastTaxTime, Config.nextTaxHours);
+        this.nextTaxTime = DateUtils.addHours(lastTaxTime, (int)Config.TaxesConfig.get("nextTaxHours"));
     }
 
     @Override

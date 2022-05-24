@@ -6,7 +6,7 @@ import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.smartshop.ShopOrder.ShopOrder;
+import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.ShopOrder.ShopOrder;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.io.*;

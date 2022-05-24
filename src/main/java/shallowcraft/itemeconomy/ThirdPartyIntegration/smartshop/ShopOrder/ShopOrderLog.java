@@ -1,4 +1,4 @@
-package shallowcraft.smartshop.ShopOrder;
+package shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.ShopOrder;
 
 import lombok.Getter;
 import lombok.Setter;

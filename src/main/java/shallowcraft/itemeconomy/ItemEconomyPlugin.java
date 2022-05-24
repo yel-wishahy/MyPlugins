@@ -10,10 +10,11 @@ import shallowcraft.itemeconomy.Commands.IETabCompleter;
 import shallowcraft.itemeconomy.Tax.command.TaxCommand;
 import shallowcraft.itemeconomy.Tax.command.TaxTabCompleter;
 import shallowcraft.itemeconomy.Listener.IEEventHandler;
-import shallowcraft.smartshop.SmartShop;
+import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.SmartShop;
 import shallowcraft.itemeconomy.VaultEconomyHook.Economy_ItemEconomy;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.logging.Logger;
 
 //plugin class for item economy that extends JavaPlugin, handles actual startup and communication with other plugins
@@ -36,8 +37,8 @@ public class ItemEconomyPlugin extends JavaPlugin {
         try{
             Config.loadConfig();
             log.info("[ItemEconomy] Successfully loaded config.yml");
-        } catch (FileNotFoundException e) {
-            if(Config.defaultDebug)
+        } catch (Exception e) {
+            if((boolean) Config.ItemEconomyConfig.get("defaultDebug"))
                 e.printStackTrace();
             log.info("[ItemEconomy] Failed to load config, check if file exists. Or create config with /ie createconfig.");
         }
@@ -54,14 +55,14 @@ public class ItemEconomyPlugin extends JavaPlugin {
         registerEventHandler();
         registerCommands();
 
-        if(Config.enableSmartShop)
+        if((boolean) Config.ItemEconomyConfig.get("enableSmartShop"))
             try {
                 setupSmartShop();
             } catch (Exception e){
                 e.printStackTrace();
             }
 
-        if(Config.enableTaxes)
+        if((boolean) Config.ItemEconomyConfig.get("enableTaxes"))
             try {
                 setupTaxes();
                 taxesEnabled = true;
@@ -91,7 +92,7 @@ public class ItemEconomyPlugin extends JavaPlugin {
     }
 
     private void setupSmartShop(){
-        SmartShop = shallowcraft.smartshop.SmartShop.getInstance();
+        SmartShop = shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.SmartShop.getInstance();
         SmartShop.initializeSmartShop();
     }
 

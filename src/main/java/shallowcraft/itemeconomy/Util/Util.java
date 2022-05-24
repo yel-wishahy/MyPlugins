@@ -332,7 +332,7 @@ public class Util {
         Map<String, Account> accounts = ItemEconomy.getInstance().getAccounts();
 
         for (Account acc : accounts.values()) {
-            if (acc != null && !acc.getID().equals(Config.smartShopHolderName))
+            if (acc != null && !acc.getID().equals((String)Config.SmartShopConfig.get("smartShopHolderName")))
                 totalCirculation += acc.getBalance(VaultType.ALL);
         }
 
@@ -640,7 +640,7 @@ public class Util {
         Map<String, Integer> bals = new HashMap<>();
 
         for (Account acc : ItemEconomy.getInstance().getAccounts().values()) {
-            if (acc != null && !acc.getID().equals(Config.smartShopHolderName))
+            if (acc != null && !acc.getID().equals((String)Config.SmartShopConfig.get("smartShopHolderName")))
                 bals.put(acc.getName(), acc.getBalance(VaultType.ALL));
         }
 
