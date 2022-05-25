@@ -3,8 +3,7 @@ package shallowcraft.itemeconomy.Accounts;
 import shallowcraft.itemeconomy.BankVault.Vault;
 import shallowcraft.itemeconomy.BankVault.VaultType;
 import shallowcraft.itemeconomy.Data.Serializable;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
-import shallowcraft.itemeconomy.Util.Util;
+import shallowcraft.itemeconomy.Transaction.Transaction;
 
 import java.util.List;
 
@@ -20,14 +19,14 @@ public interface Account_old extends Serializable<Account_old> {
     public void overrideLoadVaults(List<Vault> override);
     public boolean removeVault(Vault vault);
     public void addVault(Vault vault);
-    public TransactionResult withdraw(int amount);
-    public TransactionResult forcedWithdraw(int amount);
-    public TransactionResult deposit(int amount);
+    public Transaction withdraw(int amount);
+    public Transaction forcedWithdraw(int amount);
+    public Transaction deposit(int amount);
     public String getID();
     public String getName();
     public int hashCode();
     public String getAccountType();
-    public TransactionResult transfer(VaultType source, VaultType destination, int amount);
+    public Transaction transfer(VaultType source, VaultType destination, int amount);
     public void updateBalanceBuffer(double amount);
     public double getBalanceBuffer();
 }

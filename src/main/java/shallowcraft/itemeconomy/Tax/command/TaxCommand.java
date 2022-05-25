@@ -15,7 +15,7 @@ import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.Tax.taxable.GeneralTax;
 import shallowcraft.itemeconomy.Tax.taxable.Taxable;
 import shallowcraft.itemeconomy.Tax.Taxation;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
+import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.util.HashMap;
@@ -205,7 +205,7 @@ public class TaxCommand implements CommandExecutor {
                 if(sender.hasPermission(Permissions.adminPerm)){
                     for (Account acc:accounts.values()) {
                         if(acc instanceof PlayerAccount) {
-                            TransactionResult r = ((PlayerAccount) acc).taxAll();
+                            Transaction r = ((PlayerAccount) acc).taxAll();
                         }
                     }
                 } else
@@ -218,7 +218,7 @@ public class TaxCommand implements CommandExecutor {
 
                         if (accounts.containsKey(Util.getPlayerID(playerName))) {
                             PlayerAccount holder = (PlayerAccount) accounts.get(Util.getPlayerID(playerName));
-                            TransactionResult r = holder.taxAll();
+                            Transaction r = holder.taxAll();
                             pass3 = true;
                         }
                     } else if (args.length == 3){
@@ -230,7 +230,7 @@ public class TaxCommand implements CommandExecutor {
 
                             if(holder.getTaxes().containsKey(taxName)){
                                 Taxable tax = holder.getTaxes().get(taxName);
-                                TransactionResult r = tax.tax();
+                                Transaction r = tax.tax();
                                 pass3 = true;
                             }
                         }

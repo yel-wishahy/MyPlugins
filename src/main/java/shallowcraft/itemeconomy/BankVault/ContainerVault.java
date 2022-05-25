@@ -6,8 +6,8 @@ import org.bukkit.block.Sign;
 import org.bukkit.inventory.Inventory;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.ItemEconomy;
+import shallowcraft.itemeconomy.Transaction.TransactionUtils;
 import shallowcraft.itemeconomy.Transaction.Transaction;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
 
 public class ContainerVault implements Vault {
@@ -52,15 +52,15 @@ public class ContainerVault implements Vault {
     }
 
     @Override
-    public TransactionResult withdraw(int amount){
+    public Transaction withdraw(int amount){
         Inventory inventory =  ((Container) containerVault.getState()).getInventory();
-        return Transaction.withdraw(inventory, amount);
+        return TransactionUtils.withdraw(inventory, amount);
     }
 
     @Override
-    public TransactionResult deposit(int amount){
+    public Transaction deposit(int amount){
         Inventory inventory =  ((Container) containerVault.getState()).getInventory();
-        return Transaction.deposit(inventory, amount);
+        return TransactionUtils.deposit(inventory, amount);
     }
 
     @Override

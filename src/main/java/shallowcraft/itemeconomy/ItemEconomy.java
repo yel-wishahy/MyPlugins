@@ -12,7 +12,7 @@ import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
 import shallowcraft.itemeconomy.BankVault.VaultType;
 import shallowcraft.itemeconomy.Data.DataManager;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
+import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Data.InvalidDataException;
 import shallowcraft.itemeconomy.Util.Util;
 import lombok.Getter;
@@ -129,7 +129,7 @@ public class ItemEconomy {
     }
 
 
-    public TransactionResult withdrawPlayer(OfflinePlayer player, double amount) {
+    public Transaction withdrawPlayer(OfflinePlayer player, double amount) {
         Account holder = getAccount(player);
 
         int toWithdraw = (int) amount;
@@ -139,11 +139,11 @@ public class ItemEconomy {
             holder.updateBalanceBuffer(-1*buffer);
             return holder.withdraw(toWithdraw, VaultType.REGULAR);
         } else {
-            return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "playerNotFound");
+            return new Transaction(0, Transaction.ResultType.FAILURE, "playerNotFound");
         }
     }
 
-    public TransactionResult depositPlayer(OfflinePlayer player, double amount) {
+    public Transaction depositPlayer(OfflinePlayer player, double amount) {
         Account holder = getAccount(player);
 
         int toDeposit = (int) amount;
@@ -153,11 +153,11 @@ public class ItemEconomy {
             holder.updateBalanceBuffer(buffer);
             return holder.deposit(toDeposit);
         } else {
-            return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "playerNotFound");
+            return new Transaction(0, Transaction.ResultType.FAILURE, "playerNotFound");
         }
     }
 
-    public TransactionResult deposit(String id, double amount) {
+    public Transaction deposit(String id, double amount) {
         Account holder = accounts.get(id);
 
         int toDeposit = (int) amount;
@@ -167,7 +167,7 @@ public class ItemEconomy {
             holder.updateBalanceBuffer(buffer);
             return holder.deposit(toDeposit);
         } else {
-            return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "playerNotFound");
+            return new Transaction(0, Transaction.ResultType.FAILURE, "playerNotFound");
         }
     }
 

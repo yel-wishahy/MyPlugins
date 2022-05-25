@@ -5,7 +5,7 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.OfflinePlayer;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
+import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.util.ArrayList;
@@ -249,8 +249,8 @@ public class Economy_ItemEconomy implements Economy {
      */
     @Override
     public EconomyResponse withdrawPlayer(OfflinePlayer player, double amount) {
-        TransactionResult result = itemEconomy.withdrawPlayer(player, amount);
-        return new EconomyResponse(result.amount, getBalance(player), Util.convertResponse(result.type), result.errorMessage );
+        Transaction result = itemEconomy.withdrawPlayer(player, amount);
+        return new EconomyResponse(result.amount, getBalance(player), Util.convertResponse(result.resultType), result.errorMessage );
     }
 
     /**
@@ -297,8 +297,8 @@ public class Economy_ItemEconomy implements Economy {
      */
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer player, double amount) {
-        TransactionResult result = itemEconomy.depositPlayer(player, amount);
-        return new EconomyResponse(result.amount, getBalance(player), Util.convertResponse(result.type), result.errorMessage );
+        Transaction result = itemEconomy.depositPlayer(player, amount);
+        return new EconomyResponse(result.amount, getBalance(player), Util.convertResponse(result.resultType), result.errorMessage );
     }
 
     /**

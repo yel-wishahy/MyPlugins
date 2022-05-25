@@ -23,8 +23,8 @@ import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
 import shallowcraft.itemeconomy.Tax.taxable.Taxable;
 import shallowcraft.itemeconomy.Tax.Taxation;
+import shallowcraft.itemeconomy.Transaction.TransactionUtils;
 import shallowcraft.itemeconomy.Transaction.Transaction;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.BankVault.Vault;
 import shallowcraft.itemeconomy.BankVault.VaultType;
 
@@ -227,7 +227,7 @@ public class Util {
     }
 
 
-    public static EconomyResponse.ResponseType convertResponse(TransactionResult.ResultType resultType) {
+    public static EconomyResponse.ResponseType convertResponse(Transaction.ResultType resultType) {
         switch (resultType) {
             case FAILURE:
                 return EconomyResponse.ResponseType.FAILURE;
@@ -690,17 +690,17 @@ public class Util {
         return true;
     }
 
-    public static TransactionResult convertBalanceBuffer(Account account){
-        TransactionResult result;
+    public static Transaction convertBalanceBuffer(Account account){
+        Transaction result;
         if(account.getBalanceBuffer() >= 1.0) {
-            result = Transaction.depositAllVaults((int)account.getBalanceBuffer(), account.getVaults());
+            result = TransactionUtils.depositAllVaults((int)account.getBalanceBuffer(), account.getVaults());
             account.updateBalanceBuffer(-1*result.amount);
         } else if(account.getBalanceBuffer() <= -1.0) {
-            result = Transaction.withdrawAllVaults((int)(-1*account.getBalanceBuffer()),Util.getAllVaultsBalance(account.getVaults()),account.getVaults());
+            result = TransactionUtils.withdrawAllVaults((int)(-1*account.getBalanceBuffer()),Util.getAllVaultsBalance(account.getVaults()),account.getVaults());
             account.updateBalanceBuffer(result.amount);
         }
         else {
-            result = new TransactionResult(0, TransactionResult.ResultType.FAILURE, "balance buffer too small");
+            result = new Transaction(0, Transaction.ResultType.FAILURE, "balance buffer too small");
         }
 
         if(ItemEconomy.getInstance().isDebugMode())

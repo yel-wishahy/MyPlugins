@@ -7,23 +7,20 @@ import org.bukkit.entity.Player;
 import shallowcraft.itemeconomy.Accounts.Account;
 import shallowcraft.itemeconomy.Accounts.GeneralAccount;
 import shallowcraft.itemeconomy.Accounts.PlayerAccount;
-import shallowcraft.itemeconomy.BankVault.Vault;
 import shallowcraft.itemeconomy.BankVault.VaultType;
 import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
 import shallowcraft.itemeconomy.Permissions;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
+import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Util.Util;
 
-import java.text.DecimalFormat;
-import java.util.List;
 import java.util.Map;
 
 //implementations for the item economy commands
 public class Commands {
     public static boolean transfer(String[] args, CommandSender sender, Map<String, Account> accounts) {
-        TransactionResult r = new TransactionResult(0, TransactionResult.ResultType.FAILURE, "transfer");
+        Transaction r = new Transaction(0, Transaction.ResultType.FAILURE, "transfer");
         if (args.length == 4) {
             if (Util.isPlayerName(sender.getName())) {
                 String id = Util.getPlayerID(sender.getName());
@@ -35,13 +32,13 @@ public class Commands {
                 if (holder != null && amount > 0 && source != destination && holder.getBalance(source) >= amount) {
                     r = holder.transfer(source, destination, amount);
 
-                    if (holder.getBalance(VaultType.REGULAR) <= amount && TransactionResult.ResultType.failureModes.contains(r.type))
+                    if (holder.getBalance(VaultType.REGULAR) <= amount && Transaction.ResultType.failureModes.contains(r.resultType))
                         sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Encountered insufficient funds in specified vault type");
                 }
             }
         }
 
-        if (r.type == TransactionResult.ResultType.SUCCESS) {
+        if (r.resultType == Transaction.ResultType.SUCCESS) {
             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "You successfully transferred " + ChatColor.YELLOW + r.amount +
                     ChatColor.AQUA + " diamonds " + ChatColor.GREEN + " between accounts!");
         } else {
@@ -52,7 +49,7 @@ public class Commands {
     }
 
     public static boolean adminTransfer(String[] args, CommandSender sender, Map<String, Account> accounts) {
-        TransactionResult result1 = new TransactionResult(0, TransactionResult.ResultType.FAILURE, "transfer");
+        Transaction result1 = new Transaction(0, Transaction.ResultType.FAILURE, "transfer");
 
         if (args.length == 5 && sender.hasPermission(Permissions.adminPerm)) {
             String name = args[1];
@@ -75,12 +72,12 @@ public class Commands {
                 //ItemEconomy.log.info("in here");
                 result1 = holder.transfer(source, destination, amount);
 
-                if (holder.getBalance(VaultType.REGULAR) <= amount && TransactionResult.ResultType.failureModes.contains(result1.type))
+                if (holder.getBalance(VaultType.REGULAR) <= amount && Transaction.ResultType.failureModes.contains(result1.resultType))
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Encountered insufficient funds in specified vault type");
             }
         }
 
-        if (result1.type == TransactionResult.ResultType.SUCCESS) {
+        if (result1.resultType == Transaction.ResultType.SUCCESS) {
             sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully transferred " + ChatColor.YELLOW + result1.amount +
                     ChatColor.AQUA + " diamonds " + ChatColor.GREEN + " between accounts!");
         } else if (!sender.hasPermission(Permissions.adminPerm)) {
@@ -188,8 +185,8 @@ public class Commands {
                 } catch (Exception ignore) {
                 }
 
-                TransactionResult resultWithdraw = null;
-                TransactionResult resultDeposit = null;
+                Transaction resultWithdraw = null;
+                Transaction resultDeposit = null;
 
                 if (holder != null && amount > 0) {
                     resultWithdraw = holder.withdraw(amount,VaultType.ALL);
@@ -199,7 +196,7 @@ public class Commands {
                     }
                 }
 
-                if (resultWithdraw != null && resultWithdraw.type.equals(TransactionResult.ResultType.SUCCESS)) {
+                if (resultWithdraw != null && resultWithdraw.resultType.equals(Transaction.ResultType.SUCCESS)) {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully withdrew " + ChatColor.AQUA + resultDeposit.amount + " diamonds" +
                             ChatColor.GREEN + " from your vault");
                 } else {
@@ -227,13 +224,13 @@ public class Commands {
                 } catch (Exception ignore) {
                 }
 
-                TransactionResult result = null;
+                Transaction result = null;
 
                 if (holder != null && amount > 0) {
                     result = holder.deposit(amount);
                 }
 
-                if (result != null && result.type.equals(TransactionResult.ResultType.SUCCESS)) {
+                if (result != null && result.resultType.equals(Transaction.ResultType.SUCCESS)) {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully deposited " + ChatColor.AQUA + result.amount + " diamonds" +
                             ChatColor.GREEN + " into your vault");
                 } else {
@@ -314,13 +311,13 @@ public class Commands {
                     }
                 }
 
-                TransactionResult result = null;
+                Transaction result = null;
 
                 if (holder != null && amount > 0) {
                     result = holder.deposit(amount);
                 }
 
-                if (result != null && result.type.equals(TransactionResult.ResultType.SUCCESS)) {
+                if (result != null && result.resultType.equals(Transaction.ResultType.SUCCESS)) {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully deposited " + ChatColor.AQUA + result.amount + " diamonds" +
                             ChatColor.GREEN + " into " + ChatColor.AQUA + holder.getName() + "'s" + ChatColor.GREEN + " account!");
                 } else {
@@ -353,13 +350,13 @@ public class Commands {
                     }
                 }
 
-                TransactionResult result = null;
+                Transaction result = null;
 
                 if (holder != null && amount > 0) {
                     result = holder.withdraw(amount,VaultType.ALL);
                 }
 
-                if (result != null && result.type.equals(TransactionResult.ResultType.SUCCESS)) {
+                if (result != null && result.resultType.equals(Transaction.ResultType.SUCCESS)) {
                     sender.sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Successfully withdrew " + ChatColor.AQUA + result.amount + " diamonds" +
                             ChatColor.GREEN + " from " + ChatColor.AQUA + holder.getName() + "'s" + ChatColor.GREEN + " account!");
                 } else {

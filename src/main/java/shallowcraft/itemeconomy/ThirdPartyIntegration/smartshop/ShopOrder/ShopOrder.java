@@ -18,7 +18,7 @@ import shallowcraft.itemeconomy.Data.DataUtil;
 import shallowcraft.itemeconomy.Data.Serializable;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.SmartShopUtil;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
+import shallowcraft.itemeconomy.Transaction.Transaction;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -110,7 +110,7 @@ public class ShopOrder implements Serializable<ShopOrder> {
 
         if (quickShop.getRemainingStock() >= orderQuantity && buyer.getBalance(VaultType.ALL) >= subtotal) {
             buyer.withdraw((int) Math.round(subtotal),VaultType.ALL);
-            TransactionResult r = ItemEconomy.getInstance().deposit(seller.getID(), subtotal);
+            Transaction r = ItemEconomy.getInstance().deposit(seller.getID(), subtotal);
 
             Inventory inv = ((Container) quickShop.getLocation().getBlock().getState()).getInventory();
 
@@ -134,7 +134,7 @@ public class ShopOrder implements Serializable<ShopOrder> {
             type = ShopOrderResult.ShopOrderResultType.BUYER_IS_BROKE;
 
 
-        ShopOrderResult result = new ShopOrderResult(new TransactionResult(0, TransactionResult.ResultType.FAILURE,
+        ShopOrderResult result = new ShopOrderResult(new Transaction(0, Transaction.ResultType.FAILURE,
                 "failed order"), type, 0, orderItem);
         this.result = result;
         ShopOrderLog.getInstance().log(this);
@@ -189,13 +189,13 @@ public class ShopOrder implements Serializable<ShopOrder> {
     }
 
     public static class ShopOrderResult {
-        public final TransactionResult transactionResult;
+        public final Transaction transactionResult;
         public final ShopOrderResultType resultType;
         public final int amount;
         public final ItemStack itemStack;
         public final String timeOfResult;
 
-        public ShopOrderResult(TransactionResult transactionResult, ShopOrderResultType resultType, int amount, ItemStack itemStack) {
+        public ShopOrderResult(Transaction transactionResult, ShopOrderResultType resultType, int amount, ItemStack itemStack) {
             this.transactionResult = transactionResult;
             this.resultType = resultType;
             this.amount = amount;

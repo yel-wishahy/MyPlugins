@@ -1,4 +1,4 @@
-package shallowcraft.itemeconomy.ThirdPartyIntegration.Jobs.Listener;
+package shallowcraft.itemeconomy.ThirdPartyIntegration.jobs.Listener;
 
 import com.gamingmesh.jobs.api.JobsPaymentEvent;
 import com.gamingmesh.jobs.container.CurrencyType;

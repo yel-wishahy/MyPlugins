@@ -112,15 +112,25 @@ public class Config {
                 if(!ItemEconomyConfig.containsKey(key))
                     flag = false;
 
-            if(ItemEconomyConfig.containsKey("Tax Settings"))
-                for (String key:TaxesConfigNames)
-                    if(!((Map<String, Object>)ItemEconomyConfig.get("Tax Settings")).containsKey(key))
-                        flag = false;
+            if(ItemEconomyConfig.containsKey("Tax Settings")) {
+                TaxesConfig = (Map<String, Object>) ItemEconomyConfig.get("Tax Settings");
 
-            if(ItemEconomyConfig.containsKey("SmartShop Settings"))
-                for (String key:SSConfigNames)
-                    if(!((Map<String, Object>)ItemEconomyConfig.get("SmartShop Settings")).containsKey(key))
+                for (String key : TaxesConfigNames)
+                    if (!TaxesConfig.containsKey(key))
                         flag = false;
+            } else{
+                flag = false;
+            }
+
+            if(ItemEconomyConfig.containsKey("SmartShop Settings")) {
+                SmartShopConfig = (Map<String, Object>) ItemEconomyConfig.get("SmartShop Settings");
+
+                for (String key : SSConfigNames)
+                    if (!SmartShopConfig.containsKey(key))
+                        flag = false;
+            } else {
+                flag = false;
+            }
         } else{
             flag = false;
         }

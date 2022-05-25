@@ -1,13 +1,11 @@
 package shallowcraft.itemeconomy.Accounts;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Data.DataUtil;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
+import shallowcraft.itemeconomy.Transaction.TransactionUtils;
 import shallowcraft.itemeconomy.Transaction.Transaction;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
 import shallowcraft.itemeconomy.BankVault.Vault;
 import shallowcraft.itemeconomy.BankVault.VaultType;
@@ -94,23 +92,23 @@ public class GeneralAccount implements Account {
     }
 
     @Override
-    public TransactionResult withdraw(int amount, VaultType vaultType) {
+    public Transaction withdraw(int amount, VaultType vaultType) {
         convertBalanceBuffer();
-        TransactionResult result;
+        Transaction result;
         int bal = getBalance(vaultType);
 
         if(ItemEconomy.getInstance().isDebugMode())
             ItemEconomy.log.info("[ItemEconomy] Debug: attempting to withdraw " + amount + " from " + this.name + " " + this.getID());
 
         if(bal < amount)
-            return new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
+            return new Transaction(0, Transaction.ResultType.INSUFFICIENT_FUNDS, "withdraw",this, Transaction.TransactionType.WITHDRAW);
 
         if (vaultType == VaultType.DEPOSIT_ONLY)
-            result = Transaction.withdrawAllVaults(amount, bal, Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
+            result = TransactionUtils.withdrawAllVaults(amount, bal, Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
         else if (vaultType == VaultType.REGULAR || vaultType == VaultType.WITHDRAW_ONLY)
-            result = Transaction.withdrawAllVaults(amount, bal, Util.getVaultsOfNotType(VaultType.DEPOSIT_ONLY, vaults));
+            result = TransactionUtils.withdrawAllVaults(amount, bal, Util.getVaultsOfNotType(VaultType.DEPOSIT_ONLY, vaults));
         else
-            result = Transaction.withdrawAllVaults(amount, bal, vaults);
+            result = TransactionUtils.withdrawAllVaults(amount, bal, vaults);
 
         ItemEconomy.getInstance().saveData();
 
@@ -121,13 +119,13 @@ public class GeneralAccount implements Account {
     }
 
     @Override
-    public TransactionResult deposit(int amount) {
-        TransactionResult result;
+    public Transaction deposit(int amount) {
+        Transaction result;
         if(ItemEconomy.getInstance().isDebugMode())
             ItemEconomy.log.info("[ItemEconomy] Debug: attempting to deposit " + amount + " into " + this.name + " " + this.getID());
         balanceBuffer+=amount;
 
-        result = new TransactionResult(amount, TransactionResult.ResultType.SUCCESS, "deposit");
+        result = new Transaction(amount, Transaction.ResultType.SUCCESS, "deposit",this, Transaction.TransactionType.DEPOSIT);
 
         if(ItemEconomy.getInstance().isDebugMode())
             ItemEconomy.log.info("[ItemEconomy] Debug: deposit " + amount + " into " + this.name + " " + this.getID() + " : " + result);
@@ -156,10 +154,10 @@ public class GeneralAccount implements Account {
     }
 
     @Override
-    public TransactionResult transfer(VaultType source, VaultType destination, int amount) {
+    public Transaction transfer(VaultType source, VaultType destination, int amount) {
         List<Vault> sources = Util.getVaultsOfType(source, vaults);
         List<Vault> destinations = Util.getVaultsOfType(destination, vaults);
-        return Transaction.transferVaults(sources, destinations, amount);
+        return TransactionUtils.transferVaults(sources, destinations, amount);
     }
 
     @Override

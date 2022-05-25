@@ -13,8 +13,8 @@ import shallowcraft.itemeconomy.ItemEconomyPlugin;
 import shallowcraft.itemeconomy.Tax.taxable.GeneralTax;
 import shallowcraft.itemeconomy.Tax.taxable.Taxable;
 import shallowcraft.itemeconomy.BankVault.Vault;
+import shallowcraft.itemeconomy.Transaction.TransactionUtils;
 import shallowcraft.itemeconomy.Transaction.Transaction;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
 import shallowcraft.itemeconomy.Util.Util;
 import shallowcraft.itemeconomy.BankVault.VaultType;
 
@@ -162,14 +162,14 @@ public class PlayerAccount implements Account {
         this.taxes = new HashMap<>(override);
     }
 
-    public TransactionResult taxAll() {
+    public Transaction taxAll() {
         int count = 0;
         convertBalanceBuffer();
         for (Taxable tax : taxes.values()) {
             count += tax.tax().amount;
         }
 
-        return new TransactionResult(count, TransactionResult.ResultType.SUCCESS, "tax all");
+        return new Transaction(count, Transaction.ResultType.SUCCESS, "tax all");
     }
 
     private boolean updatePersonalBalance() {
@@ -205,15 +205,15 @@ public class PlayerAccount implements Account {
 
 
     @Override
-    public TransactionResult withdraw(int amount, VaultType vaultType) {
-        TransactionResult result;
+    public Transaction withdraw(int amount, VaultType vaultType) {
+        Transaction result;
         int bal = getBalance(vaultType);
 
         if (ItemEconomy.getInstance().isDebugMode())
             ItemEconomy.log.info("[ItemEconomy] Debug: attempting to withdraw " + amount + " from " + this.getName() + " " + this.getID());
 
         if (bal < amount) {
-            result = new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
+            result = new Transaction(0, Transaction.ResultType.INSUFFICIENT_FUNDS, "withdraw");
             if (ItemEconomy.getInstance().isDebugMode())
                 ItemEconomy.log.info("[ItemEconomy] Debug: withdraw result " + amount + " from " + this.getName() + " " + this.getID() + " : " + result);
         }
@@ -221,19 +221,19 @@ public class PlayerAccount implements Account {
         int removed = 0;
 
         if (vaultType == VaultType.DEPOSIT_ONLY)
-            result = Transaction.withdrawAllVaults(amount, bal, Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
+            result = TransactionUtils.withdrawAllVaults(amount, bal, Util.getVaultsOfType(VaultType.DEPOSIT_ONLY, vaults));
         else if (vaultType == VaultType.REGULAR || vaultType == VaultType.WITHDRAW_ONLY)
-            result = Transaction.withdrawAllVaults(amount, bal, Util.getVaultsOfNotType(VaultType.DEPOSIT_ONLY, vaults));
+            result = TransactionUtils.withdrawAllVaults(amount, bal, Util.getVaultsOfNotType(VaultType.DEPOSIT_ONLY, vaults));
         else
-            result = Transaction.withdrawAllVaults(amount, bal, vaults);
+            result = TransactionUtils.withdrawAllVaults(amount, bal, vaults);
 
         removed += result.amount;
 
 
-        if (TransactionResult.ResultType.failureModes.contains(result.type)) {
+        if (Transaction.ResultType.failureModes.contains(result.resultType)) {
             Inventory inventory = Util.getInventory(player);
             if (inventory != null) {
-                result = Transaction.withdraw(inventory, amount - removed);
+                result = TransactionUtils.withdraw(inventory, amount - removed);
                 removed += result.amount;
             }
         }
@@ -245,7 +245,7 @@ public class PlayerAccount implements Account {
             player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Failed to withdraw completely! (Determined cause: Deposit only account).");
 
         netWithdraw += removed;
-        result = new TransactionResult(removed, result.type, "withdraw");
+        result = new Transaction(removed, result.resultType, "withdraw");
 
         if (ItemEconomy.getInstance().isDebugMode())
             ItemEconomy.log.info("[ItemEconomy] Debug: withdraw result " + amount + " from " + this.getName() + " " + this.getID() + " : " + result);
@@ -254,17 +254,17 @@ public class PlayerAccount implements Account {
     }
 
     @Override
-    public TransactionResult deposit(int amount) {
-        TransactionResult result;
+    public Transaction deposit(int amount) {
+        Transaction result;
         if (Bukkit.isPrimaryThread()) {
             if (ItemEconomy.getInstance().isDebugMode())
                 ItemEconomy.log.info("[ItemEconomy] Debug: attempting to deposit " + amount + " into " + this.getName() + " " + this.getID());
 
             int numAdded = 0;
-            result = Transaction.depositAllVaults(amount, vaults);
+            result = TransactionUtils.depositAllVaults(amount, vaults);
             numAdded += result.amount;
 
-            if (TransactionResult.ResultType.failureModes.contains(result.type)) {
+            if (Transaction.ResultType.failureModes.contains(result.resultType)) {
                 Inventory inventory = null;
                 try {
                     inventory = player.getPlayer().getInventory();
@@ -272,14 +272,14 @@ public class PlayerAccount implements Account {
                 }
 
                 if (inventory != null) {
-                    result = Transaction.deposit(inventory, amount - numAdded);
+                    result = TransactionUtils.deposit(inventory, amount - numAdded);
                     numAdded += result.amount;
                 }
             }
 
             updatePersonalBalance();
             ItemEconomy.getInstance().saveData();
-            result = new TransactionResult(numAdded, result.type, "deposit");
+            result = new Transaction(numAdded, result.resultType, "deposit");
 
             if (ItemEconomy.getInstance().isDebugMode())
                 ItemEconomy.log.info("[ItemEconomy] Debug: deposit " + amount + " into " + this.getName() + " " + this.getID() + " : " + result);
@@ -291,7 +291,7 @@ public class PlayerAccount implements Account {
 
             balanceBuffer += amount;
 
-            result = new TransactionResult(amount, TransactionResult.ResultType.SUCCESS, "deposit into buffer");
+            result = new Transaction(amount, Transaction.ResultType.SUCCESS, "deposit into buffer");
 
             if (ItemEconomy.getInstance().isDebugMode())
                 ItemEconomy.log.info("[ItemEconomy] Debug: buffer deposit " + amount + " into " + this.getName() + " " + this.getID() + " : " + result);
@@ -300,8 +300,8 @@ public class PlayerAccount implements Account {
         return result;
     }
 
-    public TransactionResult depositInventory(int amount) {
-        TransactionResult result;
+    public Transaction depositInventory(int amount) {
+        Transaction result;
         Inventory inventory = null;
         try {
             inventory = player.getPlayer().getInventory();
@@ -309,9 +309,9 @@ public class PlayerAccount implements Account {
         }
 
         if (inventory != null) {
-            result = Transaction.deposit(inventory, amount);
+            result = TransactionUtils.deposit(inventory, amount);
         } else {
-            result = new TransactionResult(0, TransactionResult.ResultType.FAILURE, "fail");
+            result = new Transaction(0, Transaction.ResultType.FAILURE, "fail");
         }
 
         return result;
@@ -338,10 +338,10 @@ public class PlayerAccount implements Account {
     }
 
     @Override
-    public TransactionResult transfer(VaultType source, VaultType destination, int amount) {
+    public Transaction transfer(VaultType source, VaultType destination, int amount) {
         List<Vault> sources = Util.getVaultsOfType(source, vaults);
         List<Vault> destinations = Util.getVaultsOfType(destination, vaults);
-        return Transaction.transferVaults(sources, destinations, amount);
+        return TransactionUtils.transferVaults(sources, destinations, amount);
     }
 
     @Override

@@ -1,12 +1,12 @@
 package shallowcraft.itemeconomy.Tax.taxable;
 
 import shallowcraft.itemeconomy.Accounts.Account;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
+import shallowcraft.itemeconomy.Transaction.Transaction;
 
 import java.util.Date;
 
 public interface Taxable {
-    public TransactionResult tax();
+    public Transaction tax();
     public Date getLastTaxTime();
     public double getTaxRate();
     public Date getNextTaxTime();

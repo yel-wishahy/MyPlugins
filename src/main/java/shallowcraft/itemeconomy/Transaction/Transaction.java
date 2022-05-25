@@ -1,252 +1,86 @@
 package shallowcraft.itemeconomy.Transaction;
 
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import shallowcraft.itemeconomy.Config;
-import shallowcraft.itemeconomy.BankVault.Vault;
-import shallowcraft.itemeconomy.BankVault.VaultType;
-import shallowcraft.itemeconomy.ItemEconomy;
-import shallowcraft.itemeconomy.Util.Util;
+import org.bukkit.Bukkit;
+import shallowcraft.itemeconomy.Accounts.Account;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Transaction {
 
-    public static TransactionResult withdraw(Inventory inventory, int amount) {
-        if(amount == 0)
-            return new TransactionResult(0, TransactionResult.ResultType.SUCCESS, "withdraw");
-        if(ItemEconomy.getInstance().isDebugMode())
-            ItemEconomy.log.info("Trying to withdraw " + amount + "from " + inventory.getType().name() + " with total of " + Util.countItem(inventory));
-        int numRemoved = 0;
+    /**
+     * Amount modified by calling method
+     */
+    public final int amount;
 
-        for (int i = 0; i < inventory.getSize(); i++) {
-            if (numRemoved >= amount)
-                break;
+    /**
+     * Success or failure of call. Using Enum of ResponseType to determine valid
+     * outcomes
+     */
+    public final ResultType resultType;
+    /**
+     * Error message if the variable 'type' is ResponseType.FAILURE
+     */
+    public final String errorMessage;
 
-            ItemStack stack = inventory.getItem(i);
 
-            if (stack != null && stack.getType().equals(Config.currency)) {
-                //ItemEconomy.log.info(" start stack is" + (stack.getAmount()));
-                int toRemove = Util.amountToRemove(stack.getAmount(), amount - numRemoved);
-                //ItemEconomy.log.info("items: " + toRemove);
-                stack.setAmount(stack.getAmount() - toRemove);
-                inventory.setItem(i,stack);
-                numRemoved += toRemove;
-               // ItemEconomy.log.info("stack is" + (stack.getAmount()));
-            } else if (stack != null && stack.getType().equals(Config.currency_block)) {
-                //ItemEconomy.log.info(" start stack is" + (stack.getAmount()));
-                int toRemove = Util.amountToRemove(stack.getAmount() * 9, amount - numRemoved);
-                int[] result = Util.currencyToCurrencyBlock(toRemove);
+    public final Account account;
+    public final TransactionType transactionType;
 
-                int itemsToRemove = result[0];
-                int blocksToRemove = result[1];
-                int toConvert = 0;
-                //ItemEconomy.log.info("items: " + itemsToRemove + " blocks: " + blocksToRemove);
+    public Transaction(int amount, ResultType resultType, String errorMessage){
+        this.amount = amount;
+        this.resultType = resultType;
+        this.errorMessage = errorMessage;
 
-                if(itemsToRemove > 0)
-                    toConvert = (int) Math.ceil(itemsToRemove/9.0);
+        //bad practice, will refactor other code and fix later
+        this.account = null;
+        this.transactionType = null;
 
-                //ItemEconomy.log.info("to convert " + toConvert);
+        TransactionEvent thisEvent = new TransactionEvent(this);
+        Bukkit.getPluginManager().callEvent(thisEvent);
 
-                int itemStack = -1;
-                if(toConvert > 0) {
-                    if (stack.getAmount() - toConvert < blocksToRemove && blocksToRemove >= toConvert)
-                        blocksToRemove -= toConvert;
-                    itemStack = Util.getSlotToConvertToItem(toConvert, stack, i, inventory);
-                }
+    }
+    public Transaction(int amount, ResultType resultType, String errorMessage,Account account, TransactionType transactionType) {
+        this.amount = amount;
+        this.resultType = resultType;
+        this.errorMessage = errorMessage;
+        this.account = account;
+        this.transactionType = transactionType;
 
-                if(itemStack != -1 && stack.getAmount() >= blocksToRemove){
-                    stack.setAmount(stack.getAmount() - blocksToRemove);
-                    inventory.setItem(i, stack);
-                    inventory.setItem(itemStack, new ItemStack(Config.currency, toConvert * 9 - itemsToRemove));
-                    numRemoved += itemsToRemove + blocksToRemove * 9;
-                } else if (itemsToRemove == 0 && stack.getAmount() >= blocksToRemove) {
-                    stack.setAmount(stack.getAmount() - blocksToRemove);
-                    inventory.setItem(i, stack);
-                    numRemoved += itemsToRemove + blocksToRemove * 9;
-                }
+        TransactionEvent thisEvent = new TransactionEvent(this);
+        Bukkit.getPluginManager().callEvent(thisEvent);
+    }
 
-                //ItemEconomy.log.info("stack is" + (stack.getAmount()));
-            }
-        }
-
-        if(numRemoved == amount){
-            if(ItemEconomy.getInstance().isDebugMode())
-                ItemEconomy.log.info("success NOW HAS:  " + Util.countItem(inventory));
-            return new TransactionResult(numRemoved, TransactionResult.ResultType.SUCCESS, "withdraw");
-        }
-        if(ItemEconomy.getInstance().isDebugMode())
-            ItemEconomy.log.info("fail NOW HAS:  " + Util.countItem(inventory));
-        return new TransactionResult(numRemoved, TransactionResult.ResultType.FAILURE, "withdraw");
+    @Override
+    public String toString(){
+        return "Type: " + resultType.toString() + " Amount: " + amount + "Error Msg: " + errorMessage;
     }
 
 
-    public static TransactionResult deposit(Inventory inventory, int amount){
-        if(amount == 0)
-            return new TransactionResult(0, TransactionResult.ResultType.SUCCESS, "deposit");
-        if(ItemEconomy.getInstance().isDebugMode())
-            ItemEconomy.log.info("Trying to deposit " + amount + " into " + inventory.getType().name() + " with total of " + Util.countItem(inventory));
-        int numAdded = 0;
+    /**
+     * Enum for types of Responses indicating the status of a method call.
+     */
+    public enum ResultType {
+        SUCCESS(1),
+        FAILURE(2),
+        INSUFFICIENT_SPACE(3),
+        INSUFFICIENT_FUNDS(4),
+        NOT_IMPLEMENTED(5);
 
-
-        for (int i = 0; i < inventory.getSize(); i++) {
-            if(numAdded >= amount)
-                break;
-
-            int toAdd = 0;
-
-            ItemStack item = inventory.getItem(i);
-
-            int[] conversion = Util.currencyToCurrencyBlock(amount - numAdded);
-            int itemsToAdd = conversion[0];
-            int blocksToAdd = conversion[1];
-            //ItemEconomy.log.info("items: " + itemsToAdd + " blocks: " + blocksToAdd);
-
-            if(item == null){
-                if(blocksToAdd > 0){
-                    toAdd = Util.amountToAdd(0, blocksToAdd);
-                    inventory.setItem(i, new ItemStack(Config.currency_block, toAdd));
-                    numAdded += toAdd * 9;
-                } else {
-                    toAdd = Util.amountToAdd(0, itemsToAdd);
-                    inventory.setItem(i, new ItemStack(Config.currency, toAdd));
-                    numAdded += toAdd;
-                }
-            } else if(item.getType().equals(Config.currency_block)){
-                toAdd = Util.amountToAdd(item.getAmount(), blocksToAdd);
-                item.setAmount(item.getAmount() + toAdd);
-                numAdded+= toAdd * 9;
-            } else if(item.getType().equals(Config.currency)){
-                toAdd = Util.amountToAdd(item.getAmount(), itemsToAdd);
-                item.setAmount(item.getAmount() + toAdd);
-                numAdded+= toAdd;
-            }
+        public final int id;
+        ResultType(int id) {
+            this.id = id;
         }
 
-        if(numAdded == amount){
-            if(ItemEconomy.getInstance().isDebugMode()) {
-                ItemEconomy.log.info("Success: Deposited " + numAdded + " into " + inventory.getType().name());
-                ItemEconomy.log.info("NOW HAS:  " + Util.countItem(inventory));
-            }
-            return new TransactionResult(numAdded, TransactionResult.ResultType.SUCCESS, "deposit");
-        }
-        if(ItemEconomy.getInstance().isDebugMode())
-            ItemEconomy.log.info("NOW HAS:  " + Util.countItem(inventory));
-
-        return new TransactionResult(numAdded, TransactionResult.ResultType.INSUFFICIENT_SPACE, "deposit");
+        public static List<ResultType> failureModes = List.of(FAILURE, INSUFFICIENT_SPACE, INSUFFICIENT_FUNDS);
     }
 
-    public static TransactionResult depositAllVaults(int amount, List<Vault> vaults){
-        if(amount < 1)
-            return new TransactionResult(0, TransactionResult.ResultType.SUCCESS, "deposit");
+    public enum TransactionType{
+        DEPOSIT(1),
+        WITHDRAW(2),
+        TAXDEPOSIT(3);
 
-        int numAdded = 0;
+        public final int id;
+        TransactionType(int id){this.id = id;}
 
-        for (Vault vault:new ArrayList<>(vaults)) {
-            if(numAdded >= amount)
-                break;
-
-            if(vault.getVaultType() == VaultType.DEPOSIT_ONLY)
-                numAdded+=vault.deposit(amount - numAdded).amount;
-        }
-
-        for (Vault vault:new ArrayList<>(vaults)) {
-            if(numAdded >= amount)
-                break;
-
-            if(vault.getVaultType() != VaultType.WITHDRAW_ONLY)
-                numAdded+=vault.deposit(amount - numAdded).amount;
-        }
-
-        if(numAdded < amount)
-            return new TransactionResult(numAdded, TransactionResult.ResultType.INSUFFICIENT_SPACE, "deposit");
-
-        return new TransactionResult(numAdded, TransactionResult.ResultType.SUCCESS, "deposit");
-    }
-
-    public static TransactionResult withdrawAllVaults(int amount, int currentBalance, List<Vault> vaults){
-        if(currentBalance < amount)
-            return new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
-
-        int numRemoved = 0;
-
-        for (Vault vault:new ArrayList<>(vaults)) {
-            if(numRemoved >= amount)
-                break;
-
-            if(vault.getVaultType() == VaultType.WITHDRAW_ONLY){
-                int toRemove = Util.amountToRemove(vault.getVaultBalance(), amount - numRemoved);
-                numRemoved += vault.withdraw(toRemove).amount;
-            }
-        }
-
-        for (Vault vault:new ArrayList<>(vaults)) {
-            if(numRemoved >= amount)
-                break;
-            if(vault.getVaultType() != VaultType.DEPOSIT_ONLY){
-                int toRemove = Util.amountToRemove(vault.getVaultBalance(), amount - numRemoved);
-                numRemoved += vault.withdraw(toRemove).amount;
-            }
-        }
-
-
-        if(numRemoved < amount)
-            return new TransactionResult(numRemoved, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
-
-        return new TransactionResult(numRemoved, TransactionResult.ResultType.SUCCESS, "withdraw");
-    }
-
-    public static TransactionResult forceWithdrawAllVaults(int amount, int currentBalance, List<Vault> vaults){
-        if(currentBalance < amount)
-            return new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
-
-
-        int numRemoved = 0;
-
-        for (Vault vault:new ArrayList<>(vaults)) {
-            if(numRemoved >= amount)
-                break;
-
-            int toRemove = Util.amountToRemove(vault.getVaultBalance(), amount - numRemoved);
-            numRemoved += vault.withdraw(toRemove).amount;
-        }
-
-
-        if(numRemoved < amount)
-            return new TransactionResult(numRemoved, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "withdraw");
-
-        return new TransactionResult(numRemoved, TransactionResult.ResultType.SUCCESS, "withdraw");
-    }
-
-    private static TransactionResult transferVault(Vault source, Vault destination, int amount){
-        if(source.getVaultBalance() < amount)
-            return new TransactionResult(0, TransactionResult.ResultType.INSUFFICIENT_FUNDS, "insufficient funds");
-
-        TransactionResult result = source.withdraw(amount);
-        result = destination.deposit(result.amount);
-
-        return result;
-    }
-
-    public static TransactionResult transferVaults(List<Vault> sources, List<Vault> destinations, int amount){
-        int numTransferred = 0;
-
-        for (Vault s:sources) {
-            if(numTransferred >= amount)
-                break;
-            for (Vault d:destinations) {
-                if(numTransferred >= amount)
-                    break;
-
-                TransactionResult result = Transaction.transferVault(s, d, amount - numTransferred);
-                numTransferred += result.amount;
-            }
-        }
-
-        if(numTransferred == amount)
-            return new TransactionResult(numTransferred, TransactionResult.ResultType.SUCCESS, "transfer");
-        else
-            return new TransactionResult(numTransferred, TransactionResult.ResultType.FAILURE, "transfer");
     }
 }

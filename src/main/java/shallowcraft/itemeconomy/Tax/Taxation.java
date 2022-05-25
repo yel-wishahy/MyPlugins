@@ -12,7 +12,7 @@ import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.ItemEconomy;
 import shallowcraft.itemeconomy.ItemEconomyPlugin;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
+import shallowcraft.itemeconomy.Transaction.Transaction;
 import shallowcraft.itemeconomy.Util.Util;
 
 import java.text.DecimalFormat;
@@ -38,7 +38,7 @@ public class Taxation {
     }
 
 
-    public TransactionResult redistribute(Map<String, Account> accounts){
+    public Transaction redistribute(Map<String, Account> accounts){
         int totalCirculation = Util.getTotalCirculation();
         TextComponent starting = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Starting daily wealth distribution. Total currency " +
                 "in circulation right now is: " + ChatColor.YELLOW + totalCirculation + ChatColor.AQUA + " Diamonds.");
@@ -74,7 +74,7 @@ public class Taxation {
                 if(percent > 0 && percent <= 1){
 
                     int toTake = (int) ((percent) * ((double) hoarder.getBalance(VaultType.ALL)));
-                    TransactionResult result = hoarder.withdraw(toTake,VaultType.ALL);
+                    Transaction result = hoarder.withdraw(toTake,VaultType.ALL);
                     toDistribute += result.amount;
 
                     TextComponent hoarderInfo = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Embezzled " + ChatColor.YELLOW + result.amount + ChatColor.AQUA
@@ -92,7 +92,7 @@ public class Taxation {
             remainder = 0;
 
             for(PlayerAccount saver: savers){
-                TransactionResult result = saver.deposit(split);
+                Transaction result = saver.deposit(split);
                 remainder+=split-result.amount;
                 distributed+=result.amount;
 
@@ -105,9 +105,9 @@ public class Taxation {
         }
 
         if(distributed == toDistribute)
-            return new TransactionResult(distributed, TransactionResult.ResultType.SUCCESS, "distribution");
+            return new Transaction(distributed, Transaction.ResultType.SUCCESS, "distribution");
 
-        return new TransactionResult(distributed, TransactionResult.ResultType.FAILURE, "distribution");
+        return new Transaction(distributed, Transaction.ResultType.FAILURE, "distribution");
     }
 
 
@@ -115,7 +115,7 @@ public class Taxation {
         return ((double) balance)/((double) circulation) > (double)Config.TaxesConfig.get("wealthCap")/100.0;
     }
 
-    public TransactionResult taxAllProfits(Map<String, Account> accounts){
+    public Transaction taxAllProfits(Map<String, Account> accounts){
         int totalCirculation = Util.getTotalCirculation();
         TextComponent starting = Component.text(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.GREEN + "Starting daily" + ChatColor.BOLD + " " +
                 ChatColor.RED + "Income Tax!" + ChatColor.RESET + " " + ChatColor.GREEN + "Total currency " +
@@ -136,7 +136,7 @@ public class Taxation {
                     r = 0.0;
                 String rate = (new DecimalFormat("#.##")).format(r);
 
-                TransactionResult result = holder.withdraw(taxable,VaultType.ALL);
+                Transaction result = holder.withdraw(taxable,VaultType.ALL);
                 tax(result.amount);
                 totalTaxed += result.amount;
 
@@ -151,7 +151,7 @@ public class Taxation {
 
         Util.updateAllPlayerSavings();
 
-        return new TransactionResult(totalTaxed, TransactionResult.ResultType.SUCCESS, "profit tax");
+        return new Transaction(totalTaxed, Transaction.ResultType.SUCCESS, "profit tax");
     }
 
     private int amountToTax(int profit, double rate){

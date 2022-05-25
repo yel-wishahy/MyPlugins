@@ -10,7 +10,7 @@ import shallowcraft.itemeconomy.Config;
 import shallowcraft.itemeconomy.Permissions;
 import shallowcraft.itemeconomy.*;
 import shallowcraft.itemeconomy.Tax.Taxation;
-import shallowcraft.itemeconomy.Transaction.TransactionResult;
+import shallowcraft.itemeconomy.Transaction.Transaction;
 
 import java.util.Date;
 
@@ -62,12 +62,12 @@ public class GeneralTax implements Taxable {
     }
 
     @Override
-    public TransactionResult tax(){
+    public Transaction tax(){
         Date now = new Date();
         if(now.compareTo(nextTaxTime) > 0){
             if(taxDeposit!=null){
                 int taxable = amountToTax();
-                TransactionResult withdrawResult = holder.withdraw(taxable, VaultType.ALL);
+                Transaction withdrawResult = holder.withdraw(taxable, VaultType.ALL);
                 taxDeposit.deposit(withdrawResult.amount);
 
                 setTaxTimes();
@@ -76,11 +76,11 @@ public class GeneralTax implements Taxable {
                         ChatColor.GREEN + " has been taxed " + ChatColor.YELLOW + withdrawResult.amount + ChatColor.AQUA + " Diamonds" + ChatColor.GREEN + " at a rate of " +
                         ChatColor.YELLOW + taxRate + " %" + ChatColor.GREEN + " as a result of the" + ChatColor.RED + " " + ChatColor.BOLD + taxName + " TAX \n");
                 ItemEconomyPlugin.getInstance().getServer().broadcast(announcement, Permissions.msgPerm);
-                return new TransactionResult(withdrawResult.amount, TransactionResult.ResultType.SUCCESS, "tax");
+                return new Transaction(withdrawResult.amount, Transaction.ResultType.SUCCESS, "tax");
             }
         }
 
-        return new TransactionResult(0, TransactionResult.ResultType.FAILURE, "tax");
+        return new Transaction(0, Transaction.ResultType.FAILURE, "tax");
     }
 
     @Override
