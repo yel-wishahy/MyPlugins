@@ -75,6 +75,7 @@ public class Config {
     public static boolean enableTaxes = true;
     public static boolean enableSmartShop = true;
     public static boolean defaultDebug = true;
+    public static boolean enableJobsIntegration = true;
     public static int maxAllowedInitializeAttempts = 5;
     public static int initializeTaskDelay = 200;
 
@@ -220,6 +221,7 @@ public class Config {
         dataMap.put("maxAllowedInitializeAttempts",maxAllowedInitializeAttempts);
         dataMap.put("initializeTaskDelay",initializeTaskDelay);
         dataMap.put("defaultDebug",defaultDebug);
+        dataMap.put("enableJobsIntegration",enableJobsIntegration);
 
         Map<String,Object> taxDataMap = new HashMap<>();
         taxDataMap.put("nextTaxHours",nextTaxHours);

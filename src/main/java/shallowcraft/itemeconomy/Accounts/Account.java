@@ -25,9 +25,10 @@ public interface Account extends Serializable<Account> {
     public int hashCode();
     public String getAccountType();
     public Transaction transfer(VaultType source, VaultType destination, int amount);
-    public void updateBalanceBuffer(double amount);
+    public void transactionBalanceBuffer(double amount);
     public double getBalanceBuffer();
     public default Transaction convertBalanceBuffer(){
-        return Util.convertBalanceBuffer(this);
+        Transaction result = Util.convertBalanceBuffer(this);
+        return new Transaction(result.amount,result.resultType, result.errorMessage,this, Transaction.TransactionType.DEPOSIT);
     }
 }

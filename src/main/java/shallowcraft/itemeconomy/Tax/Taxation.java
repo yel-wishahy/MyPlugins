@@ -209,7 +209,7 @@ public class Taxation {
 
     public boolean tax(double amount) {
         if (this.mainTaxDeposit != null) {
-            this.mainTaxDeposit.updateBalanceBuffer(amount);
+            this.mainTaxDeposit.transactionBalanceBuffer(amount);
             return true;
         }
 
@@ -218,7 +218,7 @@ public class Taxation {
 
     public boolean tax(double amount, Account taxDeposit) {
         if (taxDeposit instanceof GeneralAccount account && ((GeneralAccount) taxDeposit).isMainTaxDeposit) {
-            account.updateBalanceBuffer(amount);
+            account.transactionBalanceBuffer(amount);
             return true;
         }
 

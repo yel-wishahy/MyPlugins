@@ -4,7 +4,6 @@ import com.gamingmesh.jobs.api.JobsPaymentEvent;
 import com.gamingmesh.jobs.container.CurrencyType;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -119,7 +118,7 @@ public class IEEventHandler implements Listener {
         try {
             double amount = event.get(CurrencyType.MONEY);
             Account taxAccount = ItemEconomy.getInstance().getAccounts().get((String)Config.TaxesConfig.get("mainTaxDepositID"));
-            taxAccount.updateBalanceBuffer(-1 * amount);
+            taxAccount.transactionBalanceBuffer(-1 * amount);
             taxAccount.convertBalanceBuffer();
             if (ItemEconomy.getInstance().isDebugMode()) {
                 ItemEconomy.log.info("[ItemEconomy] JobsReborn API Listener detected job payment event");

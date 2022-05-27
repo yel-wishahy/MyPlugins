@@ -161,7 +161,7 @@ public class GeneralAccount implements Account {
     }
 
     @Override
-    public void updateBalanceBuffer(double amount) {
+    public void transactionBalanceBuffer(double amount) {
         balanceBuffer += amount;
     }
 

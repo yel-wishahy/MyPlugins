@@ -14,7 +14,7 @@ public class JobsEventHandler implements Listener {
         try {
             double amount = event.get(CurrencyType.MONEY);
             Account taxAccount = ItemEconomy.getInstance().getAccounts().get((String)Config.TaxesConfig.get("mainTaxDepositID"));
-            taxAccount.updateBalanceBuffer(-1 * amount);
+            taxAccount.transactionBalanceBuffer(-1 * amount);
             taxAccount.convertBalanceBuffer();
             if (ItemEconomy.getInstance().isDebugMode()) {
                 ItemEconomy.log.info("[ItemEconomy] JobsReborn API Listener detected job payment event");

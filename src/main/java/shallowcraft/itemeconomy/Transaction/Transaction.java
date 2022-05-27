@@ -1,7 +1,11 @@
 package shallowcraft.itemeconomy.Transaction;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import shallowcraft.itemeconomy.Accounts.Account;
+import shallowcraft.itemeconomy.BankVault.VaultType;
+import shallowcraft.itemeconomy.ItemEconomy;
 
 import java.util.List;
 
@@ -25,7 +29,10 @@ public class Transaction {
 
     public final Account account;
     public final TransactionType transactionType;
+    @Getter @Setter
+    private boolean isCancelled;
 
+    //internal trasactions
     public Transaction(int amount, ResultType resultType, String errorMessage){
         this.amount = amount;
         this.resultType = resultType;
@@ -34,17 +41,17 @@ public class Transaction {
         //bad practice, will refactor other code and fix later
         this.account = null;
         this.transactionType = null;
-
-        TransactionEvent thisEvent = new TransactionEvent(this);
-        Bukkit.getPluginManager().callEvent(thisEvent);
-
+        this.isCancelled = false;
     }
+
+    //for main transaction initial events, eg. withdraw account, deposit account, tax account
     public Transaction(int amount, ResultType resultType, String errorMessage,Account account, TransactionType transactionType) {
         this.amount = amount;
         this.resultType = resultType;
         this.errorMessage = errorMessage;
         this.account = account;
         this.transactionType = transactionType;
+        this.isCancelled = false;
 
         TransactionEvent thisEvent = new TransactionEvent(this);
         Bukkit.getPluginManager().callEvent(thisEvent);
@@ -53,6 +60,21 @@ public class Transaction {
     @Override
     public String toString(){
         return "Type: " + resultType.toString() + " Amount: " + amount + "Error Msg: " + errorMessage;
+    }
+
+    //cancel transaction
+    public void cancel(){
+        if(this.resultType==ResultType.SUCCESS && this.account != null && this.transactionType != null){
+            if (this.transactionType == TransactionType.WITHDRAW) {
+                this.account.deposit(amount);
+            }else {
+                this.account.withdraw(amount, VaultType.ALL);
+            }
+
+            this.isCancelled = true;
+            if(ItemEconomy.getInstance().isDebugMode())
+                ItemEconomy.log.info("[ItemEconomy] Transaction: " + this + " is cancelled.");
+        }
     }
 
 

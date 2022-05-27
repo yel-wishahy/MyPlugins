@@ -136,7 +136,7 @@ public class ItemEconomy {
         double buffer = amount - toWithdraw;
 
         if (holder != null) {
-            holder.updateBalanceBuffer(-1*buffer);
+            holder.transactionBalanceBuffer(-1*buffer);
             return holder.withdraw(toWithdraw, VaultType.REGULAR);
         } else {
             return new Transaction(0, Transaction.ResultType.FAILURE, "playerNotFound");
@@ -150,7 +150,7 @@ public class ItemEconomy {
         double buffer = amount - toDeposit;
 
         if (holder != null) {
-            holder.updateBalanceBuffer(buffer);
+            holder.transactionBalanceBuffer(buffer);
             return holder.deposit(toDeposit);
         } else {
             return new Transaction(0, Transaction.ResultType.FAILURE, "playerNotFound");
@@ -164,7 +164,7 @@ public class ItemEconomy {
         double buffer = amount - toDeposit;
 
         if (holder != null) {
-            holder.updateBalanceBuffer(buffer);
+            holder.transactionBalanceBuffer(buffer);
             return holder.deposit(toDeposit);
         } else {
             return new Transaction(0, Transaction.ResultType.FAILURE, "playerNotFound");

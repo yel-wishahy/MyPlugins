@@ -245,7 +245,7 @@ public class PlayerAccount implements Account {
             player.getPlayer().sendMessage(ChatColor.GOLD + "[ItemEconomy] " + ChatColor.RED + "Failed to withdraw completely! (Determined cause: Deposit only account).");
 
         netWithdraw += removed;
-        result = new Transaction(removed, result.resultType, "withdraw");
+        result = new Transaction(removed, result.resultType, "withdraw",this, Transaction.TransactionType.WITHDRAW);
 
         if (ItemEconomy.getInstance().isDebugMode())
             ItemEconomy.log.info("[ItemEconomy] Debug: withdraw result " + amount + " from " + this.getName() + " " + this.getID() + " : " + result);
@@ -279,7 +279,7 @@ public class PlayerAccount implements Account {
 
             updatePersonalBalance();
             ItemEconomy.getInstance().saveData();
-            result = new Transaction(numAdded, result.resultType, "deposit");
+            result = new Transaction(numAdded, result.resultType, "deposit",this, Transaction.TransactionType.DEPOSIT);
 
             if (ItemEconomy.getInstance().isDebugMode())
                 ItemEconomy.log.info("[ItemEconomy] Debug: deposit " + amount + " into " + this.getName() + " " + this.getID() + " : " + result);
@@ -291,7 +291,7 @@ public class PlayerAccount implements Account {
 
             balanceBuffer += amount;
 
-            result = new Transaction(amount, Transaction.ResultType.SUCCESS, "deposit into buffer");
+            result = new Transaction(amount, Transaction.ResultType.SUCCESS, "deposit into buffer",this, Transaction.TransactionType.DEPOSIT);
 
             if (ItemEconomy.getInstance().isDebugMode())
                 ItemEconomy.log.info("[ItemEconomy] Debug: buffer deposit " + amount + " into " + this.getName() + " " + this.getID() + " : " + result);
@@ -311,7 +311,7 @@ public class PlayerAccount implements Account {
         if (inventory != null) {
             result = TransactionUtils.deposit(inventory, amount);
         } else {
-            result = new Transaction(0, Transaction.ResultType.FAILURE, "fail");
+            result = new Transaction(0, Transaction.ResultType.FAILURE, "fail",this, Transaction.TransactionType.DEPOSIT);
         }
 
         return result;
@@ -345,7 +345,7 @@ public class PlayerAccount implements Account {
     }
 
     @Override
-    public void updateBalanceBuffer(double amount) {
+    public void transactionBalanceBuffer(double amount) {
         balanceBuffer += amount;
     }
 

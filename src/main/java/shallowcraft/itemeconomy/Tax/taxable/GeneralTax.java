@@ -76,11 +76,11 @@ public class GeneralTax implements Taxable {
                         ChatColor.GREEN + " has been taxed " + ChatColor.YELLOW + withdrawResult.amount + ChatColor.AQUA + " Diamonds" + ChatColor.GREEN + " at a rate of " +
                         ChatColor.YELLOW + taxRate + " %" + ChatColor.GREEN + " as a result of the" + ChatColor.RED + " " + ChatColor.BOLD + taxName + " TAX \n");
                 ItemEconomyPlugin.getInstance().getServer().broadcast(announcement, Permissions.msgPerm);
-                return new Transaction(withdrawResult.amount, Transaction.ResultType.SUCCESS, "tax");
+                return new Transaction(withdrawResult.amount, Transaction.ResultType.SUCCESS, "tax",this.taxDeposit, Transaction.TransactionType.TAXDEPOSIT);
             }
         }
 
-        return new Transaction(0, Transaction.ResultType.FAILURE, "tax");
+        return new Transaction(0, Transaction.ResultType.FAILURE, "tax",this.taxDeposit, Transaction.TransactionType.TAXDEPOSIT);
     }
 
     @Override

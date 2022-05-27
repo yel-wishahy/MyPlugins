@@ -10,11 +10,10 @@ import shallowcraft.itemeconomy.Commands.IETabCompleter;
 import shallowcraft.itemeconomy.Tax.command.TaxCommand;
 import shallowcraft.itemeconomy.Tax.command.TaxTabCompleter;
 import shallowcraft.itemeconomy.Listener.IEEventHandler;
+import shallowcraft.itemeconomy.ThirdPartyIntegration.jobs.Listener.JobsEventHandler;
 import shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.SmartShop;
 import shallowcraft.itemeconomy.VaultEconomyHook.Economy_ItemEconomy;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.logging.Logger;
 
 //plugin class for item economy that extends JavaPlugin, handles actual startup and communication with other plugins
@@ -52,7 +51,7 @@ public class ItemEconomyPlugin extends JavaPlugin {
 
         ItemEconomy.loadData();
 
-        registerEventHandler();
+        registerIEEventHandler();
         registerCommands();
 
         if((boolean) Config.ItemEconomyConfig.get("enableSmartShop"))
@@ -70,6 +69,9 @@ public class ItemEconomyPlugin extends JavaPlugin {
                 taxesEnabled = false;
                 e.printStackTrace();
             }
+
+        if((boolean) Config.ItemEconomyConfig.get("enableJobsIntegration"))
+            setupJobs();
     }
 
     @Override
@@ -91,9 +93,15 @@ public class ItemEconomyPlugin extends JavaPlugin {
         }
     }
 
+    //quasi third party integration : QuickShop
     private void setupSmartShop(){
         SmartShop = shallowcraft.itemeconomy.ThirdPartyIntegration.smartshop.SmartShop.getInstance();
         SmartShop.initializeSmartShop();
+    }
+
+    //third party plugin integration : Jobs
+    private void setupJobs(){
+        getServer().getPluginManager().registerEvents(new JobsEventHandler(), this);
     }
 
     private void setupTaxes(){
@@ -105,7 +113,7 @@ public class ItemEconomyPlugin extends JavaPlugin {
         }
     }
 
-    private void registerEventHandler() {
+    private void registerIEEventHandler() {
         getServer().getPluginManager().registerEvents(new IEEventHandler(), this);
     }
 

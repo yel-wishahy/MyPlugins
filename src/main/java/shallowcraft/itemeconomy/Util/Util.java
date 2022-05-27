@@ -694,10 +694,10 @@ public class Util {
         Transaction result;
         if(account.getBalanceBuffer() >= 1.0) {
             result = TransactionUtils.depositAllVaults((int)account.getBalanceBuffer(), account.getVaults());
-            account.updateBalanceBuffer(-1*result.amount);
+            account.transactionBalanceBuffer(-1*result.amount);
         } else if(account.getBalanceBuffer() <= -1.0) {
             result = TransactionUtils.withdrawAllVaults((int)(-1*account.getBalanceBuffer()),Util.getAllVaultsBalance(account.getVaults()),account.getVaults());
-            account.updateBalanceBuffer(result.amount);
+            account.transactionBalanceBuffer(result.amount);
         }
         else {
             result = new Transaction(0, Transaction.ResultType.FAILURE, "balance buffer too small");

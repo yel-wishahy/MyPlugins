@@ -31,7 +31,7 @@ public class SSEventHandler implements Listener {
                 ItemEconomy.log.info("[ItemEconomy: SmartShop] Attempting to withdraw money from tax account due to quickshop shop delete event.");
 
             Account taxAccount = ItemEconomy.getInstance().getAccounts().get((String)Config.TaxesConfig.get("mainTaxDepositID"));
-            taxAccount.updateBalanceBuffer(-1*(int)Config.SmartShopConfig.get("shopDepositCost"));
+            taxAccount.transactionBalanceBuffer(-1*(int)Config.SmartShopConfig.get("shopDepositCost"));
             taxAccount.convertBalanceBuffer();
         } catch (Exception e){
             if(ItemEconomy.getInstance().isDebugMode())
@@ -45,7 +45,7 @@ public class SSEventHandler implements Listener {
             if(ItemEconomy.getInstance().isDebugMode())
                 ItemEconomy.log.info("[ItemEconomy: SmartShop] Attempting to deposit into tax account due to quickshop tax event.");
             Account taxAccount = ItemEconomy.getInstance().getAccounts().get((String)Config.TaxesConfig.get("mainTaxDepositID"));
-            taxAccount.updateBalanceBuffer(shopTaxEvent.getTax());
+            taxAccount.transactionBalanceBuffer(shopTaxEvent.getTax());
             taxAccount.convertBalanceBuffer();
         } catch (Exception e){
             if(ItemEconomy.getInstance().isDebugMode())
